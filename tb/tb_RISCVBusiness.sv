@@ -135,11 +135,11 @@ module tb_RISCVBusiness ();
   function [7:0] calculate_crc (logic [63:0] hex_line);
     static logic [7:0] checksum = 0;
     int i;
-    for(i=1;i <= 8;i++) begin
-      checksum = checksum + hex_line[((i*8)-1)-:8];
-      if (hex_line[47:40] == 8'h83)
-        $display("%2h", checksum);
-    end
+
+    checksum = hex_line[7:0] + hex_line[15:8] + hex_line[23:16] +
+                hex_line[31:24] + hex_line[39:32] + hex_line[47:40] +
+                hex_line[55:48] + hex_line[63:56];
+    
     //take two's complement
     checksum = (~checksum) + 1;
     return checksum;
