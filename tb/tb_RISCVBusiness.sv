@@ -16,7 +16,7 @@
 
 `include "ram_if.vh"
 
-`define OUTPUT_FILE_NAME "cpu.hex"
+`define OUTPUT_FILE_NAME "../cpu.hex"
 
 module tb_RISCVBusiness ();
    
@@ -117,7 +117,9 @@ module tb_RISCVBusiness ();
       if(data != 0)
         $fwrite(fptr, ":%2h%4h00%8h%2h\n", 8'h4, addr[15:0]>>2, data, checksum);
     end
-    
+    // add the EOL entry to the file
+    $fwrite(fptr, ":00000001FF");  
+
   endtask
 
   task read_ram (input logic [31:0] raddr, output logic [31:0] rdata);
@@ -135,6 +137,8 @@ module tb_RISCVBusiness ();
     int i;
     for(i=1;i <= 8;i++) begin
       checksum = checksum + hex_line[((i*8)-1)-:8];
+      if (hex_line[47:40] == 8'h83)
+        $display("%2h", checksum);
     end
     //take two's complement
     checksum = (~checksum) + 1;
