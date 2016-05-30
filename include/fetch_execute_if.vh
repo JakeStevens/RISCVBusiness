@@ -1,10 +1,10 @@
 `ifndef FETCH_EXECUTE_IF_VH
 `define FETCH_EXECUTE_IF_VH
 
-`include "rv32i_types_pkg.vh"
+`include "tspp_types_pkg.vh"
 
 interface fetch_execute_if;
-  import rv32i_types_pkg::*;
+  import tspp_types_pkg::*;
  
   word_t pc, instr, npc;
 

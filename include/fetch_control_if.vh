@@ -1,10 +1,10 @@
 `ifndef FETCH_CONTROL_IF_VH
 `define FETCH_CONTROL_IF_VH
 
-`include "rv32i_types_pkg.vh"
+`include "tspp_types_pkg.vh"
 
 interface fetch_control_if;
-  import rv32i_types_pkg::*;
+  import tspp_types_pkg::*;
 
   logic update_pc, flush, stall;
   word_t update_addr;

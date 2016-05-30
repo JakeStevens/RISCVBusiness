@@ -1,10 +1,10 @@
 `ifndef EXECUTE_CONTROL_IF_VH
 `define EXECUTE_CONTROL_IF_VH
 
-`include "rv32i_types_pkg.vh"
+`include "tspp_types_pkg.vh"
 
 interface execute_control_if;
-  import rv32i_types_pkg::*;
+  import tspp_types_pkg::*;
 
   logic flush, stall, dwait, branch_mispredict;
   word_t branch_jump_addr;
