@@ -40,6 +40,7 @@ module tb_RISCVBusiness ();
   RISCVBusiness DUT (
     .CLK(CLK),
     .nRST(nRST),
+    .halt(halt),
     .ramif(rvb_ramif)
   );
 
@@ -82,9 +83,6 @@ module tb_RISCVBusiness ();
   initial begin : CORE_RUN
     nRST = 0;
     ram_control = 1;
-
-    //for testing tb:
-    halt = 1;
  
     @(posedge CLK);
     @(posedge CLK);
