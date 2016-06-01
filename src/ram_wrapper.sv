@@ -37,3 +37,4 @@ module ram_wrapper (
     .ramif(ramif)
   );
 
+endmodule

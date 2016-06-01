@@ -32,5 +32,25 @@ module memory_controller (
   ram_if.cpu out_ram_if
 );
 
+  //Arbitration - give precedence to data transactions
+  always_comb begin
+    if (d_ram_if.wen || d_ram_if.ren) begin
+      out_ram_if.wen  = d_ram_if.wen;
+      out_ram_if.ren  = d_ram_if.ren;
+      out_ram_if.addr = d_ram_if.addr;
+      d_ram_if.busy   = out_ram_if.busy;
+      i_ram_if.busy   = 1'b1;
+    end else begin
+      out_ram_if.wen  = i_ram_if.wen;
+      out_ram_if.ren  = i_ram_if.ren;
+      out_ram_if.addr = i_ram_if.addr;
+      d_ram_if.busy   = 1'b1;
+      i_ram_if.busy   = out_ram_if.busy;
+    end
+  end
+
+  assign out_ram_if.wdata = d_ram_if.wdata;
+  assign d_ram_if.rdata   = out_ram_if.rdata;
+  assign i_ram_if.rdata   = out_ram_if.rdata;
 
 endmodule
