@@ -38,12 +38,15 @@ def parse_arguments():
     FILE_NAME = args.file_name
     TEST_TYPE = args.test_type
 
+    if TEST_TYPE not in ['asm', 'c', 'self']:
+        print "ERROR: " + TEST_TYPE + " is not a supported test type"
+        sys.exit(1)
+
     test_file_dir = TEST_TYPE + '-tests/'
     SUPPORTED_ARCHS = glob.glob('./verification/' + test_file_dir + '*')
     SUPPORTED_ARCHS = [a.split('/'+test_file_dir)[1] for a in SUPPORTED_ARCHS]
-
     if ARCH not in SUPPORTED_ARCHS:
-        print "ERROR: There are no tests for that architecture"
+        print "ERROR: No " + TEST_TYPE + " tests exist for " + ARCH
         sys.exit(1)
 
 # compile_asm takes a file_name as input and assembles the file pointed
@@ -139,8 +142,8 @@ def clean_init_hex(file_name):
 # version of the spike log file, delete the original log file
 # and rename the temp file to the original's name
 def clean_spike_output(file_name):
-    spike_output = file_name[:len(file_name)-2] + '_spike.log'
-    cleaned_location = file_name[:len(file_name)-2] + '_spike_clean.log'
+    spike_output = file_name[:len(file_name)-2] + '_spike.hex'
+    cleaned_location = file_name[:len(file_name)-2] + '_spike_clean.hex'
     addr = 0x200
     with open(spike_output, 'r') as spike_file:
         cleaned_file = open(cleaned_location, 'w')
@@ -168,7 +171,7 @@ def clean_spike_output(file_name):
 
 def run_sim(file_name):
     cmd_arr = ['waf', 'verify_source']
-    failure = subprocess.call(cmd_arr)
+    failure = subprocess.call(cmd_arr, stdout=FNULL)
     if failure:
         return -1
     return 0
@@ -176,7 +179,7 @@ def run_sim(file_name):
 def run_spike_asm(file_name):
     # the object file should already exist from calling compile_asm
     elf_name = file_name[:len(file_name)-2] + '.elf'
-    log_name = file_name[:len(file_name)-2] + '_spike.log'
+    log_name = file_name[:len(file_name)-2] + '_spike.hex'
     cmd_arr = ['spike', '--isa=RV32IM', '+signature=' + log_name, elf_name]
     failure = subprocess.call(cmd_arr)
     if failure:
@@ -186,31 +189,28 @@ def run_spike_asm(file_name):
 def compare_results(f):
     short_name = f.split(ARCH+'/')[1]
     sim_name = "./cpu.hex" 
-    spike_name = f[:len(f)-2] + '_spike.log'
+    spike_name = f[:len(f)-2] + '_spike.hex'
     pass_msg = '{0:<40}{1:>20}'.format(short_name,START_GREEN + '[PASSED]' + END_COLOR)
     fail_msg = '{0:<40}{1:>20}'.format(short_name,START_RED + '[FAILED]' + END_COLOR)
     failure = subprocess.call(['diff', sim_name, spike_name],
                 stdout=FNULL, stderr=subprocess.STDOUT)
     if failure:
         print fail_msg
+        return -1
     else:
         print pass_msg
+        return 0
 
 if __name__ == '__main__':
-    # get a list of all self tests for ARCH
-    # that begin with the string FILE_NAME
-    # or all of them if FILE_NAME is None
-    if FILE_NAME is None:
-        files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/*")
-    else:
-        files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/"+FILE_NAME+"*")
-
-    # run the testbench for each test case in files
-    for f in files:
-        #check to make sure file format is correct
-        if TEST_TYPE == "self" and ".S" in f:
-            print "To be implemented."
-        elif TEST_TYPE == "asm" and ".S" in f:
+    parse_arguments()  
+    
+    # asm comparison testing
+    if TEST_TYPE == "asm":
+        if FILE_NAME is None:
+            files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/*.S")
+        else:
+            files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/"+FILE_NAME+"*.S")
+        for f in files:
             ret = compile_asm(f)
             clean_init_hex(f)
             if ret != 0:
@@ -226,5 +226,17 @@ if __name__ == '__main__':
                 sys.exit(1)
             clean_spike_output(f)
             compare_results(f)
-        elif TEST_TYPE == "c" and ".c" in f:
-            print "To be implemented"
+    # C comparison testing
+    elif TEST_TYPE == "c":
+        if FILE_NAME is None:
+            files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/*.c")
+        else:
+            files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/"+FILE_NAME+"*.c")
+        print "To be implemented"
+    # self tests
+    elif TEST_TYPE == "self":
+        for f in files:
+            if ".S" in f:
+                print "To be implemented."
+            elif ".c" in f:
+                print "To be implemented"
