@@ -14,26 +14,30 @@
 *		limitations under the License.
 *
 *
-*		Filename:			tspp_types_pkg.vh
+*		Filename:			alu_types_pkg.vh
 *
 *		Created by:	  Jacob R. Stevens	
 *		Email:				steven69@purdue.edu
 *		Date Created:	06/01/2016
-*		Description:	Package containing types used in the two stage pipeline
-*		              implementation.
+*		Description:	Package containing types used in the alu
 */
+`ifndef ALU_TYPES_PKG_VH
+`define ALU_TYPES_PKG_VH
 
-`ifndef TSPP_TYPES_PKG_VH
-`define TSPP_TYPES_PKG_VH
+package alu_types_pkg;
 
-// include the packages needed for TSPP
-`include "rv32i_types_pkg"
-`include "alu_types_pkg"
-
-package tspp_types_pkg;
-  // import those packages
-  import rv32i_types_pkg::*;
-  import alu_types_pkg::*;
+  typedef enum logic [:0] {
+    ALU_SLL   = 4'b0000;
+    ALU_SRL   = 4'b0001;
+    ALU_SRA   = 4'b0010;
+    ALU_ADD   = 4'b0011;
+    ALU_SUB   = 4'b0100;
+    ALU_AND   = 4'b0101;
+    ALU_OR    = 4'b0110;
+    ALU_XOR   = 4'b0111;
+    ALU_SLT   = 4'b1000;
+    ALU_SLTU  = 4'b1001;
+  } aluop_t;
 
 endpackage
 `endif
