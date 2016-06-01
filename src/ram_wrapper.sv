@@ -7,7 +7,6 @@
 //
 //  If no ram modules are provided, an emulated ram 
 //  module must be created.
-//
 //  -----------------------------------------------------
 
 `include "ram_if.vh"
@@ -17,6 +16,10 @@ module ram_wrapper (
   ram_if.ram ramif
 );
 
-  //  connect ram module or model here
+  ram #(.LAT(0)) v_lat_ram (
+    .CLK(CLK),
+    .nRST(nRST),
+    .ramif(ramif)
+  );
 
 endmodule
