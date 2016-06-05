@@ -1,0 +1,11 @@
+# ignore the build output from waf
+build/
+# ignore memory files from test cases
+*.hex
+meminit.ver
+verification/asm-tests/RV32I/*.elf
+verification/asm-tests/RV32I/*.log
+verification/asm-tests/RV32I/*.hex
+# proprietary files
+src/altera_mf.v
+src/ram.sv

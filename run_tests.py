@@ -1,27 +1,27 @@
 #!/usr/bin/python
 
 #
-#		Copyright 2016 Purdue University
-#		
-#		Licensed under the Apache License, Version 2.0 (the "License");
-#		you may not use this file except in compliance with the License.
-#		You may obtain a copy of the License at
-#		
-#		    http://www.apache.org/licenses/LICENSE-2.0
-#		
-#		Unless required by applicable law or agreed to in writing, software
-#		distributed under the License is distributed on an "AS IS" BASIS,
-#		WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#		See the License for the specific language governing permissions and
-#		limitations under the License.
+#   Copyright 2016 Purdue University
+#   
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#   
+#       http://www.apache.org/licenses/LICENSE-2.0
+#   
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 #
 #
-#		Filename:			run_tests.py
+#   Filename:     run_tests.py
 #
-#		Created by:		Jacob R. Stevens
-#		Email:				steven69@purdue.edu
-#		Date Created:	06/01/2016
-#		Description:	Script for running processor tests
+#   Created by:   Jacob R. Stevens
+#   Email:        steven69@purdue.edu
+#   Date Created: 06/01/2016
+#   Description:  Script for running processor tests
 
 import argparse
 import sys
@@ -38,33 +38,37 @@ FILE_NAME = None
 ARCH = "RV32I"
 SUPPORTED_ARCHS = []
 TEST_TYPE = "asm"
+# Change this variable to the filename (minus extension)
+# of the top level file for your project. This should
+# match the file name given in the top level wscript
+TOP_LEVEL = "RISCVBusiness" 
 
 def parse_arguments():
-    global ARCH, FILE_NAME, SUPPORTED_ARCHS, TEST_TYPE
-    parser = argparse.ArgumentParser(description="Run various processor tests. This script expects to be run at the top level of the RISCV Business directory")
-    parser.add_argument('--arch', '-a', dest='arch', type=str,
-                        default="RV32I",
-                        help="Specify the architecture targeted. Default: RV32I")
-    parser.add_argument('--test', '-t', dest='test_type', type=str, default="asm",
-                        help="Specify what type of tests to run. Default: asm")
-    parser.add_argument('file_name', metavar='file_name', type=str,
-                        nargs='?',
-                        help="Run all tests that begin with this string. Optional")
-    args = parser.parse_args()
-    ARCH = args.arch
-    FILE_NAME = args.file_name
-    TEST_TYPE = args.test_type
-
-    if TEST_TYPE not in ['asm', 'c', 'self']:
-        print "ERROR: " + TEST_TYPE + " is not a supported test type"
-        sys.exit(1)
-
-    test_file_dir = TEST_TYPE + '-tests/'
-    SUPPORTED_ARCHS = glob.glob('./verification/' + test_file_dir + '*')
-    SUPPORTED_ARCHS = [a.split('/'+test_file_dir)[1] for a in SUPPORTED_ARCHS]
-    if ARCH not in SUPPORTED_ARCHS:
-        print "ERROR: No " + TEST_TYPE + " tests exist for " + ARCH
-        sys.exit(1)
+      global ARCH, FILE_NAME, SUPPORTED_ARCHS, TEST_TYPE
+      parser = argparse.ArgumentParser(description="Run various processor tests. This script expects to be run at the top level of the RISCV Business directory")
+      parser.add_argument('--arch', '-a', dest='arch', type=str,
+                          default="RV32I",
+                          help="Specify the architecture targeted. Default: RV32I")
+      parser.add_argument('--test', '-t', dest='test_type', type=str, default="asm",
+                          help="Specify what type of tests to run. Default: asm")
+      parser.add_argument('file_name', metavar='file_name', type=str,
+                          nargs='?',
+                          help="Run all tests that begin with this string. Optional")
+      args = parser.parse_args()
+      ARCH = args.arch
+      FILE_NAME = args.file_name
+      TEST_TYPE = args.test_type
+      
+      if TEST_TYPE not in ['asm', 'c', 'self']:
+          print "ERROR: " + TEST_TYPE + " is not a supported test type"
+          sys.exit(1)
+      
+      test_file_dir = TEST_TYPE + '-tests/'
+      SUPPORTED_ARCHS = glob.glob('./verification/' + test_file_dir + '*')
+      SUPPORTED_ARCHS = [a.split('/'+test_file_dir)[1] for a in SUPPORTED_ARCHS]
+      if ARCH not in SUPPORTED_ARCHS:
+          print "ERROR: No " + TEST_TYPE + " tests exist for " + ARCH
+          sys.exit(1)
 
 # compile_asm takes a file_name as input and assembles the file pointed
 # to by that file name. It also takes the elf file that is the result
@@ -187,10 +191,15 @@ def clean_spike_output(file_name):
     return
 
 def run_sim(file_name):
+    cmd_arr = ['waf', 'configure', '--top_level=' + TOP_LEVEL]
+    failure = subprocess.call(cmd_arr, stdout=FNULL)
+    if failure:
+      return -1
+    return 0;
     cmd_arr = ['waf', 'verify_source']
     failure = subprocess.call(cmd_arr, stdout=FNULL)
     if failure:
-        return -1
+        return -2
     return 0
 
 def run_spike_asm(file_name):
@@ -231,15 +240,21 @@ if __name__ == '__main__':
             ret = compile_asm(f)
             clean_init_hex(f)
             if ret != 0:
-                print "An error has occured during compilation"
+                if ret == -1:
+                    print "An error has occured during GCC compilation"
+                elif ret == -2:
+                    print "An erro has occured converting elf to hex"
                 sys.exit(1)
             ret = run_sim(f)
             if ret != 0:
-                print "An error has occured during running sim"
+                if ret == -1:
+                  print "An error has occurred while setting waf's top level"
+                elif ret == -2:
+                    print "An error has occurred while running sim"
                 sys.exit(1)
             ret = run_spike_asm(f)
             if ret != 0:
-                print "An error has occured during running Spike"
+                print "An error has occurred during running Spike"
                 sys.exit(1)
             clean_spike_output(f)
             compare_results(f)
