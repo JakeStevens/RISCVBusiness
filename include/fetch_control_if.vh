@@ -14,12 +14,12 @@
 *		limitations under the License.
 *
 *
-*		Filename:			fetch_control_if.vh
+*		Filename:     fetch_control_if.vh
 *
-*		Created by:	  Jacob R. Stevens	
-*		Email:				steven69@purdue.edu
-*		Date Created:	06/01/2016
-*		Description:	Interface between the fetch pipeline stage and the control
+*		Created by:   Jacob R. Stevens	
+*		Email:        steven69@purdue.edu
+*		Date Created: 06/01/2016
+*		Description:  Interface between the fetch pipeline stage and the control
 *		              unit.
 */
 

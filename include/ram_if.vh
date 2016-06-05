@@ -14,11 +14,11 @@
 *		limitations under the License.
 *
 *
-*		Filename:			ram_if.vh
+*		Filename:     ram_if.vh
 *
-*		Created by:		John Skubic
-*		Email:				jskubic@purdue.edu
-*		Date Created:	06/01/2016
+*		Created by:   John Skubic
+*		Email:        jskubic@purdue.edu
+*		Date Created: 06/01/2016
 *		Description:  Interface for connecting a requestor to ram.	
 */
 

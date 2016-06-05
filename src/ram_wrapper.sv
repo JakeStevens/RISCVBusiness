@@ -14,12 +14,12 @@
 *		limitations under the License.
 *
 *
-*		Filename:			ram_wrapper.sv
+*		Filename:     ram_wrapper.sv
 *
-*		Created by:	  John Skubic	
-*		Email:				jskubic@purdue.edu
-*		Date Created:	06/01/2016
-*		Description:	Ram wrapper should contain the ram module provided by the 
+*		Created by:   John Skubic	
+*		Email:        jskubic@purdue.edu
+*		Date Created: 06/01/2016
+*		Description:  Ram wrapper should contain the ram module provided by the 
 *		              simulation environment being used. If no ram modules are 
 *		              provided, an emulated ram module must be created.
 */

@@ -14,12 +14,12 @@
 *		limitations under the License.
 *
 *
-*		Filename:			memory_controller.sv
+*		Filename:     memory_controller.sv
 *
-*		Created by:		John Skubic
-*		Email:				jskubic@purdue.edu
-*		Date Created:	06/01/2016
-*		Description:	Memory controller and arbitration between instruction
+*		Created by:   John Skubic
+*		Email:        jskubic@purdue.edu
+*		Date Created: 06/01/2016
+*		Description:  Memory controller and arbitration between instruction
 *		              and data accesses
 */
 

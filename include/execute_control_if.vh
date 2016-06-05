@@ -14,12 +14,12 @@
 *		limitations under the License.
 *
 *
-*		Filename:			tspp_types_pkg.vh
+*		Filename:     execute_control_if.vh
 *
-*		Created by:	  Jacob R. Stevens	
-*		Email:				steven69@purdue.edu
-*		Date Created:	06/01/2016
-*		Description:	Package containing types used in the Two Stage Pipeline
+*		Created by:   Jacob R. Stevens	
+*		Email:        steven69@purdue.edu
+*		Date Created: 06/01/2016
+*		Description:  Package containing types used in the Two Stage Pipeline
 */
 
 `ifndef EXECUTE_CONTROL_IF_VH

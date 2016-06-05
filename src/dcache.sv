@@ -14,11 +14,11 @@
 *		limitations under the License.
 *
 *
-*		Filename:			dcache.sv
+*		Filename:     dcache.sv
 *
-*		Created by:		John Skubic
-*		Email:				jskubic@purdue.edu
-*		Date Created:	06/01/2016
+*		Created by:   John Skubic
+*		Email:        jskubic@purdue.edu
+*		Date Created: 06/01/2016
 *		Description:  Data Cache	
 */
 

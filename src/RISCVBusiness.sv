@@ -14,12 +14,12 @@
 *		limitations under the License.
 *
 *
-*		Filename:			RISCVBusiness.sv
+*		Filename:     RISCVBusiness.sv
 *
-*		Created by:		John Skubic
-*		Email:				jskubic@purdue.edu
-*		Date Created:	06/01/2016
-*		Description:	Top level module for RISCVBusiness
+*		Created by:   John Skubic
+*		Email:        jskubic@purdue.edu
+*		Date Created: 06/01/2016
+*		Description:  Top level module for RISCVBusiness
 */
 
 `include "ram_if.vh"

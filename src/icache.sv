@@ -14,12 +14,12 @@
 *		limitations under the License.
 *
 *
-*		Filename:			icache.sv
+*		Filename:     icache.sv
 *
-*		Created by:		John Skubic
-*		Email:				jskubic@purdue.edu
-*		Date Created:	06/01/2016
-*		Description:	Instruction Cache
+*		Created by:   John Skubic
+*		Email:        jskubic@purdue.edu
+*		Date Created: 06/01/2016
+*		Description:  Instruction Cache
 */
 
 `include "ram_if.vh"

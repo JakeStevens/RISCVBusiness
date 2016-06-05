@@ -14,12 +14,12 @@
 *		limitations under the License.
 *
 *
-*		Filename:			rv32i_types_pkg.vh
+*		Filename:     rv32i_types_pkg.vh
 *
-*		Created by:	  Jacob R. Stevens	
-*		Email:				steven69@purdue.edu
-*		Date Created:	06/01/2016
-*		Description:	Package containing types used for a RV32I implementation
+*		Created by:   Jacob R. Stevens	
+*		Email:        steven69@purdue.edu
+*		Date Created: 06/01/2016
+*		Description:  Package containing types used for a RV32I implementation
 */
 
 `ifndef RV32I_TYPES_PKG_VH

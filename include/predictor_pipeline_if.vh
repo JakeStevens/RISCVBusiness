@@ -14,12 +14,12 @@
 *		limitations under the License.
 *
 *
-*		Filename:			predictor_pipeline_if.vh
+*		Filename:     predictor_pipeline_if.vh
 *
-*		Created by:	  Jacob R. Stevens	
-*		Email:				steven69@purdue.edu
-*		Date Created:	06/01/2016
-*		Description:	Interface between the branch predictor and pipeline
+*		Created by:   Jacob R. Stevens	
+*		Email:        steven69@purdue.edu
+*		Date Created: 06/01/2016
+*		Description:  Interface between the branch predictor and pipeline
 */
 
 `ifndef PREDICTOR_PIPELINE_IF_VH

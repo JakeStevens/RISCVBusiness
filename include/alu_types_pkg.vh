@@ -14,12 +14,12 @@
 *		limitations under the License.
 *
 *
-*		Filename:			alu_types_pkg.vh
+*		Filename:     alu_types_pkg.vh
 *
-*		Created by:	  Jacob R. Stevens	
-*		Email:				steven69@purdue.edu
-*		Date Created:	06/01/2016
-*		Description:	Package containing types used in the alu
+*		Created by:   Jacob R. Stevens	
+*		Email:        steven69@purdue.edu
+*		Date Created: 06/01/2016
+*		Description:  Package containing types used in the alu
 */
 `ifndef ALU_TYPES_PKG_VH
 `define ALU_TYPES_PKG_VH

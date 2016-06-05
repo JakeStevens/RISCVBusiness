@@ -14,12 +14,12 @@
 *		limitations under the License.
 *
 *
-*		Filename:			tspp.sv
+*		Filename:     tspp.sv
 *
-*		Created by:		John Skubic
-*		Email:				jskubic@purdue.edu
-*		Date Created:	06/01/2016
-*		Description:	Two Stage Pipeline
+*		Created by:   John Skubic
+*		Email:        jskubic@purdue.edu
+*		Date Created: 06/01/2016
+*		Description:  Two Stage Pipeline
 */
 
 `include "ram_if.vh"
