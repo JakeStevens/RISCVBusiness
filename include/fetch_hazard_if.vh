@@ -14,33 +14,32 @@
 *		limitations under the License.
 *
 *
-*		Filename:     execute_control_if.vh
+*		Filename:     fetch_hazard_if.vh
 *
 *		Created by:   Jacob R. Stevens	
 *		Email:        steven69@purdue.edu
 *		Date Created: 06/01/2016
-*		Description:  Package containing types used in the Two Stage Pipeline
+*		Description:  Interface between the fetch pipeline stage and the hazard
+*		              unit.
 */
 
-`ifndef EXECUTE_CONTROL_IF_VH
-`define EXECUTE_CONTROL_IF_VH
+`ifndef FETCH_HAZARD_IF_VH
+`define FETCH_HAZARD_IF_VH
 
 `include "tspp_types_pkg.vh"
 
-interface execute_control_if;
+interface fetch_hazard_if;
   import tspp_types_pkg::*;
 
-  logic flush, stall, dwait, branch_mispredict;
-  word_t branch_jump_addr;
+  logic update_pc, flush, stall;
+  word_t update_addr;
 
-  modport execute(
-    input flush, stall,
-    output dwait, branch_mispredict, branch_jump_addr
+  modport fetch(
+    input update_addr, update_pc, flush, stall
   );
 
-  modport control(
-    input dwait, branch_mispredict, branch_jump_addr,
-    output flush, stall
+  modport hazard(
+    output update_addr, update_pc, flush, stall
   );
 
 endinterface
