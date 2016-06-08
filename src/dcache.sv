@@ -31,11 +31,12 @@ module dcache (
 );
 
   //passthrough layer
-  assign ram_in_if.addr  = ram_out_if.addr;
-  assign ram_in_if.ren   = ram_out_if.ren;
-  assign ram_in_if.wen   = ram_out_if.wen;
-  assign ram_in_if.wdata = ram_out_if.wdata;
-  
+  assign ram_in_if.addr     = ram_out_if.addr;
+  assign ram_in_if.ren      = ram_out_if.ren;
+  assign ram_in_if.wen      = ram_out_if.wen;
+  assign ram_in_if.wdata    = ram_out_if.wdata;
+  assign ram_in_if.byte_en  = ram_out_if.byte_en; 
+
   assign ram_out_if.rdata  = ram_in_if.rdata;
   assign ram_out_if.busy   = ram_in_if.busy;
 

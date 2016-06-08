@@ -35,15 +35,16 @@ interface ram_if ();
   logic [DATA_BITS-1:0]rdata;
   logic ren,wen;
   logic busy;
+  logic [3:0] byte_en;
 
   modport ram (
-    input addr, ren, wen, wdata,
+    input addr, ren, wen, wdata, byte_en,
     output rdata, busy
   );
 
   modport cpu (
     input rdata, busy,
-    output addr, ren, wen, wdata
+    output addr, ren, wen, wdata, byte_en
   );
 
 endinterface
