@@ -27,8 +27,8 @@
 module tspp (
   input logic CLK, nRST,
   output logic halt,
-  ram_if.cpu iram_if,
-  ram_if.cpu dram_if
+  ram_if.ram iram_if,
+  ram_if.ram dram_if
 );
 
   // TODO: Implement two stage pipeline

@@ -50,15 +50,15 @@ module RISCVBusiness (
   icache icache_m (
     .CLK(CLK),
     .nRST(nRST),
-    .ram_in_if(tspp_icache_ram_if),
-    .ram_out_if(icache_mc_if)
+    .proc_ram_if(tspp_icache_ram_if),
+    .mem_ram_if(icache_mc_if)
   );
 
   dcache dcache_m (
     .CLK(CLK),
     .nRST(nRST),
-    .ram_in_if(tspp_dcache_ram_if),
-    .ram_out_if(dcache_mc_if)
+    .proc_ram_if(tspp_dcache_ram_if),
+    .mem_ram_if(dcache_mc_if)
   );
 
   memory_controller mc (

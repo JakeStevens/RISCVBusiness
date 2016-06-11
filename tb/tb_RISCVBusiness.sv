@@ -63,15 +63,17 @@ module tb_RISCVBusiness ();
   //Ramif Mux
   always_comb begin
     if(ram_control) begin
-      ramif.addr  =   rvb_ramif.addr;
-      ramif.ren   =   rvb_ramif.ren;
-      ramif.wen   =   rvb_ramif.wen;
-      ramif.wdata =   rvb_ramif.wdata;
+      ramif.addr    =   rvb_ramif.addr;
+      ramif.ren     =   rvb_ramif.ren;
+      ramif.wen     =   rvb_ramif.wen;
+      ramif.wdata   =   rvb_ramif.wdata;
+      ramif.byte_en = rvb_ramif.byte_en;
     end else begin
-      ramif.addr  =   tb_ramif.addr;
-      ramif.ren   =   tb_ramif.ren;
-      ramif.wen   =   tb_ramif.wen;
-      ramif.wdata =   tb_ramif.wdata;
+      ramif.addr    =   tb_ramif.addr;
+      ramif.ren     =   tb_ramif.ren;
+      ramif.wen     =   tb_ramif.wen;
+      ramif.wdata   =   tb_ramif.wdata;
+      ramif.byte_en = tb_ramif.byte_en;
     end
   end
 
@@ -115,6 +117,7 @@ module tb_RISCVBusiness ();
     tb_ramif.ren = 0;
     tb_ramif.wen = 0;
     tb_ramif.wdata = 0;
+    tb_ramif.byte_en = 4'hf;
 
     fptr = $fopen(`OUTPUT_FILE_NAME, "w");
 

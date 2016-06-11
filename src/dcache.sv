@@ -26,18 +26,18 @@
 
 module dcache (
   input logic CLK, nRST,
-  ram_if.cpu ram_in_if,
-  ram_if.ram ram_out_if
+  ram_if.cpu mem_ram_if,
+  ram_if.ram proc_ram_if
 );
 
   //passthrough layer
-  assign ram_in_if.addr     = ram_out_if.addr;
-  assign ram_in_if.ren      = ram_out_if.ren;
-  assign ram_in_if.wen      = ram_out_if.wen;
-  assign ram_in_if.wdata    = ram_out_if.wdata;
-  assign ram_in_if.byte_en  = ram_out_if.byte_en; 
+  assign mem_ram_if.addr     = proc_ram_if.addr;
+  assign mem_ram_if.ren      = proc_ram_if.ren;
+  assign mem_ram_if.wen      = proc_ram_if.wen;
+  assign mem_ram_if.wdata    = proc_ram_if.wdata;
+  assign mem_ram_if.byte_en  = proc_ram_if.byte_en; 
 
-  assign ram_out_if.rdata  = ram_in_if.rdata;
-  assign ram_out_if.busy   = ram_in_if.busy;
+  assign proc_ram_if.rdata   = mem_ram_if.rdata;
+  assign proc_ram_if.busy    = mem_ram_if.busy;
 
 endmodule
