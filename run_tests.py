@@ -194,10 +194,9 @@ def run_sim(file_name):
     cmd_arr = ['waf', 'configure', '--top_level=' + TOP_LEVEL]
     failure = subprocess.call(cmd_arr, stdout=FNULL)
     if failure:
-      return -1
-    return 0;
+        return -1
     cmd_arr = ['waf', 'verify_source']
-    failure = subprocess.call(cmd_arr, stdout=FNULL)
+    failure = subprocess.call(cmd_arr)
     if failure:
         return -2
     return 0
@@ -245,6 +244,7 @@ if __name__ == '__main__':
                 elif ret == -2:
                     print "An erro has occured converting elf to hex"
                 sys.exit(1)
+            print "Running sim..."
             ret = run_sim(f)
             if ret != 0:
                 if ret == -1:
