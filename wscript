@@ -22,6 +22,11 @@ def configure(ctx):
       tb = 'tb_RISCVBusiness',
       tb_includes = ['include']
     )
+    ctx.setup_hdl_module('alu', 
+      includes = ['include'],
+      tb = 'tb_alu',
+      tb_includes = ['include']
+    )
 
 def build(ctx):
     pass
