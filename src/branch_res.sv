@@ -14,7 +14,7 @@
 *   limitations under the License.
 *
 *
-*   Filename:     src/branch_res_unit.sv
+*   Filename:     src/branch_res.sv
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
