@@ -25,10 +25,8 @@
 `ifndef EXECUTE_HAZARD_IF_VH
 `define EXECUTE_HAZARD_IF_VH
 
-`include "tspp_types_pkg.vh"
-
 interface execute_hazard_if;
-  import tspp_types_pkg::*;
+  import rv32i_types_pkg::*;
 
   logic flush, stall, dwait, branch_mispredict;
   word_t branch_jump_addr;

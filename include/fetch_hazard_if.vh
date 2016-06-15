@@ -26,10 +26,8 @@
 `ifndef FETCH_HAZARD_IF_VH
 `define FETCH_HAZARD_IF_VH
 
-`include "tspp_types_pkg.vh"
-
 interface fetch_hazard_if;
-  import tspp_types_pkg::*;
+  import rv32i_types_pkg::*;
 
   logic update_pc, flush, stall;
   word_t update_addr;

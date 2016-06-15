@@ -33,7 +33,7 @@ module tb_alu ();
  
   logic error_found;
 
-  word_t input_aluop_vec [NUM_TESTS-1:0];
+  aluop_t input_aluop_vec [NUM_TESTS-1:0];
   assign input_aluop_vec = {
     ALU_SLL,
     ALU_SRL,

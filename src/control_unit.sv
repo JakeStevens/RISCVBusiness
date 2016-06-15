@@ -23,8 +23,6 @@
 *                 signals used in the processor based on the incoming instruction. 
 */
 
-`include "alu_types_pkg.vh"
-`include "rv32i_types_pkg.vh"
 `include "control_unit_if.vh"
 
 module control_unit 
@@ -166,3 +164,4 @@ module control_unit
   assign aluop_sltu = ((cu_if.opcode == IMMED && instr_i.funct3 == SLTIU) ||
                       (cu_if.opcdoe == REGREG && instr_r.funct3 == SLTU));
 endmodule
+
