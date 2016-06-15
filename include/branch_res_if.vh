@@ -14,30 +14,31 @@
 *   limitations under the License.
 *
 *
-*   Filename:     include/rv32i_reg_file_if.vh
+*   Filename:     include/branch_res_if.vh
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 06/14/2016
-*   Description:  Interface for the Register File 
+*   Description:  Interface for the branch resolution module 
 */
 
-`ifndef RV32I_REG_FILE_IF_VH
-`define RV32I_REG_FILE_IF_VH
+`ifndef BRANCH_RES_IF_VH
+`define BRANCH_RES_IF_VH
 
-interface rv32i_reg_file_if();
+interface branch_res_if();
 
   import rv32i_types_pkg::*;
 
-  word_t        w_data, rs1_data, rs2_data;
-  logic   [4:0] rs1, rs2, rd;
-  logic         wen;
-
-  modport rf (
-    input w_data, rs1, rs2, rd, wen,
-    output rs1_data, rs2_data
+  word_t rs1_data, rs2_data, pc, branch_addr;
+  logic [11:0] imm_b;
+  branch_t branch_type;
+  logic branch_taken;
+  
+  modport bres (
+    input rs1_data, rs2_data, pc, imm_b, branch_type,
+    output branch_addr, branch_taken
   );
 
 endinterface
 
-`endif //RV32I_REG_FILE_IF_VH
+`endif //BRANCH_RES_IF_VH

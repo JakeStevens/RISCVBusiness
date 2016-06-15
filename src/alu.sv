@@ -44,6 +44,7 @@ module alu (
       ALU_SLTU  : aluif.port_out = aluif.port_a < aluif.port_b;
       ALU_ADD   : aluif.port_out = aluif.port_a + aluif.port_b; 
       ALU_SUB   : aluif.port_out = aluif.port_a - aluif.port_b;
+      default   : aluif.port_out = '0;
     endcase
   end
 

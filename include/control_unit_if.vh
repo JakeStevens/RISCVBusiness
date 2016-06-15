@@ -26,9 +26,6 @@
 `ifndef CONTROL_UNIT_IF_VH
 `define CONTROL_UNIT_IF_VH
 
-`include "alu_types_pkg.vh"
-`include "rv32i_types_pkg.vh"
-
 interface control_unit_if;
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;
