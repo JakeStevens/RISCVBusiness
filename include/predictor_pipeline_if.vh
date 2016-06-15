@@ -25,10 +25,8 @@
 `ifndef PREDICTOR_PIPELINE_IF_VH
 `define PREDICTOR_PIPELINE_IF_VH
 
-`include "tspp_types_pkg.vh"
-
 interface predictor_pipeline_if;
-  import tspp_types_pkg::*;
+  import rv32i_types_pkg::*;
 
   word_t current_PC, target_addr, update_addr;
   logic update_predictor;

@@ -22,8 +22,6 @@
 *   Description:  Arithmetic Logic Unit
 */
 
-`include "alu_types_pkg.vh"
-`include "rv32i_types_pkg.vh"
 `include "alu_if.vh"
 
 module alu (

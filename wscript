@@ -19,11 +19,13 @@ def configure(ctx):
     ctx.load('Syn_support', tooldir=toolpath)
     ctx.setup_hdl_module('RISCVBusiness',
       includes = ['include'],
+      src_dir = ['packages','src'],
       tb = 'tb_RISCVBusiness',
       tb_includes = ['include']
     )
     ctx.setup_hdl_module('alu', 
       includes = ['include'],
+      src_dir = ['packages','src'],
       tb = 'tb_alu',
       tb_includes = ['include']
     )

@@ -26,13 +26,11 @@
 `define RAM_IF_VH
 
 interface ram_if ();
+  import rv32i_types_pkg::*;
 
-  parameter ADDR_BITS = 16;
-  parameter DATA_BITS = 32;
-  
-  logic [ADDR_BITS-1:0]addr;
-  logic [DATA_BITS-1:0]wdata;
-  logic [DATA_BITS-1:0]rdata;
+  logic [RAM_ADDR_SIZE-1:0]addr;
+  word_t wdata;
+  word_t rdata;
   logic ren,wen;
   logic busy;
   logic [3:0] byte_en;
