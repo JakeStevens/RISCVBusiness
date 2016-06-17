@@ -30,12 +30,12 @@ interface branch_res_if();
   import rv32i_types_pkg::*;
 
   word_t rs1_data, rs2_data, pc, branch_addr;
-  logic [11:0] imm_b;
+  logic [11:0] imm_sb;
   branch_t branch_type;
   logic branch_taken;
   
   modport bres (
-    input rs1_data, rs2_data, pc, imm_b, branch_type,
+    input rs1_data, rs2_data, pc, imm_sb, branch_type,
     output branch_addr, branch_taken
   );
 

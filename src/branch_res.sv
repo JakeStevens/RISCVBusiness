@@ -33,7 +33,7 @@ module branch_res (
   
   word_t offset, offset_m2;
 
-  assign offset = $signed(imm_b);
+  assign offset = $signed(brif.imm_sb);
   assign offset_m2 = offset << 1;
   assign brif.branch_addr = brif.pc + offset_m2;
 
