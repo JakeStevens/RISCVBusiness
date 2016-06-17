@@ -30,7 +30,7 @@ interface branch_res_if();
   import rv32i_types_pkg::*;
 
   word_t rs1_data, rs2_data, pc, branch_addr;
-  logic [11:0] imm_sb;
+  logic [12:0] imm_sb;
   branch_t branch_type;
   logic branch_taken;
   
