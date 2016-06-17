@@ -38,6 +38,10 @@ interface rv32i_reg_file_if();
     output rs1_data, rs2_data
   );
 
+  modport cu (
+    output rs1, rs2, rd, wen
+  );
+
 endinterface
 
 `endif //RV32I_REG_FILE_IF_VH

@@ -30,11 +30,11 @@ interface control_unit_if;
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;
 
-  logic w_en, dwen, dren, j_sel, branch, jump, ex_pc_sel, imm_shamt_sel;
+  logic dwen, dren, j_sel, branch, jump, ex_pc_sel, imm_shamt_sel;
   aluop_t alu_op;
   logic [1:0] alu_a_sel, alu_b_sel, w_sel;
   logic [3:0] byte_en;
-  logic [4:0] rd, shamt;
+  logic [4:0] shamt;
   logic [6:0] opcode;
   logic [11:0] imm_I, imm_S, imm_UJ;
   logic [12:0] imm_SB;
@@ -42,10 +42,12 @@ interface control_unit_if;
   load_t load_type;
   branch_t branch_type;
 
+  
+
   modport control_unit(
     input instr,
-    output w_en, dwen, dren, j_sel, branch, jump, ex_pc_sel, alu_a_sel,
-    alu_b_sel, w_sel, byte_en, load_type, branch_type,
+    output dwen, dren, j_sel, branch, jump, ex_pc_sel, alu_a_sel,
+    alu_b_sel, w_sel, byte_en, load_type, branch_type, shamt,
     imm_I, imm_S, imm_SB, imm_UJ, imm_U, imm_shamt_sel, alu_op
   );
 
