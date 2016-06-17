@@ -31,11 +31,11 @@ interface fetch_execute_if;
   word_t pc, instr, npc;
 
   modport fetch(
-    output pc, instr, nc
+    output pc, instr, npc
   );
 
-  modport execute{
-    input pc, instr, nc
+  modport execute(
+    input pc, instr, npc
   );
 
 endinterface

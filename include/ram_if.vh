@@ -28,7 +28,7 @@
 interface ram_if ();
   import rv32i_types_pkg::*;
 
-  logic [RAM_ADDR_SIZE-1:0]addr;
+  logic [RAM_ADDR_SIZE-1:0] addr;
   word_t wdata;
   word_t rdata;
   logic ren,wen;
