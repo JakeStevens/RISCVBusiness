@@ -24,10 +24,12 @@
 */
 
 `include "control_unit_if.vh"
+`include "rv32i_reg_file_if.vh"
 
 module control_unit 
 (
-  control_unit_if.control_unit cu_if
+  control_unit_if.control_unit  cu_if,
+  rv32i_reg_file_if.cu          rfif,  
 );
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;
@@ -43,7 +45,11 @@ module control_unit
   assign instr_uj = ujtype_t'(cu_if.instr);
 
   assign cu_if.opcode = opcode_t'(cu_if.instr[6:0]);
-  
+  assign rf_if.rs1  = cu_if.instr[19:15];
+  assign rf_if.rs2  = cu_if.instr[24:20];
+  assign rf_if.rd   = cu_if.instr[11:7]; 
+  assign cu_if.shamt = cu_if.instr[24:20];
+ 
   // Assign the immediate values
   assign cu_if.imm_I  = instr_i.imm11_00;
   assign cu_if.imm_S  = {instr_s.imm11_05, instr_s.imm04_00};
@@ -57,11 +63,11 @@ module control_unit
                             (instr_i.funct3 == SLLI || instr_i.funct3 == SRI));
 
   // Assign branch and load type
-  assign cu_if.load_type    = load_t'(instr_i);
-  assign cu_if.branch_type  = branch_t'(instr_sb);
+  assign cu_if.load_type    = load_t'(instr_i.funct3);
+  assign cu_if.branch_type  = branch_t'(instr_sb.funct3);
 
   // Assign byte_en based on store type
-  assign store_type = store_t'(instr_s);
+  assign store_type = store_t'(instr_s.funct3);
   always_comb begin
     unique case(store_type)
       SB: cu_if.byte_en       = 4'b0001;
@@ -121,16 +127,16 @@ module control_unit
   // Assign register write enable
   always_comb begin
     case(cu_if.opcode)
-      STORE:  cu_if.w_en   = 1'b0;
-      BRANCH: cu_if.w_en   = 1'b0;
-      IMMED:  cu_if.w_en   = 1'b1;
-      LUI:    cu_if.w_en   = 1'b1;
-      AUIPC:  cu_if.w_en   = 1'b1;
-      REGREG: cu_if.w_en   = 1'b1;
-      JAL:    cu_if.w_en   = 1'b1;
-      JALR:   cu_if.w_en   = 1'b1;
-      LOAD:   cu_if.w_en   = 1'b1;
-      default: cu_if.w_en  = 1'b0;
+      STORE:    rf_if.wen   = 1'b0;
+      BRANCH:   rf_if.wen   = 1'b0;
+      IMMED:    rf_if.wen   = 1'b1;
+      LUI:      rf_if.wen   = 1'b1;
+      AUIPC:    rf_if.wen   = 1'b1;
+      REGREG:   rf_if.wen   = 1'b1;
+      JAL:      rf_if.wen   = 1'b1;
+      JALR:     rf_if.wen   = 1'b1;
+      LOAD:     rf_if.wen   = 1'b1;
+      default:  rf_if.wen   = 1'b0;
     endcase
   end
 
@@ -162,6 +168,32 @@ module control_unit
   assign aluop_slt = ((cu_if.opcode == IMMED && instr_i.funct3 == SLTI) ||
                       (cu_if.opcdoe == REGREG && instr_r.funct3 == SLT));
   assign aluop_sltu = ((cu_if.opcode == IMMED && instr_i.funct3 == SLTIU) ||
-                      (cu_if.opcdoe == REGREG && instr_r.funct3 == SLTU));
+                      (cu_if.opcode == REGREG && instr_r.funct3 == SLTU));
+
+  always_comb begin
+    unique if (aluop_sll)
+      cu_if.alu_op = ALU_SLL;
+    else if (aluop_sra)
+      cu_if.alu_op = ALU_SRA;
+    else if (aluop_srl)
+      cu_if.alu_op = ALU_SRL;
+    else if (aluop_add)
+      cu_if.alu_op = ALU_ADD;
+    else if (aluop_sub)
+      cu_if.alu_op = ALU_SUB;
+    else if (aluop_and)
+      cu_if.alu_op = ALU_AND;
+    else if (aluop_or)
+      cu_if.alu_op = ALU_OR;
+    else if (aluop_xor)
+      cu_if.alu_op = ALU_XOR;
+    else if (aluop_slt)
+      cu_if.alu_op = ALU_SLT;
+    else if (aluop_sltu)
+      cu_if.alu_op = ALU_SLTU;
+    else
+      cu_if.alu_op = ALU_ADD;
+  end
+
 endmodule
 

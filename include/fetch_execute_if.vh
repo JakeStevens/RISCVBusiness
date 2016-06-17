@@ -28,14 +28,14 @@
 interface fetch_execute_if;
   import rv32i_types_pkg::*;
  
-  word_t pc, instr, npc;
+  word_t pc, instr, npc, prediction;
 
   modport fetch(
-    output pc, instr, npc
+    output pc, instr, npc, prediction
   );
 
   modport execute(
-    input pc, instr, npc
+    input pc, instr, npc, prediction
   );
 
 endinterface
