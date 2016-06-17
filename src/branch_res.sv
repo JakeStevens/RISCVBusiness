@@ -31,11 +31,10 @@ module branch_res (
   
   import rv32i_types_pkg::*;
   
-  word_t offset, offset_m2;
+  word_t offset;
 
   assign offset = $signed(brif.imm_sb);
-  assign offset_m2 = offset << 1;
-  assign brif.branch_addr = brif.pc + offset_m2;
+  assign brif.branch_addr = brif.pc + offset;
 
   always_comb begin
     casez (brif.branch_type) 
