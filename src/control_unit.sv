@@ -29,13 +29,13 @@
 module control_unit 
 (
   control_unit_if.control_unit  cu_if,
-  rv32i_reg_file_if.cu          rfif,  
+  rv32i_reg_file_if.cu          rfif 
 );
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;
 
   word_t instr_s, instr_i, instr_r, instr_sb, instr_u, instr_uj;
-  store_t store_type;
+  load_t load_type;
 
   assign instr_s = stype_t'(cu_if.instr);
   assign instr_i = itype_t'(cu_if.instr);
@@ -66,14 +66,32 @@ module control_unit
   assign cu_if.load_type    = load_t'(instr_i.funct3);
   assign cu_if.branch_type  = branch_t'(instr_sb.funct3);
 
-  // Assign byte_en based on store type
-  assign store_type = store_t'(instr_s.funct3);
+  // Assign byte_en based on load type 
+  // funct3 for loads and stores are the same bit positions
+  // cu_if.byte_en is valid for both loads and stores 
+  assign load_type = load_t'(instr_i.funct3);
   always_comb begin
-    unique case(store_type)
-      SB: cu_if.byte_en       = 4'b0001;
-      SH: cu_if.byte_en       = 4'b0011;
-      SW: cu_if.byte_en       = 4'b1111;
-      default: cu_if.byte_en  = 4'b0000;
+    unique case(load_type)
+      LB  :
+      LBU : begin
+        unique case(cu_if.byte_offset)
+          2'b00   : cu_if.byte_en = 4'b0001;
+          2'b01   : cu_if.byte_en = 4'b0010;
+          2'b10   : cu_if.byte_en = 4'b0100;
+          2'b11   : cu_if.byte_en = 4'b1000;
+          default : cu_if.byte_en = 4'b0000;
+        endcase
+      end
+      LH:
+      LHU : begin
+        unique case(cu_if.byte_offset)
+          2'b00   : cu_if.byte_en = 4'b0011;
+          2'b10   : cu_if.byte_en = 4'b1100;
+          default : cu_if.byte_en = 4'b0000;
+        endcase
+      end
+      LW:           cu_if.byte_en = 4'b1111;
+      default :     cu_if.byte_en = 4'b0000;
     endcase
   end
 

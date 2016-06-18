@@ -119,6 +119,7 @@ module execute_state(
       jumpif.base = rfif.rs1_data;
       jumpif.offset = imm_I_ext;
       jump_addr = jumpif.jalr_addr;
+    end
   end 
 
 endmodule

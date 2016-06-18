@@ -41,11 +41,11 @@ interface control_unit_if;
   word_t instr, imm_U;
   load_t load_type;
   branch_t branch_type;
-
+  logic [1:0] byte_offset;
   
 
   modport control_unit(
-    input instr,
+    input instr, byte_offset,
     output dwen, dren, j_sel, branch, jump, ex_pc_sel, alu_a_sel,
     alu_b_sel, w_sel, byte_en, load_type, branch_type, shamt,
     imm_I, imm_S, imm_SB, imm_UJ, imm_U, imm_shamt_sel, alu_op
