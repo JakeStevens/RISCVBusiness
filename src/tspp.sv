@@ -22,17 +22,54 @@
 *   Description:  Two Stage Pipeline
 */
 
+`include "fetch_execute_if.vh"
+`include "hazard_unit_if.vh"
+`include "predictor_pipeline_if.vh"
 `include "ram_if.vh"
 
 module tspp (
   input logic CLK, nRST,
   output logic halt,
-  ram_if.ram iram_if,
-  ram_if.ram dram_if
+  ram_if.cpu iram_if,
+  ram_if.cpu dram_if
 );
 
   // TODO: Implement two stage pipeline
   // Assign halt to one so testbench stops
   assign halt = 1'b1;
+
+  //interface instantiations
+  fetch_execute_if      fetch_exif();
+  predictor_pipeline_if predictif();
+  hazard_unit_if        hazard_if();
+
+  //module instantiations
+  fetch_stage fetch_stage_i (
+    .CLK(CLK),
+    .nRST(nRST),
+    .fetch_exif(fetch_exif),
+    .hazardif(hazard_if),
+    .predictif(predictif),
+    .iram_if(iram_if)
+  );
+
+  execute_stage execute_stage_i (
+    .CLK(CLK),
+    .nRST(nRST),
+    .fetch_exif(fetch_exif),
+    .hazardif(hazard_if),
+    .predictif(predictif),
+    .dramif(dram_if)
+  );
+
+  hazard_unit hazard_unit_i (
+    .hazard_if(hazard_if)
+  );
+
+  branch_predictor branch_predictor_i (
+    .CLK(CLK),
+    .nRST(nRST),
+    .predict_if(predictif)
+  );
 
 endmodule

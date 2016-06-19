@@ -41,6 +41,6 @@ module hazard_unit
   assign hazard_if.if_ex_flush = hazard_if.jump ||
                                  (hazard_if.branch && hazard_if.mispredict);
 
-  assign hazard_if.if_ex_stall = (dmem_access && hazard_if.ram_busy) ||
+  assign hazard_if.if_ex_stall = (dmem_access && hazard_if.d_ram_busy) ||
                                  (hazard_if.iren && hazard_if.i_ram_busy);
 endmodule

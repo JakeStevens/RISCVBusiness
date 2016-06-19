@@ -12,33 +12,31 @@
 *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
-*   
-*   
-*   Filename:     fetch_hazard_if.vh
-*   
-*   Created by:   Jacob R. Stevens	
-*   Email:        steven69@purdue.edu
-*   Date Created: 06/01/2016
-*   Description:  Interface between the fetch pipeline stage and the hazard
-*                 unit.
+*
+*
+*   Filename:     fetch_stage.sv
+*
+*   Created by:   John Skubic
+*   Email:        jskubic@purdue.edu
+*   Date Created: 06/19/2016
+*   Description:  Fetch stage for the two stage pipeline
 */
 
-`ifndef FETCH_HAZARD_IF_VH
-`define FETCH_HAZARD_IF_VH
+`include "fetch_execute_if.vh"
+`include "hazard_unit_if.vh"
+`include "predictor_pipeline_if.vh"
+`include "ram_if.vh"
 
-interface fetch_hazard_if;
-  import rv32i_types_pkg::*;
+module fetch_stage (
+  input logic CLK, nRST,
+  fetch_execute_if.fetch fetch_exif,
+  hazard_unit_if.fetch hazardif,
+  predictor_pipeline_if.access predictif,
+  ram_if.cpu iram_if
+);
 
-  logic update_pc, flush, stall;
-  word_t update_addr;
+  
 
-  modport fetch(
-    input update_addr, update_pc, flush, stall
-  );
+endmodule
 
-  modport hazard(
-    output update_addr, update_pc, flush, stall
-  );
 
-endinterface
-`endif

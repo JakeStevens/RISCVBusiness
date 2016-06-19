@@ -23,7 +23,7 @@
 */
 
 `ifndef HAZARD_UNIT_IF_VH
-`define HAZARD_UNI_IF_VH
+`define HAZARD_UNIT_IF_VH
 interface hazard_unit_if();
 
   import rv32i_types_pkg::word_t;
@@ -34,6 +34,16 @@ interface hazard_unit_if();
   modport hazard_unit (
     input i_ram_busy, d_ram_busy, dren, dwen, iren, jump, branch, mispredict,
     output pc_en, npc_sel, if_ex_stall, if_ex_flush
+  );
+
+  modport fetch (
+    input pc_en, npc_sel,
+    output i_ram_busy, iren
+  );
+
+  modport execute (
+    input if_ex_stall, if_ex_flush,
+    output d_ram_busy, dren, dwen, jump, branch, mispredict
   );
  
 endinterface

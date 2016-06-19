@@ -23,17 +23,19 @@
 */
 
 `include "fetch_execute_if.vh"
-`include "execute_hazard_if.vh"
+`include "hazard_unit_if.vh"
+`include "predictor_pipeline_if.vh"
 `include "control_unit_if.vh"
 `include "rv32i_reg_file_if.vh"
 `include "ram_if.vh"
 `include "alu_if.vh"
 
-module execute_state(
-  input CLK, nRST,
+module execute_stage(
+  input logic CLK, nRST,
   fetch_execute_if.execute fetch_exif,
-  execute_hazard_if.execute ex_hazardif,
-  ram_if.ram dramif 
+  hazard_unit_if.execute hazardif,
+  predictor_pipeline_if.update predictif,
+  ram_if.cpu dramif 
 );
 
   // Interface declarations

@@ -34,8 +34,13 @@ module control_unit
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;
 
-  word_t instr_s, instr_i, instr_r, instr_sb, instr_u, instr_uj;
-  load_t load_type;
+  stype_t   instr_s;
+  itype_t   instr_i;
+  rtype_t   instr_r;
+  sbtype_t  instr_sb;
+  utype_t   instr_u;
+  ujtype_t  instr_uj;
+  load_t    load_type;
 
   assign instr_s = stype_t'(cu_if.instr);
   assign instr_i = itype_t'(cu_if.instr);
@@ -45,9 +50,9 @@ module control_unit
   assign instr_uj = ujtype_t'(cu_if.instr);
 
   assign cu_if.opcode = opcode_t'(cu_if.instr[6:0]);
-  assign rf_if.rs1  = cu_if.instr[19:15];
-  assign rf_if.rs2  = cu_if.instr[24:20];
-  assign rf_if.rd   = cu_if.instr[11:7]; 
+  assign rfif.rs1  = cu_if.instr[19:15];
+  assign rfif.rs2  = cu_if.instr[24:20];
+  assign rfif.rd   = cu_if.instr[11:7]; 
   assign cu_if.shamt = cu_if.instr[24:20];
  
   // Assign the immediate values
@@ -145,16 +150,16 @@ module control_unit
   // Assign register write enable
   always_comb begin
     case(cu_if.opcode)
-      STORE:    rf_if.wen   = 1'b0;
-      BRANCH:   rf_if.wen   = 1'b0;
-      IMMED:    rf_if.wen   = 1'b1;
-      LUI:      rf_if.wen   = 1'b1;
-      AUIPC:    rf_if.wen   = 1'b1;
-      REGREG:   rf_if.wen   = 1'b1;
-      JAL:      rf_if.wen   = 1'b1;
-      JALR:     rf_if.wen   = 1'b1;
-      LOAD:     rf_if.wen   = 1'b1;
-      default:  rf_if.wen   = 1'b0;
+      STORE:    rfif.wen   = 1'b0;
+      BRANCH:   rfif.wen   = 1'b0;
+      IMMED:    rfif.wen   = 1'b1;
+      LUI:      rfif.wen   = 1'b1;
+      AUIPC:    rfif.wen   = 1'b1;
+      REGREG:   rfif.wen   = 1'b1;
+      JAL:      rfif.wen   = 1'b1;
+      JALR:     rfif.wen   = 1'b1;
+      LOAD:     rfif.wen   = 1'b1;
+      default:  rfif.wen   = 1'b0;
     endcase
   end
 
@@ -164,7 +169,7 @@ module control_unit
 
 
   assign sr = ((cu_if.opcode == IMMED && instr_i.funct3 == SRI) ||
-                (cu_if.opcode == REGREG && instr_r.fucnt3 == SR));
+                (cu_if.opcode == REGREG && instr_r.funct3 == SR));
   assign add_sub = (cu_if.opcode == REGREG && instr_r.funct3 == ADDSUB);
   
   assign aluop_sll = ((cu_if.opcode == IMMED && instr_i.funct3 == SLLI) ||
@@ -182,9 +187,9 @@ module control_unit
   assign aluop_or = ((cu_if.opcode == IMMED && instr_i.funct3 == ORI) ||
                       (cu_if.opcode == REGREG && instr_r.funct3 == OR));
   assign aluop_xor = ((cu_if.opcode == IMMED && instr_i.funct3 == XORI) ||
-                      (cu_if.opcdoe == REGREG && instr_r.funct3 == XOR));
+                      (cu_if.opcode == REGREG && instr_r.funct3 == XOR));
   assign aluop_slt = ((cu_if.opcode == IMMED && instr_i.funct3 == SLTI) ||
-                      (cu_if.opcdoe == REGREG && instr_r.funct3 == SLT));
+                      (cu_if.opcode == REGREG && instr_r.funct3 == SLT));
   assign aluop_sltu = ((cu_if.opcode == IMMED && instr_i.funct3 == SLTIU) ||
                       (cu_if.opcode == REGREG && instr_r.funct3 == SLTU));
 
