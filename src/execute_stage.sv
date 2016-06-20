@@ -102,7 +102,7 @@ module execute_stage(
   always_comb begin
     case(cuif.w_sel)
       //2'd0: rfif.w_data = TODO: dload_ext
-      2'd1: rfif.w_data = fetch_exif.npc;
+      2'd1: rfif.w_data = fetch_exif.pc4;
       2'd2: rfif.w_data = cuif.imm_U;
       2'd3: rfif.w_data = aluif.port_out;
     endcase

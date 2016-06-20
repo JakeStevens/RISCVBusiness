@@ -31,5 +31,6 @@ module branch_predictor (
   predictor_pipeline_if.predictor predict_if
 );
 
+  assign predict_if.predict_taken = 0;
 
 endmodule

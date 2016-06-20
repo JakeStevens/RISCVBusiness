@@ -34,8 +34,46 @@ module fetch_stage (
   predictor_pipeline_if.access predictif,
   ram_if.cpu iram_if
 );
+  import rv32i_types_pkg::*;
 
+  parameter RESET_PC = 32'h200;
+
+  word_t  pc, pc4, npc, instr;
+
+  //PC logic
+
+  always @ (posedge CLK, negedge nRST) begin
+    if(~nRST) begin
+      pc <= RESET_PC;
+    end else if (hazardif.pc_en) begin
+      pc <= npc;
+    end
+  end
+
+  assign pc4 = pc + 4;
+  assign predictif.current_pc = pc;
+  assign npc = hazardif.npc_sel ? fetch_exif.brj_addr : 
+                (predictif.predict_taken ? predictif.target_addr : pc4);
+
+  //Instruction Access logic
+  assign hazardif.iren        = 1'b1;
+  assign hazardif.i_ram_busy  = iram_if.busy;
+  assign iram_if.addr         = pc;
+  assign iram_if.ren          = 1'b1;
+  assign iram_if.wen          = 1'b0;
+  assign iram_if.byte_en      = 4'h0;
+  assign iram_if.wdata        = '0;
   
+  endian_swapper ltb_endian (
+    .word_in(iram_if.rdata),
+    .word_out(instr)
+  );
+
+  //Fetch Execute Pipeline Signals
+  assign fetch_exif.pc          = pc;
+  assign fetch_exif.pc4         = pc4;
+  assign fetch_exif.instr       = instr;
+  assign fetch_exif.prediction  = predictif.predict_taken;
 
 endmodule
 
