@@ -43,6 +43,7 @@ module execute_stage(
   rv32i_reg_file_if rfif(); 
   alu_if            aluif();
   jump_calc_if      jumpif();
+  branch_res_if     branchif(); 
  
   // Module instantiations
   control_unit cu (
@@ -62,7 +63,22 @@ module execute_stage(
 
   jump_calc jump_calc (
     .jumpif(jumpif)
-  );  
+  );
+
+  branch_res branch_res (
+    .brif(branchif)
+  ); 
+
+  endian_swapper store_swap (
+    .word_in(rfif.rs2_data),
+    .word_out(dramif.wdata)
+  );
+
+  word_t dload_ext;
+  endian_swapper load_swap (
+    .word_in(dramif.rdata),
+    .word_out(dload_ext)
+  );
  
   assign cuif.instr = fetch_exif.instr;
 
@@ -101,7 +117,7 @@ module execute_stage(
 
   always_comb begin
     case(cuif.w_sel)
-      //2'd0: rfif.w_data = TODO: dload_ext
+      2'd0: rfif.w_data = dload_ext;
       2'd1: rfif.w_data = fetch_exif.pc4;
       2'd2: rfif.w_data = cuif.imm_U;
       2'd3: rfif.w_data = aluif.port_out;
@@ -123,6 +139,33 @@ module execute_stage(
       jump_addr = jumpif.jalr_addr;
     end
   end 
+
+  /*******************************************************
+  *** Branch Target Resolution and Associated Logic 
+  *******************************************************/
+  word_t resolved_addr;
+  assign branchif.rs1_data    = rfif.rs1_data;
+  assign branchif.rs2_data    = rfif.rs2_data;
+  assign branchif.pc          = fetch_exif.pc;
+  assign branchif.imm_sb      = cuif.imm_SB;
+  assign branchif.branch_type = cuif.branch_type;
+
+  assign resolved_addr = branchif.branch_taken ?
+                          branchif.branch_addr : fetch_exif.pc4;
+  
+  assign fetch_exif.brj_addr = (cuif.ex_pc_sel == 1'b1) ?
+                                jump_addr : resolved_addr;
+  
+  assign hazardif.mispredict = fetch_exif.prediction ^ branchif.branch_taken;
+  
+  /*******************************************************
+  *** Data Ram Interface Logic 
+  *******************************************************/
+  assign dramif.ren           = cuif.dren;
+  assign dramif.wen           = cuif.dwen;
+  assign dramif.byte_en       = cuif.byte_en;
+  assign dramif.addr          = aluif.port_out;
+  assign hazardif.d_ram_busy  = dramif.busy;
 
 endmodule
 
