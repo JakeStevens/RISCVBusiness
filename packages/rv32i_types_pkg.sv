@@ -156,5 +156,13 @@ package rv32i_types_pkg;
     opcode_t      opcode;
   } ujtype_t;
 
+  typedef struct packed {
+    word_t        pc;
+    word_t        pc4;
+    word_t        instr;
+    word_t        prediction;
+    logic         halt;
+  } fetch_ex_pipeline_reg_t;
+
 endpackage
 `endif

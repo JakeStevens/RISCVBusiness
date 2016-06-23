@@ -35,7 +35,8 @@ module execute_stage(
   fetch_execute_if.execute fetch_exif,
   hazard_unit_if.execute hazardif,
   predictor_pipeline_if.update predictif,
-  ram_if.cpu dramif 
+  ram_if.cpu dramif,
+  output halt 
 );
 
   // Interface declarations
@@ -80,7 +81,7 @@ module execute_stage(
     .word_out(dload_ext)
   );
  
-  assign cuif.instr = fetch_exif.instr;
+  assign cuif.instr = fetch_exif.fetch_ex_reg.instr;
 
   /*******************************************************
   *** Sign Extensions 
@@ -101,7 +102,7 @@ module execute_stage(
     case (cuif.alu_a_sel)
       2'd0: aluif.port_a = rfif.rs1_data;
       2'd1: aluif.port_a = imm_or_shamt;
-      2'd2: aluif.port_a = fetch_exif.pc;
+      2'd2: aluif.port_a = fetch_exif.fetch_ex_reg.pc;
       2'd3: aluif.port_a = 32'hBAAD_C0DE; //Should never reach here
     endcase
   end
@@ -118,7 +119,7 @@ module execute_stage(
   always_comb begin
     case(cuif.w_sel)
       2'd0: rfif.w_data = dload_ext;
-      2'd1: rfif.w_data = fetch_exif.pc4;
+      2'd1: rfif.w_data = fetch_exif.fetch_ex_reg.pc4;
       2'd2: rfif.w_data = cuif.imm_U;
       2'd3: rfif.w_data = aluif.port_out;
     endcase
@@ -130,7 +131,7 @@ module execute_stage(
   word_t jump_addr;
   always_comb begin
     if (cuif.j_sel) begin
-      jumpif.base = fetch_exif.pc;
+      jumpif.base = fetch_exif.fetch_ex_reg.pc;
       jumpif.offset = imm_UJ_ext;
       jump_addr = jumpif.jal_addr;
     end else begin
@@ -146,17 +147,18 @@ module execute_stage(
   word_t resolved_addr;
   assign branchif.rs1_data    = rfif.rs1_data;
   assign branchif.rs2_data    = rfif.rs2_data;
-  assign branchif.pc          = fetch_exif.pc;
+  assign branchif.pc          = fetch_exif.fetch_ex_reg.pc;
   assign branchif.imm_sb      = cuif.imm_SB;
   assign branchif.branch_type = cuif.branch_type;
 
   assign resolved_addr = branchif.branch_taken ?
-                          branchif.branch_addr : fetch_exif.pc4;
+                          branchif.branch_addr : fetch_exif.fetch_ex_reg.pc4;
   
   assign fetch_exif.brj_addr = (cuif.ex_pc_sel == 1'b1) ?
                                 jump_addr : resolved_addr;
   
-  assign hazardif.mispredict = fetch_exif.prediction ^ branchif.branch_taken;
+  assign hazardif.mispredict =  fetch_exif.fetch_ex_reg.prediction ^
+                                branchif.branch_taken;
   
   /*******************************************************
   *** Data Ram Interface Logic 
@@ -167,5 +169,6 @@ module execute_stage(
   assign dramif.addr          = aluif.port_out;
   assign hazardif.d_ram_busy  = dramif.busy;
 
+  assign halt = fetch_exif.fetch_ex_reg.halt;
 endmodule
 

@@ -70,10 +70,10 @@ module fetch_stage (
   );
 
   //Fetch Execute Pipeline Signals
-  assign fetch_exif.pc          = pc;
-  assign fetch_exif.pc4         = pc4;
-  assign fetch_exif.instr       = instr;
-  assign fetch_exif.prediction  = predictif.predict_taken;
+  assign fetch_exif.fetch_ex_reg.pc          = pc;
+  assign fetch_exif.fetch_ex_reg.pc4         = pc4;
+  assign fetch_exif.fetch_ex_reg.instr       = instr;
+  assign fetch_exif.fetch_ex_reg.prediction  = predictif.predict_taken;
 
 endmodule
 
