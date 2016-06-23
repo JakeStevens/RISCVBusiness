@@ -123,7 +123,10 @@ def calculate_checksum_str(data, addr):
     checksum = checksum & 0xFF
     checksum = int(invert_bin_string(bin(checksum)[2:]),2)
     checksum += 1
-    return hex(checksum)[2:] 
+    checksum_lower_byte = hex(checksum)[2:]
+    if len(checksum_lower_byte) > 2:
+      checksum_lower_byte = checksum_lower_byte[-2:]
+    return checksum_lower_byte 
 
 # Create a temp file that consists of the Intel HEX format
 # version of the meminit.hex file, delete the original log file
