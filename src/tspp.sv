@@ -34,10 +34,6 @@ module tspp (
   ram_if.cpu dram_if
 );
 
-  // TODO: Implement two stage pipeline
-  // Assign halt to one so testbench stops
-  assign halt = 1'b1;
-
   //interface instantiations
   fetch_execute_if      fetch_exif();
   predictor_pipeline_if predictif();
@@ -59,7 +55,8 @@ module tspp (
     .fetch_exif(fetch_exif),
     .hazardif(hazard_if),
     .predictif(predictif),
-    .dramif(dram_if)
+    .dramif(dram_if),
+    .halt(halt)
   );
 
   hazard_unit hazard_unit_i (
