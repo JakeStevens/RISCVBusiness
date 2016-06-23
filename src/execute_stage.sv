@@ -169,6 +169,6 @@ module execute_stage(
   assign dramif.addr          = aluif.port_out;
   assign hazardif.d_ram_busy  = dramif.busy;
 
-  assign halt = fetch_exif.fetch_ex_reg.halt;
+  assign halt = cuif.halt;
 endmodule
 

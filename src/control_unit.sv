@@ -218,5 +218,8 @@ module control_unit
       cu_if.alu_op = ALU_ADD;
   end
 
+  // HALT HACK. TODO: FIX ME WHEN IMPLEMENTING INTERRUPTS
+  assign cu_if.halt = (cu_if.instr == 32'h7800d073);
+
 endmodule
 
