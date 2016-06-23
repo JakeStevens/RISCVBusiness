@@ -51,7 +51,18 @@ module memory_controller (
     end
   end
 
-  assign out_ram_if.wdata = d_ram_if.wdata;
+  always_comb begin
+    casez (out_ram_if.byte_en)
+      4'hf: out_ram_if.wdata = d_ram_if.wdata;
+      4'h1: out_ram_if.wdata = d_ram_if.wdata;
+      4'h3: out_ram_if.wdata = d_ram_if.wdata;
+      4'h2: out_ram_if.wdata = d_ram_if.wdata << 8;
+      4'h4: out_ram_if.wdata = d_ram_if.wdata << 16;
+      4'hc: out_ram_if.wdata = d_ram_if.wdata << 16;
+      4'h8: out_ram_if.wdata = d_ram_if.wdata << 24;
+    endcase
+  end
+
   assign d_ram_if.rdata   = out_ram_if.rdata;
   assign i_ram_if.rdata   = out_ram_if.rdata;
 
