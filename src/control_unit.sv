@@ -77,7 +77,15 @@ module control_unit
   assign load_type = load_t'(instr_i.funct3);
   always_comb begin
     unique case(load_type)
-      LB  :
+      LB : begin
+        unique case(cu_if.byte_offset)
+          2'b00   : cu_if.byte_en = 4'b0001;
+          2'b01   : cu_if.byte_en = 4'b0010;
+          2'b10   : cu_if.byte_en = 4'b0100;
+          2'b11   : cu_if.byte_en = 4'b1000;
+          default : cu_if.byte_en = 4'b0000;
+        endcase
+      end
       LBU : begin
         unique case(cu_if.byte_offset)
           2'b00   : cu_if.byte_en = 4'b0001;
@@ -87,7 +95,13 @@ module control_unit
           default : cu_if.byte_en = 4'b0000;
         endcase
       end
-      LH:
+      LH : begin
+        unique case(cu_if.byte_offset)
+          2'b00   : cu_if.byte_en = 4'b0011;
+          2'b10   : cu_if.byte_en = 4'b1100;
+          default : cu_if.byte_en = 4'b0000;
+        endcase
+      end
       LHU : begin
         unique case(cu_if.byte_offset)
           2'b00   : cu_if.byte_en = 4'b0011;
