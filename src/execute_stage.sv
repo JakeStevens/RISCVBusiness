@@ -95,7 +95,7 @@ module execute_stage(
   *** ALU and Associated Logic 
   *******************************************************/
   word_t imm_or_shamt;
-  assign imm_or_shamt = (cuif.imm_shamt_sel == 1'b1) ? imm_I_ext : cuif.shamt;
+  assign imm_or_shamt = (cuif.imm_shamt_sel == 1'b1) ? cuif.shamt : imm_I_ext;
   assign aluif.aluop = cuif.alu_op;
  
   always_comb begin
@@ -124,7 +124,8 @@ module execute_stage(
       2'd3: rfif.w_data = aluif.port_out;
     endcase
   end
-  
+
+  assign rfif.wen = cuif.wen & ~hazardif.if_ex_stall; 
   /*******************************************************
   *** Jump Target Calculator and Associated Logic 
   *******************************************************/
@@ -177,7 +178,7 @@ module execute_stage(
   assign hazardif.jump    = cuif.jump;
   assign hazardif.branch  = cuif.branch;
   assign hazardif.halt    = halt;
-
+  
   assign halt = cuif.halt;
 endmodule
 

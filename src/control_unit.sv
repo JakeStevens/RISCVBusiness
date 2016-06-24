@@ -150,16 +150,16 @@ module control_unit
   // Assign register write enable
   always_comb begin
     case(cu_if.opcode)
-      STORE:    rfif.wen   = 1'b0;
-      BRANCH:   rfif.wen   = 1'b0;
-      IMMED:    rfif.wen   = 1'b1;
-      LUI:      rfif.wen   = 1'b1;
-      AUIPC:    rfif.wen   = 1'b1;
-      REGREG:   rfif.wen   = 1'b1;
-      JAL:      rfif.wen   = 1'b1;
-      JALR:     rfif.wen   = 1'b1;
-      LOAD:     rfif.wen   = 1'b1;
-      default:  rfif.wen   = 1'b0;
+      STORE:    cu_if.wen   = 1'b0;
+      BRANCH:   cu_if.wen   = 1'b0;
+      IMMED:    cu_if.wen   = 1'b1;
+      LUI:      cu_if.wen   = 1'b1;
+      AUIPC:    cu_if.wen   = 1'b1;
+      REGREG:   cu_if.wen   = 1'b1;
+      JAL:      cu_if.wen   = 1'b1;
+      JALR:     cu_if.wen   = 1'b1;
+      LOAD:     cu_if.wen   = 1'b1;
+      default:  cu_if.wen   = 1'b0;
     endcase
   end
 
@@ -178,12 +178,12 @@ module control_unit
   assign aluop_srl = sr && cu_if.instr[30];
   assign aluop_add = ((cu_if.opcode == IMMED && instr_i.funct3 == ADDI) ||
                       (cu_if.opcode == AUIPC) ||
-                      (add_sub && ~cu_if.instr[30]));
-  assign aluop_sub = (add_sub && cu_if.instr[30]);
-  assign aluop_and = ((cu_if.opcode == IMMED && instr_i.funct3 == ANDI) ||
-                      (cu_if.opcode == REGREG && instr_r.funct3 == AND) ||
+                      (add_sub && ~cu_if.instr[30]) ||
                       (cu_if.opcode == LOAD) ||
                       (cu_if.opcode == STORE));
+  assign aluop_sub = (add_sub && cu_if.instr[30]);
+  assign aluop_and = ((cu_if.opcode == IMMED && instr_i.funct3 == ANDI) ||
+                      (cu_if.opcode == REGREG && instr_r.funct3 == AND));
   assign aluop_or = ((cu_if.opcode == IMMED && instr_i.funct3 == ORI) ||
                       (cu_if.opcode == REGREG && instr_r.funct3 == OR));
   assign aluop_xor = ((cu_if.opcode == IMMED && instr_i.funct3 == XORI) ||

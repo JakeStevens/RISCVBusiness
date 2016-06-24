@@ -30,7 +30,7 @@ interface control_unit_if;
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;
 
-  logic dwen, dren, j_sel, branch, jump, ex_pc_sel, imm_shamt_sel, halt;
+  logic dwen, dren, j_sel, branch, jump, ex_pc_sel, imm_shamt_sel, halt, wen;
   aluop_t alu_op;
   logic [1:0] alu_a_sel, alu_b_sel, w_sel;
   logic [3:0] byte_en;
@@ -48,7 +48,7 @@ interface control_unit_if;
     output dwen, dren, j_sel, branch, jump, ex_pc_sel, alu_a_sel,
     alu_b_sel, w_sel, byte_en, load_type, branch_type, shamt,
     imm_I, imm_S, imm_SB, imm_UJ, imm_U, imm_shamt_sel, alu_op, 
-    opcode, halt
+    opcode, halt, wen
   );
 
 endinterface
