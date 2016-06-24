@@ -168,6 +168,15 @@ module execute_stage(
   assign dramif.byte_en       = cuif.byte_en;
   assign dramif.addr          = aluif.port_out;
   assign hazardif.d_ram_busy  = dramif.busy;
+  
+  /*******************************************************
+  *** Hazard Unit Interface Logic 
+  *******************************************************/
+  assign hazardif.dren    = cuif.dren;
+  assign hazardif.dwen    = cuif.dwen;
+  assign hazardif.jump    = cuif.jump;
+  assign hazardif.branch  = cuif.branch;
+  assign hazardif.halt    = halt;
 
   assign halt = cuif.halt;
 endmodule
