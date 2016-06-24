@@ -70,10 +70,18 @@ module fetch_stage (
   );
 
   //Fetch Execute Pipeline Signals
-  assign fetch_exif.pc          = pc;
-  assign fetch_exif.pc4         = pc4;
-  assign fetch_exif.instr       = instr;
-  assign fetch_exif.prediction  = predictif.predict_taken;
+  always_ff @ (posedge CLK, negedge nRST) begin
+    if (!nRST || hazardif.if_ex_flush)
+      fetch_exif.fetch_ex_reg <= '0;
+    else if (hazardif.if_ex_flush)
+      fetch_exif.fetch_ex_reg <= fetch_exif.fetch_ex_reg;
+    else if (!hazardif.if_ex_stall) begin
+      fetch_exif.fetch_ex_reg.pc          <= pc;
+      fetch_exif.fetch_ex_reg.pc4         <= pc4;
+      fetch_exif.fetch_ex_reg.instr       <= instr;
+      fetch_exif.fetch_ex_reg.prediction  <= predictif.predict_taken;
+    end
+  end
 
 endmodule
 
