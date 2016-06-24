@@ -178,6 +178,6 @@ module execute_stage(
   assign hazardif.branch  = cuif.branch;
   assign hazardif.halt    = halt;
 
-  assign halt = fetch_exif.fetch_ex_reg.halt;
+  assign halt = cuif.halt;
 endmodule
 

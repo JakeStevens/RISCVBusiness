@@ -31,17 +31,19 @@ module hazard_unit
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;
   logic dmem_access;
+  logic branch_jump;
+
   assign dmem_access = (hazard_if.dren || hazard_if.dwen);
+  assign branch_jump = hazard_if.jump || 
+                        (hazard_if.branch && hazard_if.mispredict);
 
-  assign hazard_if.npc_sel = hazard_if.jump ||
-                            (hazard_if.branch && hazard_if.mispredict);
+  assign hazard_if.npc_sel = branch_jump;
   
-  assign hazard_if.pc_en = ~hazard_if.if_ex_stall & ~hazard_if.halt;
+  assign hazard_if.pc_en = ~hazard_if.if_ex_stall  | branch_jump; 
 
-  assign hazard_if.if_ex_flush = hazard_if.jump ||
-                                 (hazard_if.branch && hazard_if.mispredict);
+  assign hazard_if.if_ex_flush = branch_jump;
 
   assign hazard_if.if_ex_stall = (dmem_access && hazard_if.d_ram_busy) ||
-                                 (hazard_if.iren && hazard_if.i_ram_busy) ||
+                                 (hazard_if.iren && hazard_if.i_ram_busy && !(dmem_access)) ||
                                   hazard_if.halt;
 endmodule
