@@ -32,18 +32,25 @@ module hazard_unit
   import rv32i_types_pkg::*;
   logic dmem_access;
   logic branch_jump;
+  logic wait_for_imem;
+  logic wait_for_dmem;
 
   assign dmem_access = (hazard_if.dren || hazard_if.dwen);
   assign branch_jump = hazard_if.jump || 
                         (hazard_if.branch && hazard_if.mispredict);
-
+  assign wait_for_imem = hazard_if.iren & hazard_if.i_ram_busy;
+  assign wait_for_dmem = dmem_access & hazard_if.d_ram_busy;  
+  
   assign hazard_if.npc_sel = branch_jump;
   
-  assign hazard_if.pc_en = ~hazard_if.if_ex_stall  | branch_jump; 
+  assign hazard_if.pc_en = (~wait_for_dmem&~wait_for_imem&~hazard_if.halt) |
+                            branch_jump; 
 
-  assign hazard_if.if_ex_flush = branch_jump;
+  assign hazard_if.if_ex_flush = branch_jump |
+                                 (wait_for_imem & dmem_access &
+                                    ~hazard_if.d_ram_busy);
 
-  assign hazard_if.if_ex_stall = (dmem_access && hazard_if.d_ram_busy) ||
-                                 (hazard_if.iren && hazard_if.i_ram_busy && !(dmem_access)) ||
-                                  hazard_if.halt;
+  assign hazard_if.if_ex_stall = wait_for_dmem ||
+                                 (wait_for_imem & ~dmem_access) ||
+                                 hazard_if.halt;
 endmodule
