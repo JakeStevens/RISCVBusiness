@@ -142,15 +142,17 @@ def clean_init_hex(file_name):
             stripped_line = line[:len(line)-1]
             for i in range(len(stripped_line), 0, -8):
                 data_word = stripped_line[i-8:i]
-                checksum = calculate_checksum_str(int(data_word, 16), addr)
+                new_data_word = data_word[6:8] + data_word[4:6]
+                new_data_word += data_word[2:4] + data_word[0:2]
+                checksum = calculate_checksum_str(int(new_data_word, 16), addr)
                 if len(checksum) < 2:
                     checksum = '0' + checksum
                 addr_str = hex(addr/4)[2:]
                 #left pad the string with 0s until 4 hex digits
                 while len(addr_str) < 4:
                     addr_str = '0' + addr_str
-                if data_word != "00000000":
-                    out = ":04" + addr_str + "00" + data_word + checksum + '\n'
+                if new_data_word != "00000000":
+                    out = ":04" + addr_str + "00" + new_data_word + checksum + '\n'
                     # ignore the ELF header
                     if addr >= 0x200:
                         cleaned_file.write(out)
@@ -175,15 +177,17 @@ def clean_spike_output(file_name):
             stripped_line = line[:len(line)-1]
             for i in range(len(stripped_line), 0, -8):
                 data_word = stripped_line[i-8:i]
-                checksum = calculate_checksum_str(int(data_word, 16), addr)
+                new_data_word = data_word[6:8] + data_word[4:6]
+                new_data_word += data_word[2:4] + data_word[0:2]
+                checksum = calculate_checksum_str(int(new_data_word, 16), addr)
                 if len(checksum) < 2:
                     checksum = '0' + checksum
                 addr_str = hex(addr/4)[2:]
                 #left pad the string with 0s until 4 hex digits
                 while len(addr_str) < 4:
                     addr_str = '0' + addr_str
-                if data_word != "00000000":
-                    out = ":04" + addr_str + "00" + data_word + checksum + '\n'
+                if new_data_word != "00000000":
+                    out = ":04" + addr_str + "00" + new_data_word + checksum + '\n'
                     cleaned_file.write(out)
                 addr += 0x4
         # add the EOL record to the file
