@@ -70,15 +70,18 @@ module execute_stage(
     .brif(branchif)
   ); 
 
+  word_t store_swapped;
   endian_swapper store_swap (
     .word_in(rfif.rs2_data),
-    .word_out(dramif.wdata)
+    .word_out(store_swapped)
   );
 
   word_t dload_ext;
-  endian_swapper load_swap (
-    .word_in(dramif.rdata),
-    .word_out(dload_ext)
+  dmem_extender dmem_ext (
+    .dmem_in(dramif.rdata),
+    .load_type(cuif.load_type),
+    .byte_en(cuif.byte_en),
+    .ext_out(dload_ext)
   );
  
   assign cuif.instr = fetch_exif.fetch_ex_reg.instr;
@@ -166,10 +169,21 @@ module execute_stage(
   *******************************************************/
   assign dramif.ren           = cuif.dren;
   assign dramif.wen           = cuif.dwen;
-  assign dramif.byte_en       = cuif.byte_en;
+  assign dramif.byte_en       = cuif.dren ? cuif.byte_en:
+                                {cuif.byte_en[0], cuif.byte_en[1], cuif.byte_en[2], cuif.byte_en[3]};
   assign dramif.addr          = aluif.port_out;
   assign hazardif.d_ram_busy  = dramif.busy;
+  assign cuif.byte_offset     = aluif.port_out[1:0]; 
   
+  always_comb begin
+    // load_type can be used for store_type as well
+    case(cuif.load_type)
+      LB: dramif.wdata = {4{store_swapped[31:24]}};
+      LH: dramif.wdata = {2{store_swapped[31:16]}};
+      LW: dramif.wdata = store_swapped; 
+    endcase
+  end
+
   /*******************************************************
   *** Hazard Unit Interface Logic 
   *******************************************************/
