@@ -114,9 +114,9 @@ module control_unit
   always_comb begin
     case(cu_if.opcode)
       REGREG:   cu_if.alu_a_sel = 2'd0;
+      STORE:    cu_if.alu_a_sel = 2'd0;
       IMMED:    cu_if.alu_a_sel = 2'd1;
       LOAD:     cu_if.alu_a_sel = 2'd1;
-      STORE:    cu_if.alu_a_sel = 2'd1;
       AUIPC:    cu_if.alu_a_sel = 2'd2;
       default:  cu_if.alu_a_sel = 2'd0;
     endcase
