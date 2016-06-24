@@ -89,7 +89,7 @@ module execute_stage(
   word_t imm_I_ext, imm_S_ext, imm_UJ_ext;
   assign imm_I_ext  = {{20{cuif.imm_I[11]}}, cuif.imm_I};
   assign imm_UJ_ext = {{20{cuif.imm_UJ[11]}}, cuif.imm_UJ};
-  assign imm_S_ext  = {{20{cuif.imm_UJ[11]}}, cuif.imm_S};
+  assign imm_S_ext  = {{20{cuif.imm_S[11]}}, cuif.imm_S};
 
   /*******************************************************
   *** ALU and Associated Logic 
