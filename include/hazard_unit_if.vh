@@ -29,21 +29,21 @@ interface hazard_unit_if();
   import rv32i_types_pkg::word_t;
   logic pc_en, npc_sel, i_ram_busy, d_ram_busy, dren, dwen, iren;
   logic branch_taken, prediction, jump, branch, if_ex_stall;
-  logic if_ex_flush, mispredict;  
+  logic if_ex_flush, mispredict, halt;  
 
   modport hazard_unit (
-    input i_ram_busy, d_ram_busy, dren, dwen, iren, jump, branch, mispredict,
+    input i_ram_busy, d_ram_busy, dren, dwen, iren, jump,
+          branch, mispredict, halt,
     output pc_en, npc_sel, if_ex_stall, if_ex_flush
   );
 
   modport fetch (
-    input pc_en, npc_sel,
+    input pc_en, npc_sel, if_ex_stall, if_ex_flush,
     output i_ram_busy, iren
   );
 
   modport execute (
-    input if_ex_stall, if_ex_flush,
-    output d_ram_busy, dren, dwen, jump, branch, mispredict
+    output d_ram_busy, dren, dwen, jump, branch, mispredict, halt
   );
  
 endinterface
