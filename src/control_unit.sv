@@ -62,7 +62,7 @@ module control_unit
                          instr_sb.imm04_01, 1'b0};
   assign cu_if.imm_UJ = {instr_uj.imm20, instr_uj.imm19_12, instr_uj.imm11,
                          instr_uj.imm10_01, 1'b0};
-  assign cu_if.imm_U  = {instr_u.imm31_12, 20'b0};
+  assign cu_if.imm_U  = {instr_u.imm31_12, 12'b0};
 
   assign cu_if.imm_shamt_sel = (cu_if.opcode == IMMED &&
                             (instr_i.funct3 == SLLI || instr_i.funct3 == SRI));
