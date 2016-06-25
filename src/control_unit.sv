@@ -188,8 +188,8 @@ module control_unit
   
   assign aluop_sll = ((cu_if.opcode == IMMED && instr_i.funct3 == SLLI) ||
                       (cu_if.opcode == REGREG && instr_r.funct3 == SLL));
-  assign aluop_sra = sr && ~cu_if.instr[30];
-  assign aluop_srl = sr && cu_if.instr[30];
+  assign aluop_sra = sr && cu_if.instr[30];
+  assign aluop_srl = sr && ~cu_if.instr[30];
   assign aluop_add = ((cu_if.opcode == IMMED && instr_i.funct3 == ADDI) ||
                       (cu_if.opcode == AUIPC) ||
                       (add_sub && ~cu_if.instr[30]) ||
