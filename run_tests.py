@@ -70,14 +70,19 @@ def parse_arguments():
           print "ERROR: No " + TEST_TYPE + " tests exist for " + ARCH
           sys.exit(1)
 
+
 # compile_asm takes a file_name as input and assembles the file pointed
 # to by that file name. It also takes the elf file that is the result
 # of that compilation and creates a meminit.hex file for it
 def compile_asm(file_name):
     # compile all of the files
-    short_name = file_name.split(ARCH+'/')[1]
-    output_name = './verification/asm-tests/' + ARCH + '/'
-    output_name = output_name + short_name.split(".")[0] + ".elf"
+    short_name = file_name.split(ARCH+'/')[1][:-2]
+    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_name = output_dir + short_name + '.elf'
+
+    if not os.path.exists(os.path.dirname(output_name)):
+        os.makedirs(os.path.dirname(output_name))
+
     cmd_arr = ['riscv64-unknown-elf-gcc', '-m32', '-static',
                 '-mcmodel=medany', '-fvisibility=hidden', '-nostdlib',
                 '-nostartfiles', '-T./verification/asm-env/link.ld',
@@ -88,7 +93,7 @@ def compile_asm(file_name):
     
     # create an meminit.hex file from the elf file produced above
     cmd_arr = ['elf2hex', '8', '65536', output_name]
-    hex_file_loc = './meminit.hex'
+    hex_file_loc = output_dir + 'meminit.hex'
     with open(hex_file_loc, 'w') as hex_file:
         failure = subprocess.call(cmd_arr, stdout=hex_file)
     if failure:
@@ -132,7 +137,11 @@ def calculate_checksum_str(data, addr):
 # version of the meminit.hex file, delete the original log file
 # and rename the temp file to the original's name
 def clean_init_hex(file_name):
-    init_output = "./meminit.hex" 
+    short_name = file_name.split(ARCH+'/')[1][:-2]
+    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    init_output = output_dir + 'meminit.hex'
+    build_dir = './build/meminit.hex'
+
     cleaned_location = init_output[:len(file_name)-4] + "_clean.hex"
     addr = 0x00
     with open(init_output, 'r') as init_file:
@@ -162,14 +171,18 @@ def clean_init_hex(file_name):
         cleaned_file.close()
     subprocess.call(['rm', init_output])
     subprocess.call(['mv', cleaned_location, init_output])
+    subprocess.call(['cp', init_output, build_dir])
     return
 
 # Create a temp file that consists of the Intel HEX format
 # version of the spike log file, delete the original log file
 # and rename the temp file to the original's name
 def clean_spike_output(file_name):
-    spike_output = file_name[:len(file_name)-2] + '_spike.hex'
-    cleaned_location = file_name[:len(file_name)-2] + '_spike_clean.hex'
+    short_name = file_name.split(ARCH+'/')[1][:-2]
+    output_dir = './run/' + ARCH + '/' + short_name + '/'
+
+    spike_output = output_dir + short_name + '_spike.hex'
+    cleaned_location = output_dir + short_name + '_spike_clean.hex'
     addr = 0x200
     with open(spike_output, 'r') as spike_file:
         cleaned_file = open(cleaned_location, 'w')
@@ -198,20 +211,33 @@ def clean_spike_output(file_name):
     return
 
 def run_sim(file_name):
+    short_name = file_name.split(ARCH+'/')[1][:-2]
+    output_dir = './run/' + ARCH + '/' + short_name + '/'
+
     cmd_arr = ['waf', 'configure', '--top_level=' + TOP_LEVEL]
     failure = subprocess.call(cmd_arr, stdout=FNULL)
     if failure:
         return -1
     cmd_arr = ['waf', 'verify_source']
-    failure = subprocess.call(cmd_arr)
+    log = open(output_dir + 'waf_output.log', 'a')
+    log.write('Now running ' + file_name)
+    failure = subprocess.call(cmd_arr, stdout=log)
     if failure:
-        return -2
+      log.close()
+      log = open(output_dir + 'waf_output.log', 'r')
+      for line in log:
+        print line
+      return -2
+    subprocess.call(['mv', 'build/cpu.hex', output_dir + 'cpu.hex'])
     return 0
 
 def run_spike_asm(file_name):
     # the object file should already exist from calling compile_asm
-    elf_name = file_name[:len(file_name)-2] + '.elf'
-    log_name = file_name[:len(file_name)-2] + '_spike.hex'
+    short_name = file_name.split(ARCH+'/')[1][:-2]
+    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    
+    elf_name = output_dir + short_name + '.elf'
+    log_name = output_dir + short_name + '_spike.hex'
     cmd_arr = ['spike', '--isa=RV32IM', '+signature=' + log_name, elf_name]
     failure = subprocess.call(cmd_arr)
     if failure:
@@ -219,9 +245,11 @@ def run_spike_asm(file_name):
     return 0
 
 def compare_results(f):
-    short_name = f.split(ARCH+'/')[1]
-    sim_name = "./cpu.hex" 
-    spike_name = f[:len(f)-2] + '_spike.hex'
+    short_name = f.split(ARCH+'/')[1][:-2]
+    output_dir = './run/' + ARCH + '/' + short_name + '/'
+
+    sim_name =  output_dir + 'cpu.hex'
+    spike_name = output_dir + short_name + '_spike.hex'
     pass_msg = '{0:<40}{1:>20}'.format(short_name,START_GREEN + '[PASSED]' + END_COLOR)
     fail_msg = '{0:<40}{1:>20}'.format(short_name,START_RED + '[FAILED]' + END_COLOR)
     failure = subprocess.call(['diff', sim_name, spike_name],
@@ -242,28 +270,28 @@ if __name__ == '__main__':
             files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/*.S")
         else:
             files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/"+FILE_NAME+"*.S")
+        print "Running sim..."
         for f in files:
             ret = compile_asm(f)
-            clean_init_hex(f)
             if ret != 0:
                 if ret == -1:
                     print "An error has occured during GCC compilation"
                 elif ret == -2:
-                    print "An erro has occured converting elf to hex"
+                    print "An error has occured converting elf to hex"
                 sys.exit(1)
-            print "Running sim..."
-            ret = run_sim(f)
-            if ret != 0:
-                if ret == -1:
-                  print "An error has occurred while setting waf's top level"
-                elif ret == -2:
-                    print "An error has occurred while running sim"
-                sys.exit(1)
+            clean_init_hex(f)
             ret = run_spike_asm(f)
             if ret != 0:
                 print "An error has occurred during running Spike"
                 sys.exit(1)
             clean_spike_output(f)
+            ret = run_sim(f)
+            if ret != 0:
+                if ret == -1:
+                  print "An error has occurred while setting waf's top level"
+                elif ret == -2:
+                    print "An error has occurred while running " + f
+                sys.exit(1)
             compare_results(f)
     # C comparison testing
     elif TEST_TYPE == "c":

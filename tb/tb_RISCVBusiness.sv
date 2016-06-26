@@ -26,7 +26,7 @@
 
 `include "ram_if.vh"
 
-`define OUTPUT_FILE_NAME "../cpu.hex"
+`define OUTPUT_FILE_NAME "cpu.hex"
 
 module tb_RISCVBusiness ();
    
