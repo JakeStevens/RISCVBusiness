@@ -95,6 +95,22 @@ module execute_stage(
   assign imm_S_ext  = {{20{cuif.imm_S[11]}}, cuif.imm_S};
 
   /*******************************************************
+  *** Jump Target Calculator and Associated Logic 
+  *******************************************************/
+  word_t jump_addr;
+  always_comb begin
+    if (cuif.j_sel) begin
+      jumpif.base = fetch_exif.fetch_ex_reg.pc;
+      jumpif.offset = imm_UJ_ext;
+      jump_addr = jumpif.jal_addr;
+    end else begin
+      jumpif.base = rfif.rs1_data;
+      jumpif.offset = imm_I_ext;
+      jump_addr = jumpif.jalr_addr;
+    end
+  end 
+
+  /*******************************************************
   *** ALU and Associated Logic 
   *******************************************************/
   word_t imm_or_shamt;
@@ -128,23 +144,7 @@ module execute_stage(
     endcase
   end
 
-  assign rfif.wen = cuif.wen & ~hazardif.if_ex_stall; 
-  /*******************************************************
-  *** Jump Target Calculator and Associated Logic 
-  *******************************************************/
-  word_t jump_addr;
-  always_comb begin
-    if (cuif.j_sel) begin
-      jumpif.base = fetch_exif.fetch_ex_reg.pc;
-      jumpif.offset = imm_UJ_ext;
-      jump_addr = jumpif.jal_addr;
-    end else begin
-      jumpif.base = rfif.rs1_data;
-      jumpif.offset = imm_I_ext;
-      jump_addr = jumpif.jalr_addr;
-    end
-  end 
-
+  assign rfif.wen = cuif.wen & (~hazardif.if_ex_stall | hazard_if.npc_sel); 
   /*******************************************************
   *** Branch Target Resolution and Associated Logic 
   *******************************************************/
