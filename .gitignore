@@ -1,5 +1,6 @@
-# ignore the build output from waf
+# ignore the build and run files
 build/
+run/
 # ignore memory files from test cases
 *.hex
 meminit.ver
