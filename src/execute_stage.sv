@@ -104,9 +104,9 @@ module execute_stage(
   always_comb begin
     case (cuif.alu_a_sel)
       2'd0: aluif.port_a = rfif.rs1_data;
-      2'd1: aluif.port_a = imm_or_shamt;
+      2'd1: aluif.port_a = imm_S_ext;
       2'd2: aluif.port_a = fetch_exif.fetch_ex_reg.pc;
-      2'd3: aluif.port_a = 32'hBAAD_C0DE; //Should never reach here
+      2'd3: aluif.port_a = '0; //Not Used 
     endcase
   end
 
@@ -114,7 +114,7 @@ module execute_stage(
     case(cuif.alu_b_sel)
       2'd0: aluif.port_b = rfif.rs1_data;
       2'd1: aluif.port_b = rfif.rs2_data;
-      2'd2: aluif.port_b = imm_S_ext;
+      2'd2: aluif.port_b = imm_or_shamt;
       2'd3: aluif.port_b = cuif.imm_U;
     endcase
   end

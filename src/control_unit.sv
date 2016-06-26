@@ -128,22 +128,21 @@ module control_unit
   always_comb begin
     case(cu_if.opcode)
       REGREG:   cu_if.alu_a_sel = 2'd0;
-      STORE:    cu_if.alu_a_sel = 2'd0;
-      IMMED:    cu_if.alu_a_sel = 2'd1;
-      LOAD:     cu_if.alu_a_sel = 2'd1;
+      STORE:    cu_if.alu_a_sel = 2'd1;
+      IMMED:    cu_if.alu_a_sel = 2'd0;
+      LOAD:     cu_if.alu_a_sel = 2'd0;
       AUIPC:    cu_if.alu_a_sel = 2'd2;
-      default:  cu_if.alu_a_sel = 2'd0;
+      default:  cu_if.alu_a_sel = 2'd2;
     endcase
   end
 
   always_comb begin
     case(cu_if.opcode)
-      IMMED:    cu_if.alu_b_sel = 2'd0;
-      LOAD:     cu_if.alu_b_sel = 2'd0;
       REGREG:   cu_if.alu_b_sel = 2'd1;
-      STORE:    cu_if.alu_b_sel = 2'd2;
+      STORE:    cu_if.alu_b_sel = 2'd0;
+      IMMED:    cu_if.alu_b_sel = 2'd2;
+      LOAD:     cu_if.alu_b_sel = 2'd2;
       AUIPC:    cu_if.alu_b_sel = 2'd3;
-      default:  cu_if.alu_b_sel = 2'd0;
     endcase
   end
 
