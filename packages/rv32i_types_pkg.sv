@@ -50,7 +50,9 @@ package rv32i_types_pkg;
     // All immediate ALU instructions share an opcode
     IMMED   = 7'b0010011,
     // All register-register instructions share an opcode
-    REGREG  = 7'b0110011
+    REGREG  = 7'b0110011,
+    // All system instructions share an opcode
+    SYSTEM  = 7'b1110011
   } opcode_t;
 
   typedef enum logic [BR_W-1:0] {
@@ -104,6 +106,18 @@ package rv32i_types_pkg;
     AND     = 3'b111
   } regreg_t;
 
+  typedef enum logic [2:0] {
+    // ECALL/EBREAK based on bit 20 of instruction
+    //  0   /   1
+    EOP     = 3'b000,
+    CSRRW   = 3'b001,
+    CSRRS   = 3'b010,
+    CSRRC   = 3'b011,
+    CSRRWI  = 3'b101,
+    CSRRSI  = 3'b110,
+    CSRRCI  = 3'b111
+  } system_t;
+
   typedef struct packed {
     logic [6:0] funct7;
     logic [4:0] rs2;
@@ -155,6 +169,14 @@ package rv32i_types_pkg;
     logic [4:0]   rd;
     opcode_t      opcode;
   } ujtype_t;
+
+  typedef struct packed {
+    logic [11:0]  csr;
+    logic [4:0]   rs1_zimm;
+    logic [2:0]   funct3;
+    logic [4:0]   rd;
+    opcode_t      opcode;
+  } systype_t;
 
   typedef struct packed {
     word_t        pc;
