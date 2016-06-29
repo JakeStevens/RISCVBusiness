@@ -28,7 +28,7 @@ module tb_alu ();
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;
 
-  parameter NUM_TESTS = 13;
+  parameter NUM_TESTS = 19;
   parameter DELAY = 20;
  
   logic error_found;
@@ -44,10 +44,16 @@ module tb_alu ();
     ALU_XOR,
     ALU_SLT,
     ALU_SLT,
+    ALU_SLT,
+    ALU_SLTU,
     ALU_SLTU,
     ALU_SLTU,
     ALU_ADD,
-    ALU_SUB
+    ALU_SUB,
+    ALU_SLT,
+    ALU_SLTU,
+    ALU_SLT,
+    ALU_SLTU
   };
 
   word_t input_a_vec [NUM_TESTS-1:0];
@@ -61,10 +67,16 @@ module tb_alu ();
     32'h5555_0000,
     32'h8000_0000,
     32'h1000_0000,
+    32'h0001_0000,
+    32'h0001_0000,
     32'h8000_0000,
     32'h1000_0000,
     32'h0000_000a,
-    32'h0000_000a
+    32'h0000_000a,
+    32'h0002_0000,
+    32'h0002_0000,
+    32'hf002_0000,
+    32'hf002_0000
   }; 
 
   word_t input_b_vec [NUM_TESTS-1:0];
@@ -78,10 +90,16 @@ module tb_alu ();
     32'h5555_5555,
     32'h0800_0000,
     32'h4000_0000,
+    32'h0002_0000,
+    32'h0002_0000,
     32'h0800_0000,
     32'h4000_0000,
     32'h0000_0003,
-    32'h0000_0003
+    32'h0000_0003,
+    32'h0001_0000,
+    32'h0001_0000,
+    32'hffff_ffff,
+    32'hf001_0000
   };
 
   word_t output_vec [NUM_TESTS-1:0];
@@ -95,10 +113,16 @@ module tb_alu ();
     32'h0000_5555,
     32'h1,
     32'h1,
+    32'h1,
+    32'h1,
     32'h0,
     32'h1,
     32'h0000_000d,
-    32'h0000_0007
+    32'h0000_0007,
+    32'h0,
+    32'h0,
+    32'h1,
+    32'h0
   };
 
   alu_if aluif();
