@@ -83,7 +83,17 @@ module execute_stage(
     .byte_en(cuif.byte_en),
     .ext_out(dload_ext)
   );
- 
+
+  // TODO: Guard this with ifdefs so only used in simulation
+  cpu_tracker cpu_tracker (
+      .CLK(CLK),
+      .wb_stall(hazardif.if_ex_stall & ~hazardif.jump & ~hazardif.branch),
+      .instr(fetch_exif.fetch_ex_reg.instr),
+      .pc(fetch_exif.fetch_ex_reg.pc),
+      .opcode(cuif.opcode),
+      .funct3(cuif.instr[14:12])
+  );
+  
   assign cuif.instr = fetch_exif.fetch_ex_reg.instr;
 
   /*******************************************************
@@ -194,5 +204,6 @@ module execute_stage(
   assign hazardif.halt    = halt;
   
   assign halt = cuif.halt;
+
 endmodule
 
