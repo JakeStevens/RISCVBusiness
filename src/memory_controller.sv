@@ -51,15 +51,14 @@ module memory_controller (
     end
   end
 
+  /*  align the byte enable with the data being selected 
+      based on the byte addressing */
   always_comb begin
     casez (out_ram_if.byte_en)
-      4'hf: out_ram_if.wdata = d_ram_if.wdata;
-      4'h1: out_ram_if.wdata = d_ram_if.wdata;
-      4'h3: out_ram_if.wdata = d_ram_if.wdata;
-      4'h2: out_ram_if.wdata = d_ram_if.wdata << 8;
-      4'h4: out_ram_if.wdata = d_ram_if.wdata << 16;
-      4'hc: out_ram_if.wdata = d_ram_if.wdata << 16;
-      4'h8: out_ram_if.wdata = d_ram_if.wdata << 24;
+      4'hf, 4'h1, 4'h3  : out_ram_if.wdata = d_ram_if.wdata;      
+      4'h2              : out_ram_if.wdata = d_ram_if.wdata << 8;
+      4'h4, 4'hc        : out_ram_if.wdata = d_ram_if.wdata << 16;
+      4'h8              : out_ram_if.wdata = d_ram_if.wdata << 24;
     endcase
   end
 

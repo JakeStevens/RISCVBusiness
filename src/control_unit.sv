@@ -127,51 +127,40 @@ module control_unit
   // Assign alu operands
   always_comb begin
     case(cu_if.opcode)
-      REGREG:   cu_if.alu_a_sel = 2'd0;
-      STORE:    cu_if.alu_a_sel = 2'd1;
-      IMMED:    cu_if.alu_a_sel = 2'd0;
-      LOAD:     cu_if.alu_a_sel = 2'd0;
-      AUIPC:    cu_if.alu_a_sel = 2'd2;
-      default:  cu_if.alu_a_sel = 2'd2;
+      REGREG, IMMED, LOAD : cu_if.alu_a_sel = 2'd0;
+      STORE               : cu_if.alu_a_sel = 2'd1;
+      AUIPC               : cu_if.alu_a_sel = 2'd2;
+      default             : cu_if.alu_a_sel = 2'd2;
     endcase
   end
 
   always_comb begin
     case(cu_if.opcode)
-      REGREG:   cu_if.alu_b_sel = 2'd1;
-      STORE:    cu_if.alu_b_sel = 2'd0;
-      IMMED:    cu_if.alu_b_sel = 2'd2;
-      LOAD:     cu_if.alu_b_sel = 2'd2;
-      AUIPC:    cu_if.alu_b_sel = 2'd3;
+      STORE       : cu_if.alu_b_sel = 2'd0;
+      REGREG      : cu_if.alu_b_sel = 2'd1;
+      IMMED, LOAD : cu_if.alu_b_sel = 2'd2;
+      AUIPC       : cu_if.alu_b_sel = 2'd3;
     endcase
   end
 
   // Assign write select
   always_comb begin
     case(cu_if.opcode)
-      LOAD:   cu_if.w_sel   = 2'd0;
-      JAL:    cu_if.w_sel   = 2'd1;
-      JALR:   cu_if.w_sel   = 2'd1;
-      LUI:    cu_if.w_sel   = 2'd2;
-      IMMED:  cu_if.w_sel   = 2'd3;
-      AUIPC:  cu_if.w_sel   = 2'd3;
-      REGREG: cu_if.w_sel   = 2'd3;
-      default:cu_if.w_sel   = 2'd0;
+      LOAD                  : cu_if.w_sel   = 2'd0;
+      JAL, JALR             : cu_if.w_sel   = 2'd1;
+      LUI                   : cu_if.w_sel   = 2'd2;
+      IMMED, AUIPC, REGREG  : cu_if.w_sel   = 2'd3;
+      default               : cu_if.w_sel   = 2'd0;
     endcase
   end
 
   // Assign register write enable
   always_comb begin
     case(cu_if.opcode)
-      STORE:    cu_if.wen   = 1'b0;
-      BRANCH:   cu_if.wen   = 1'b0;
-      IMMED:    cu_if.wen   = 1'b1;
-      LUI:      cu_if.wen   = 1'b1;
-      AUIPC:    cu_if.wen   = 1'b1;
-      REGREG:   cu_if.wen   = 1'b1;
-      JAL:      cu_if.wen   = 1'b1;
-      JALR:     cu_if.wen   = 1'b1;
-      LOAD:     cu_if.wen   = 1'b1;
+      STORE, BRANCH       : cu_if.wen   = 1'b0;
+      IMMED, LUI, AUIPC,
+      REGREG, JAL, JALR,
+      LOAD                : cu_if.wen   = 1'b1;
       default:  cu_if.wen   = 1'b0;
     endcase
   end
