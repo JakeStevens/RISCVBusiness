@@ -32,55 +32,55 @@
 
 module execute_stage(
   input logic CLK, nRST,
-  fetch_execute_if.execute fetch_exif,
-  hazard_unit_if.execute hazardif,
-  predictor_pipeline_if.update predictif,
-  ram_if.cpu dramif,
+  fetch_execute_if.execute fetch_ex_if,
+  hazard_unit_if.execute hazard_if,
+  predictor_pipeline_if.update predict_if,
+  ram_if.cpu dram_if,
   output halt 
 );
 
   // Interface declarations
-  control_unit_if   cuif();
-  rv32i_reg_file_if rfif(); 
-  alu_if            aluif();
-  jump_calc_if      jumpif();
-  branch_res_if     branchif(); 
+  control_unit_if   cu_if();
+  rv32i_reg_file_if rf_if(); 
+  alu_if            alu_if();
+  jump_calc_if      jump_if();
+  branch_res_if     branch_if(); 
  
   // Module instantiations
   control_unit cu (
-    .cu_if(cuif),
-    .rfif(rfif)
+    .cu_if(cu_if),
+    .rf_if(rf_if)
   );
 
   rv32i_reg_file rf (
     .CLK(CLK),
     .nRST(nRST),
-    .rfif(rfif)
+    .rf_if(rf_if)
   );
 
   alu alu (
-    .aluif(aluif)
+    .alu_if(alu_if)
   );
 
   jump_calc jump_calc (
-    .jumpif(jumpif)
+    .jump_if(jump_if)
   );
 
   branch_res branch_res (
-    .brif(branchif)
+    .br_if(branch_if)
   ); 
 
   word_t store_swapped;
   endian_swapper store_swap (
-    .word_in(rfif.rs2_data),
+    .word_in(rf_if.rs2_data),
     .word_out(store_swapped)
   );
 
   word_t dload_ext;
   logic [3:0] byte_en;
   dmem_extender dmem_ext (
-    .dmem_in(dramif.rdata),
-    .load_type(cuif.load_type),
+    .dmem_in(dram_if.rdata),
+    .load_type(cu_if.load_type),
     .byte_en(byte_en),
     .ext_out(dload_ext)
   );
@@ -88,36 +88,36 @@ module execute_stage(
   // TODO: Guard this with ifdefs so only used in simulation
   cpu_tracker cpu_tracker (
       .CLK(CLK),
-      .wb_stall(hazardif.if_ex_stall & ~hazardif.jump & ~hazardif.branch),
-      .instr(fetch_exif.fetch_ex_reg.instr),
-      .pc(fetch_exif.fetch_ex_reg.pc),
-      .opcode(cuif.opcode),
-      .funct3(cuif.instr[14:12])
+      .wb_stall(hazard_if.if_ex_stall & ~hazard_if.jump & ~hazard_if.branch),
+      .instr(fetch_ex_if.fetch_ex_reg.instr),
+      .pc(fetch_ex_if.fetch_ex_reg.pc),
+      .opcode(cu_if.opcode),
+      .funct3(cu_if.instr[14:12])
   );
   
-  assign cuif.instr = fetch_exif.fetch_ex_reg.instr;
+  assign cu_if.instr = fetch_ex_if.fetch_ex_reg.instr;
 
   /*******************************************************
   *** Sign Extensions 
   *******************************************************/
   word_t imm_I_ext, imm_S_ext, imm_UJ_ext;
-  assign imm_I_ext  = {{20{cuif.imm_I[11]}}, cuif.imm_I};
-  assign imm_UJ_ext = {{20{cuif.imm_UJ[11]}}, cuif.imm_UJ};
-  assign imm_S_ext  = {{20{cuif.imm_S[11]}}, cuif.imm_S};
+  assign imm_I_ext  = {{20{cu_if.imm_I[11]}}, cu_if.imm_I};
+  assign imm_UJ_ext = {{20{cu_if.imm_UJ[11]}}, cu_if.imm_UJ};
+  assign imm_S_ext  = {{20{cu_if.imm_S[11]}}, cu_if.imm_S};
 
   /*******************************************************
   *** Jump Target Calculator and Associated Logic 
   *******************************************************/
   word_t jump_addr;
   always_comb begin
-    if (cuif.j_sel) begin
-      jumpif.base = fetch_exif.fetch_ex_reg.pc;
-      jumpif.offset = imm_UJ_ext;
-      jump_addr = jumpif.jal_addr;
+    if (cu_if.j_sel) begin
+      jump_if.base = fetch_ex_if.fetch_ex_reg.pc;
+      jump_if.offset = imm_UJ_ext;
+      jump_addr = jump_if.jal_addr;
     end else begin
-      jumpif.base = rfif.rs1_data;
-      jumpif.offset = imm_I_ext;
-      jump_addr = jumpif.jalr_addr;
+      jump_if.base = rf_if.rs1_data;
+      jump_if.offset = imm_I_ext;
+      jump_addr = jump_if.jalr_addr;
     end
   end 
 
@@ -125,75 +125,75 @@ module execute_stage(
   *** ALU and Associated Logic 
   *******************************************************/
   word_t imm_or_shamt;
-  assign imm_or_shamt = (cuif.imm_shamt_sel == 1'b1) ? cuif.shamt : imm_I_ext;
-  assign aluif.aluop = cuif.alu_op;
+  assign imm_or_shamt = (cu_if.imm_shamt_sel == 1'b1) ? cu_if.shamt : imm_I_ext;
+  assign alu_if.aluop = cu_if.alu_op;
  
   always_comb begin
-    case (cuif.alu_a_sel)
-      2'd0: aluif.port_a = rfif.rs1_data;
-      2'd1: aluif.port_a = imm_S_ext;
-      2'd2: aluif.port_a = fetch_exif.fetch_ex_reg.pc;
-      2'd3: aluif.port_a = '0; //Not Used 
+    case (cu_if.alu_a_sel)
+      2'd0: alu_if.port_a = rf_if.rs1_data;
+      2'd1: alu_if.port_a = imm_S_ext;
+      2'd2: alu_if.port_a = fetch_ex_if.fetch_ex_reg.pc;
+      2'd3: alu_if.port_a = '0; //Not Used 
     endcase
   end
 
   always_comb begin
-    case(cuif.alu_b_sel)
-      2'd0: aluif.port_b = rfif.rs1_data;
-      2'd1: aluif.port_b = rfif.rs2_data;
-      2'd2: aluif.port_b = imm_or_shamt;
-      2'd3: aluif.port_b = cuif.imm_U;
+    case(cu_if.alu_b_sel)
+      2'd0: alu_if.port_b = rf_if.rs1_data;
+      2'd1: alu_if.port_b = rf_if.rs2_data;
+      2'd2: alu_if.port_b = imm_or_shamt;
+      2'd3: alu_if.port_b = cu_if.imm_U;
     endcase
   end
 
   always_comb begin
-    case(cuif.w_sel)
-      2'd0: rfif.w_data = dload_ext;
-      2'd1: rfif.w_data = fetch_exif.fetch_ex_reg.pc4;
-      2'd2: rfif.w_data = cuif.imm_U;
-      2'd3: rfif.w_data = aluif.port_out;
+    case(cu_if.w_sel)
+      2'd0: rf_if.w_data = dload_ext;
+      2'd1: rf_if.w_data = fetch_ex_if.fetch_ex_reg.pc4;
+      2'd2: rf_if.w_data = cu_if.imm_U;
+      2'd3: rf_if.w_data = alu_if.port_out;
     endcase
   end
 
-  assign rfif.wen = cuif.wen & (~hazardif.if_ex_stall | hazard_if.npc_sel); 
+  assign rf_if.wen = cu_if.wen & (~hazard_if.if_ex_stall | hazard_if.npc_sel); 
   /*******************************************************
   *** Branch Target Resolution and Associated Logic 
   *******************************************************/
   word_t resolved_addr;
-  assign branchif.rs1_data    = rfif.rs1_data;
-  assign branchif.rs2_data    = rfif.rs2_data;
-  assign branchif.pc          = fetch_exif.fetch_ex_reg.pc;
-  assign branchif.imm_sb      = cuif.imm_SB;
-  assign branchif.branch_type = cuif.branch_type;
+  assign branch_if.rs1_data    = rf_if.rs1_data;
+  assign branch_if.rs2_data    = rf_if.rs2_data;
+  assign branch_if.pc          = fetch_ex_if.fetch_ex_reg.pc;
+  assign branch_if.imm_sb      = cu_if.imm_SB;
+  assign branch_if.branch_type = cu_if.branch_type;
 
-  assign resolved_addr = branchif.branch_taken ?
-                          branchif.branch_addr : fetch_exif.fetch_ex_reg.pc4;
+  assign resolved_addr = branch_if.branch_taken ?
+                          branch_if.branch_addr : fetch_ex_if.fetch_ex_reg.pc4;
   
-  assign fetch_exif.brj_addr = (cuif.ex_pc_sel == 1'b1) ?
+  assign fetch_ex_if.brj_addr = (cu_if.ex_pc_sel == 1'b1) ?
                                 jump_addr : resolved_addr;
   
-  assign hazardif.mispredict =  fetch_exif.fetch_ex_reg.prediction ^
-                                branchif.branch_taken;
+  assign hazard_if.mispredict =  fetch_ex_if.fetch_ex_reg.prediction ^
+                                branch_if.branch_taken;
   
   /*******************************************************
   *** Data Ram Interface Logic 
   *******************************************************/
   logic [1:0] byte_offset;
 
-  assign dramif.ren           = cuif.dren;
-  assign dramif.wen           = cuif.dwen;
-  assign dramif.byte_en       = cuif.dren ? byte_en:
+  assign dram_if.ren           = cu_if.dren;
+  assign dram_if.wen           = cu_if.dwen;
+  assign dram_if.byte_en       = cu_if.dren ? byte_en:
                                 {byte_en[0], byte_en[1], byte_en[2], byte_en[3]};
-  assign dramif.addr          = aluif.port_out;
-  assign hazardif.d_ram_busy  = dramif.busy;
-  assign byte_offset          = aluif.port_out[1:0]; 
+  assign dram_if.addr          = alu_if.port_out;
+  assign hazard_if.d_ram_busy  = dram_if.busy;
+  assign byte_offset          = alu_if.port_out[1:0]; 
   
   always_comb begin
     // load_type can be used for store_type as well
-    case(cuif.load_type)
-      LB: dramif.wdata = {4{store_swapped[31:24]}};
-      LH: dramif.wdata = {2{store_swapped[31:16]}};
-      LW: dramif.wdata = store_swapped; 
+    case(cu_if.load_type)
+      LB: dram_if.wdata = {4{store_swapped[31:24]}};
+      LH: dram_if.wdata = {2{store_swapped[31:16]}};
+      LW: dram_if.wdata = store_swapped; 
     endcase
   end
 
@@ -202,7 +202,7 @@ module execute_stage(
   // funct3 for loads and stores are the same bit positions
   // byte_en is valid for both loads and stores 
   always_comb begin
-    unique case(cuif.load_type)
+    unique case(cu_if.load_type)
       LB : begin
         unique case(byte_offset)
           2'b00   : byte_en = 4'b0001;
@@ -243,13 +243,13 @@ module execute_stage(
   /*******************************************************
   *** Hazard Unit Interface Logic 
   *******************************************************/
-  assign hazardif.dren    = cuif.dren;
-  assign hazardif.dwen    = cuif.dwen;
-  assign hazardif.jump    = cuif.jump;
-  assign hazardif.branch  = cuif.branch;
-  assign hazardif.halt    = halt;
+  assign hazard_if.dren    = cu_if.dren;
+  assign hazard_if.dwen    = cu_if.dwen;
+  assign hazard_if.jump    = cu_if.jump;
+  assign hazard_if.branch  = cu_if.branch;
+  assign hazard_if.halt    = halt;
   
-  assign halt = cuif.halt;
+  assign halt = cu_if.halt;
 
 endmodule
 

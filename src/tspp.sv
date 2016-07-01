@@ -35,27 +35,27 @@ module tspp (
 );
 
   //interface instantiations
-  fetch_execute_if      fetch_exif();
-  predictor_pipeline_if predictif();
+  fetch_execute_if      fetch_ex_if();
+  predictor_pipeline_if predict_if();
   hazard_unit_if        hazard_if();
 
   //module instantiations
   fetch_stage fetch_stage_i (
     .CLK(CLK),
     .nRST(nRST),
-    .fetch_exif(fetch_exif),
-    .hazardif(hazard_if),
-    .predictif(predictif),
+    .fetch_ex_if(fetch_ex_if),
+    .hazard_if(hazard_if),
+    .predict_if(predict_if),
     .iram_if(iram_if)
   );
 
   execute_stage execute_stage_i (
     .CLK(CLK),
     .nRST(nRST),
-    .fetch_exif(fetch_exif),
-    .hazardif(hazard_if),
-    .predictif(predictif),
-    .dramif(dram_if),
+    .fetch_ex_if(fetch_ex_if),
+    .hazard_if(hazard_if),
+    .predict_if(predict_if),
+    .dram_if(dram_if),
     .halt(halt)
   );
 
@@ -66,7 +66,7 @@ module tspp (
   branch_predictor branch_predictor_i (
     .CLK(CLK),
     .nRST(nRST),
-    .predict_if(predictif)
+    .predict_if(predict_if)
   );
 
 endmodule

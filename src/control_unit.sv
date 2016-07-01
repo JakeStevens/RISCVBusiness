@@ -29,7 +29,7 @@
 module control_unit 
 (
   control_unit_if.control_unit  cu_if,
-  rv32i_reg_file_if.cu          rfif 
+  rv32i_reg_file_if.cu          rf_if 
 );
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;
@@ -50,9 +50,9 @@ module control_unit
   assign instr_uj = ujtype_t'(cu_if.instr);
 
   assign cu_if.opcode = opcode_t'(cu_if.instr[6:0]);
-  assign rfif.rs1  = cu_if.instr[19:15];
-  assign rfif.rs2  = cu_if.instr[24:20];
-  assign rfif.rd   = cu_if.instr[11:7]; 
+  assign rf_if.rs1  = cu_if.instr[19:15];
+  assign rf_if.rs2  = cu_if.instr[24:20];
+  assign rf_if.rd   = cu_if.instr[11:7]; 
   assign cu_if.shamt = cu_if.instr[24:20];
  
   // Assign the immediate values

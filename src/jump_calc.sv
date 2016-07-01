@@ -26,15 +26,15 @@
 
 module jump_calc
 (
-  jump_calc_if.jump_calc jumpif
+  jump_calc_if.jump_calc jump_if
 );
 
   import rv32i_types_pkg::*;
 
   word_t jump_addr;
-  assign jump_addr = jumpif.base + jumpif.offset;
+  assign jump_addr = jump_if.base + jump_if.offset;
 
-  assign jumpif.jal_addr = jump_addr;
-  assign jumpif.jalr_addr = {jump_addr[31:1], 1'b0};
+  assign jump_if.jal_addr = jump_addr;
+  assign jump_if.jalr_addr = {jump_addr[31:1], 1'b0};
 
 endmodule

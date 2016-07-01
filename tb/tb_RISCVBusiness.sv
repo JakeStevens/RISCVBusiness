@@ -41,9 +41,9 @@ module tb_RISCVBusiness ();
   integer fptr;
 
   //Interface Instantiations
-  ram_if ramif();
-  ram_if rvb_ramif();
-  ram_if tb_ramif();
+  ram_if ram_if();
+  ram_if rvb_ram_if();
+  ram_if tb_ram_if();
 
   //Module Instantiations
 
@@ -51,36 +51,36 @@ module tb_RISCVBusiness ();
     .CLK(CLK),
     .nRST(nRST),
     .halt(halt),
-    .ramif(rvb_ramif)
+    .ram_if(rvb_ram_if)
   );
 
   ram_wrapper ram (
     .CLK(CLK),
     .nRST(nRST),
-    .ramif(ramif)
+    .ram_if(ram_if)
   ); 
 
   //Ramif Mux
   always_comb begin
     if(ram_control) begin
-      ramif.addr    =   rvb_ramif.addr;
-      ramif.ren     =   rvb_ramif.ren;
-      ramif.wen     =   rvb_ramif.wen;
-      ramif.wdata   =   rvb_ramif.wdata;
-      ramif.byte_en = rvb_ramif.byte_en;
+      ram_if.addr    =   rvb_ram_if.addr;
+      ram_if.ren     =   rvb_ram_if.ren;
+      ram_if.wen     =   rvb_ram_if.wen;
+      ram_if.wdata   =   rvb_ram_if.wdata;
+      ram_if.byte_en = rvb_ram_if.byte_en;
     end else begin
-      ramif.addr    =   tb_ramif.addr;
-      ramif.ren     =   tb_ramif.ren;
-      ramif.wen     =   tb_ramif.wen;
-      ramif.wdata   =   tb_ramif.wdata;
-      ramif.byte_en = tb_ramif.byte_en;
+      ram_if.addr    =   tb_ram_if.addr;
+      ram_if.ren     =   tb_ram_if.ren;
+      ram_if.wen     =   tb_ram_if.wen;
+      ram_if.wdata   =   tb_ram_if.wdata;
+      ram_if.byte_en = tb_ram_if.byte_en;
     end
   end
 
-  assign rvb_ramif.rdata  = ramif.rdata;
-  assign rvb_ramif.busy   = ramif.busy;
-  assign tb_ramif.rdata   = ramif.rdata;
-  assign tb_ramif.busy    = ramif.busy;
+  assign rvb_ram_if.rdata  = ram_if.rdata;
+  assign rvb_ram_if.busy   = ram_if.busy;
+  assign tb_ram_if.rdata   = ram_if.rdata;
+  assign tb_ram_if.busy    = ram_if.busy;
 
   //Clock generation
   initial begin : INIT
@@ -113,11 +113,11 @@ module tb_RISCVBusiness ();
 
   task dump_ram ();
     ram_control = 0;
-    tb_ramif.addr = 0;
-    tb_ramif.ren = 0;
-    tb_ramif.wen = 0;
-    tb_ramif.wdata = 0;
-    tb_ramif.byte_en = 4'hf;
+    tb_ram_if.addr = 0;
+    tb_ram_if.ren = 0;
+    tb_ram_if.wen = 0;
+    tb_ram_if.wdata = 0;
+    tb_ram_if.byte_en = 4'hf;
 
     fptr = $fopen(`OUTPUT_FILE_NAME, "w");
 
@@ -135,12 +135,12 @@ module tb_RISCVBusiness ();
 
   task read_ram (input logic [31:0] raddr, output logic [31:0] rdata);
     @(posedge CLK);
-    tb_ramif.addr = raddr;
-    tb_ramif.ren = 1;
+    tb_ram_if.addr = raddr;
+    tb_ram_if.ren = 1;
     @(posedge CLK);
-    while(tb_ramif.busy == 1) @(posedge CLK);
-    rdata = tb_ramif.rdata;
-    tb_ramif.ren = 0;
+    while(tb_ram_if.busy == 1) @(posedge CLK);
+    rdata = tb_ram_if.rdata;
+    tb_ram_if.ren = 0;
   endtask
 
   function [7:0] calculate_crc (logic [63:0] hex_line);

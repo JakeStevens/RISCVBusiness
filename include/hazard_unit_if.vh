@@ -43,7 +43,7 @@ interface hazard_unit_if();
   );
 
   modport execute (
-    input if_ex_stall,
+    input if_ex_stall, npc_sel,
     output d_ram_busy, dren, dwen, jump, branch, mispredict, halt
   );
  

@@ -26,7 +26,7 @@
 
 module rv32i_reg_file (
   input CLK, nRST,
-  rv32i_reg_file_if.rf rfif
+  rv32i_reg_file_if.rf rf_if
 );
 
   import rv32i_types_pkg::*;
@@ -38,12 +38,12 @@ module rv32i_reg_file (
   always_ff @ (posedge CLK, negedge nRST) begin
     if (~nRST) begin
       registers <= '{default:'0};
-    end else if (rfif.wen) begin
-      registers[rfif.rd] <= rfif.w_data;
+    end else if (rf_if.wen) begin
+      registers[rf_if.rd] <= rf_if.w_data;
     end
   end 
 
-  assign rfif.rs1_data = (!rfif.rs1) ? '0 : registers[rfif.rs1];
-  assign rfif.rs2_data = (!rfif.rs2) ? '0 : registers[rfif.rs2];
+  assign rf_if.rs1_data = (!rf_if.rs1) ? '0 : registers[rf_if.rs1];
+  assign rf_if.rs2_data = (!rf_if.rs2) ? '0 : registers[rf_if.rs2];
 
 endmodule

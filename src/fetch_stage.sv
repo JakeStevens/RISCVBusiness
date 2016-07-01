@@ -29,9 +29,9 @@
 
 module fetch_stage (
   input logic CLK, nRST,
-  fetch_execute_if.fetch fetch_exif,
-  hazard_unit_if.fetch hazardif,
-  predictor_pipeline_if.access predictif,
+  fetch_execute_if.fetch fetch_ex_if,
+  hazard_unit_if.fetch hazard_if,
+  predictor_pipeline_if.access predict_if,
   ram_if.cpu iram_if
 );
   import rv32i_types_pkg::*;
@@ -45,19 +45,19 @@ module fetch_stage (
   always @ (posedge CLK, negedge nRST) begin
     if(~nRST) begin
       pc <= RESET_PC;
-    end else if (hazardif.pc_en) begin
+    end else if (hazard_if.pc_en) begin
       pc <= npc;
     end
   end
 
   assign pc4 = pc + 4;
-  assign predictif.current_pc = pc;
-  assign npc = hazardif.npc_sel ? fetch_exif.brj_addr : 
-                (predictif.predict_taken ? predictif.target_addr : pc4);
+  assign predict_if.current_pc = pc;
+  assign npc = hazard_if.npc_sel ? fetch_ex_if.brj_addr : 
+                (predict_if.predict_taken ? predict_if.target_addr : pc4);
 
   //Instruction Access logic
-  assign hazardif.iren        = 1'b1;
-  assign hazardif.i_ram_busy  = iram_if.busy;
+  assign hazard_if.iren        = 1'b1;
+  assign hazard_if.i_ram_busy  = iram_if.busy;
   assign iram_if.addr         = pc;
   assign iram_if.ren          = 1'b1;
   assign iram_if.wen          = 1'b0;
@@ -71,15 +71,15 @@ module fetch_stage (
 
   //Fetch Execute Pipeline Signals
   always_ff @ (posedge CLK, negedge nRST) begin
-    if (!nRST || hazardif.if_ex_flush)
-      fetch_exif.fetch_ex_reg <= '0;
-    else if (hazardif.if_ex_flush)
-      fetch_exif.fetch_ex_reg <= fetch_exif.fetch_ex_reg;
-    else if (!hazardif.if_ex_stall) begin
-      fetch_exif.fetch_ex_reg.pc          <= pc;
-      fetch_exif.fetch_ex_reg.pc4         <= pc4;
-      fetch_exif.fetch_ex_reg.instr       <= instr;
-      fetch_exif.fetch_ex_reg.prediction  <= predictif.predict_taken;
+    if (!nRST || hazard_if.if_ex_flush)
+      fetch_ex_if.fetch_ex_reg <= '0;
+    else if (hazard_if.if_ex_flush)
+      fetch_ex_if.fetch_ex_reg <= fetch_ex_if.fetch_ex_reg;
+    else if (!hazard_if.if_ex_stall) begin
+      fetch_ex_if.fetch_ex_reg.pc          <= pc;
+      fetch_ex_if.fetch_ex_reg.pc4         <= pc4;
+      fetch_ex_if.fetch_ex_reg.instr       <= instr;
+      fetch_ex_if.fetch_ex_reg.prediction  <= predict_if.predict_taken;
     end
   end
 

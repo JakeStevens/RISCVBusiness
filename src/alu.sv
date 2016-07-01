@@ -27,7 +27,7 @@
 `include "alu_if.vh"
 
 module alu (
-  alu_if.alu aluif
+  alu_if.alu alu_if
 );
   
   import alu_types_pkg::*;
@@ -39,17 +39,17 @@ module alu (
 
   //sign bits of adder result and operands
   assign sign_r = adder_out[WORD_SIZE-1];
-  assign sign_a = aluif.port_a[WORD_SIZE-1];
-  assign sign_b = aluif.port_b[WORD_SIZE-1];
+  assign sign_a = alu_if.port_a[WORD_SIZE-1];
+  assign sign_b = alu_if.port_b[WORD_SIZE-1];
 
   //assign adder operands (2's compilment b for subtraction)
-  assign op_a = aluif.port_a;
-  assign op_b = (aluif.aluop == ALU_ADD) ? aluif.port_b : twos_comp_b;
-  assign twos_comp_b = (~aluif.port_b) + 1;
+  assign op_a = alu_if.port_a;
+  assign op_b = (alu_if.aluop == ALU_ADD) ? alu_if.port_b : twos_comp_b;
+  assign twos_comp_b = (~alu_if.port_b) + 1;
 
   //extend operands a and b for the adder 
-  assign op_a_ext[WORD_SIZE] = (aluif.aluop == ALU_SLTU) ? 1'b0 : op_a[WORD_SIZE-1];
-  assign op_b_ext[WORD_SIZE] = (aluif.aluop == ALU_SLTU) ? 1'b0 : op_b[WORD_SIZE-1];
+  assign op_a_ext[WORD_SIZE] = (alu_if.aluop == ALU_SLTU) ? 1'b0 : op_a[WORD_SIZE-1];
+  assign op_b_ext[WORD_SIZE] = (alu_if.aluop == ALU_SLTU) ? 1'b0 : op_b[WORD_SIZE-1];
   assign op_a_ext[WORD_SIZE-1:0] = op_a;
   assign op_b_ext[WORD_SIZE-1:0] = op_b;
 
@@ -59,21 +59,21 @@ module alu (
   assign carry_out = adder_out[WORD_SIZE];
 
   always_comb begin 
-    casez (aluif.aluop)
-      ALU_SLL   : aluif.port_out = aluif.port_a << aluif.port_b;
-      ALU_SRL   : aluif.port_out = aluif.port_a >> aluif.port_b;
-      ALU_SRA   : aluif.port_out = $signed(aluif.port_a) >>> aluif.port_b;
-      ALU_AND   : aluif.port_out = aluif.port_a & aluif.port_b;
-      ALU_OR    : aluif.port_out = aluif.port_a | aluif.port_b;
-      ALU_XOR   : aluif.port_out = aluif.port_a ^ aluif.port_b;
+    casez (alu_if.aluop)
+      ALU_SLL   : alu_if.port_out = alu_if.port_a << alu_if.port_b;
+      ALU_SRL   : alu_if.port_out = alu_if.port_a >> alu_if.port_b;
+      ALU_SRA   : alu_if.port_out = $signed(alu_if.port_a) >>> alu_if.port_b;
+      ALU_AND   : alu_if.port_out = alu_if.port_a & alu_if.port_b;
+      ALU_OR    : alu_if.port_out = alu_if.port_a | alu_if.port_b;
+      ALU_XOR   : alu_if.port_out = alu_if.port_a ^ alu_if.port_b;
       ALU_SLT   : begin
-        aluif.port_out = (sign_a & !sign_b) ? 1 : 
+        alu_if.port_out = (sign_a & !sign_b) ? 1 : 
                           ((!sign_a & sign_b) ? 0 : sign_r);
       end
-      ALU_SLTU  : aluif.port_out = !carry_out;
-      ALU_ADD   : aluif.port_out = adder_result;
-      ALU_SUB   : aluif.port_out = adder_result;
-      default   : aluif.port_out = '0;
+      ALU_SLTU  : alu_if.port_out = !carry_out;
+      ALU_ADD   : alu_if.port_out = adder_result;
+      ALU_SUB   : alu_if.port_out = adder_result;
+      default   : alu_if.port_out = '0;
     endcase
   end
 

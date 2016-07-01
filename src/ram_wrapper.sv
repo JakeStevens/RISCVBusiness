@@ -28,13 +28,13 @@
 
 module ram_wrapper (
   input logic CLK, nRST,
-  ram_if.ram ramif
+  ram_if.ram ram_if
 );
 
   ram #(.LAT(0)) v_lat_ram (
     .CLK(CLK),
     .nRST(nRST),
-    .ramif(ramif)
+    .ram_if(ram_if)
   );
 
 endmodule

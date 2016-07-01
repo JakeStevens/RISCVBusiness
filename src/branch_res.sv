@@ -26,25 +26,25 @@
 `include "branch_res_if.vh"
 
 module branch_res (
-  branch_res_if.bres brif
+  branch_res_if.bres br_if
 );
   
   import rv32i_types_pkg::*;
   
   word_t offset;
 
-  assign offset = $signed(brif.imm_sb);
-  assign brif.branch_addr = brif.pc + offset;
+  assign offset = $signed(br_if.imm_sb);
+  assign br_if.branch_addr = br_if.pc + offset;
 
   always_comb begin
-    casez (brif.branch_type) 
-      BEQ   : brif.branch_taken = (brif.rs1_data == brif.rs2_data);
-      BNE   : brif.branch_taken = (brif.rs1_data != brif.rs2_data);
-      BLT   : brif.branch_taken = ($signed(brif.rs1_data) <  $signed(brif.rs2_data));
-      BGE   : brif.branch_taken = ($signed(brif.rs1_data) >= $signed(brif.rs2_data));
-      BLTU  : brif.branch_taken = (brif.rs1_data < brif.rs2_data);
-      BGEU  : brif.branch_taken = (brif.rs1_data >= brif.rs2_data);
-      default : brif.branch_taken = 1'b0;
+    casez (br_if.branch_type) 
+      BEQ   : br_if.branch_taken = (br_if.rs1_data == br_if.rs2_data);
+      BNE   : br_if.branch_taken = (br_if.rs1_data != br_if.rs2_data);
+      BLT   : br_if.branch_taken = ($signed(br_if.rs1_data) <  $signed(br_if.rs2_data));
+      BGE   : br_if.branch_taken = ($signed(br_if.rs1_data) >= $signed(br_if.rs2_data));
+      BLTU  : br_if.branch_taken = (br_if.rs1_data < br_if.rs2_data);
+      BGEU  : br_if.branch_taken = (br_if.rs1_data >= br_if.rs2_data);
+      default : br_if.branch_taken = 1'b0;
     endcase
   end
 

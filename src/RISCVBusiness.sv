@@ -27,7 +27,7 @@
 module RISCVBusiness (
   input logic CLK, nRST,
   output logic halt,
-  ram_if.cpu ramif
+  ram_if.cpu ram_if
 );
   
   // Interface instantiations
@@ -66,7 +66,7 @@ module RISCVBusiness (
     .nRST(nRST),
     .d_ram_if(dcache_mc_if),
     .i_ram_if(icache_mc_if),
-    .out_ram_if(ramif)
+    .out_ram_if(ram_if)
   );
 
 
