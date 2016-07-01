@@ -171,6 +171,8 @@ def clean_init_hex(file_name):
         cleaned_file.close()
     subprocess.call(['rm', init_output])
     subprocess.call(['mv', cleaned_location, init_output])
+    if not os.path.exists(os.path.dirname(build_dir)):
+        os.makedirs(os.path.dirname(build_dir))
     subprocess.call(['cp', init_output, build_dir])
     return
 
@@ -238,8 +240,10 @@ def run_spike_asm(file_name):
     
     elf_name = output_dir + short_name + '.elf'
     log_name = output_dir + short_name + '_spike.hex'
-    cmd_arr = ['spike', '--isa=RV32IM', '+signature=' + log_name, elf_name]
-    failure = subprocess.call(cmd_arr)
+    cmd_arr = ['spike', '-l', '--isa=RV32IM', '+signature=' + log_name, elf_name]
+    spike_log = open(output_dir + short_name + '_spike.trace', 'w')
+    failure = subprocess.call(cmd_arr, stdout = spike_log, stderr = spike_log)
+    spike_log.close()
     if failure:
         return -1
     return 0
@@ -256,14 +260,14 @@ def compare_results(f):
                 stdout=FNULL, stderr=subprocess.STDOUT)
     if failure:
         print fail_msg
-        return -1
+        return 1
     else:
         print pass_msg
         return 0
 
 if __name__ == '__main__':
     parse_arguments()  
-    
+    failures = 0 
     # asm comparison testing
     if TEST_TYPE == "asm":
         if FILE_NAME is None:
@@ -292,7 +296,7 @@ if __name__ == '__main__':
                 elif ret == -2:
                     print "An error has occurred while running " + f
                 sys.exit(1)
-            compare_results(f)
+            failures += compare_results(f)
     # C comparison testing
     elif TEST_TYPE == "c":
         if FILE_NAME is None:
@@ -307,3 +311,4 @@ if __name__ == '__main__':
                 print "To be implemented."
             elif ".c" in f:
                 print "To be implemented"
+    sys.exit(failures)
