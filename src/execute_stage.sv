@@ -77,10 +77,11 @@ module execute_stage(
   );
 
   word_t dload_ext;
+  logic [3:0] byte_en;
   dmem_extender dmem_ext (
     .dmem_in(dramif.rdata),
     .load_type(cuif.load_type),
-    .byte_en(cuif.byte_en),
+    .byte_en(byte_en),
     .ext_out(dload_ext)
   );
 
@@ -177,13 +178,15 @@ module execute_stage(
   /*******************************************************
   *** Data Ram Interface Logic 
   *******************************************************/
+  logic [1:0] byte_offset;
+
   assign dramif.ren           = cuif.dren;
   assign dramif.wen           = cuif.dwen;
-  assign dramif.byte_en       = cuif.dren ? cuif.byte_en:
-                                {cuif.byte_en[0], cuif.byte_en[1], cuif.byte_en[2], cuif.byte_en[3]};
+  assign dramif.byte_en       = cuif.dren ? byte_en:
+                                {byte_en[0], byte_en[1], byte_en[2], byte_en[3]};
   assign dramif.addr          = aluif.port_out;
   assign hazardif.d_ram_busy  = dramif.busy;
-  assign cuif.byte_offset     = aluif.port_out[1:0]; 
+  assign byte_offset          = aluif.port_out[1:0]; 
   
   always_comb begin
     // load_type can be used for store_type as well
@@ -191,6 +194,49 @@ module execute_stage(
       LB: dramif.wdata = {4{store_swapped[31:24]}};
       LH: dramif.wdata = {2{store_swapped[31:16]}};
       LW: dramif.wdata = store_swapped; 
+    endcase
+  end
+
+
+  // Assign byte_en based on load type 
+  // funct3 for loads and stores are the same bit positions
+  // byte_en is valid for both loads and stores 
+  always_comb begin
+    unique case(cuif.load_type)
+      LB : begin
+        unique case(byte_offset)
+          2'b00   : byte_en = 4'b0001;
+          2'b01   : byte_en = 4'b0010;
+          2'b10   : byte_en = 4'b0100;
+          2'b11   : byte_en = 4'b1000;
+          default : byte_en = 4'b0000;
+        endcase
+      end
+      LBU : begin
+        unique case(byte_offset)
+          2'b00   : byte_en = 4'b0001;
+          2'b01   : byte_en = 4'b0010;
+          2'b10   : byte_en = 4'b0100;
+          2'b11   : byte_en = 4'b1000;
+          default : byte_en = 4'b0000;
+        endcase
+      end
+      LH : begin
+        unique case(byte_offset)
+          2'b00   : byte_en = 4'b0011;
+          2'b10   : byte_en = 4'b1100;
+          default : byte_en = 4'b0000;
+        endcase
+      end
+      LHU : begin
+        unique case(byte_offset)
+          2'b00   : byte_en = 4'b0011;
+          2'b10   : byte_en = 4'b1100;
+          default : byte_en = 4'b0000;
+        endcase
+      end
+      LW:           byte_en = 4'b1111;
+      default :     byte_en = 4'b0000;
     endcase
   end
 

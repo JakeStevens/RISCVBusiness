@@ -71,49 +71,6 @@ module control_unit
   assign cu_if.load_type    = load_t'(instr_i.funct3);
   assign cu_if.branch_type  = branch_t'(instr_sb.funct3);
 
-  // Assign byte_en based on load type 
-  // funct3 for loads and stores are the same bit positions
-  // cu_if.byte_en is valid for both loads and stores 
-  assign load_type = load_t'(instr_i.funct3);
-  always_comb begin
-    unique case(load_type)
-      LB : begin
-        unique case(cu_if.byte_offset)
-          2'b00   : cu_if.byte_en = 4'b0001;
-          2'b01   : cu_if.byte_en = 4'b0010;
-          2'b10   : cu_if.byte_en = 4'b0100;
-          2'b11   : cu_if.byte_en = 4'b1000;
-          default : cu_if.byte_en = 4'b0000;
-        endcase
-      end
-      LBU : begin
-        unique case(cu_if.byte_offset)
-          2'b00   : cu_if.byte_en = 4'b0001;
-          2'b01   : cu_if.byte_en = 4'b0010;
-          2'b10   : cu_if.byte_en = 4'b0100;
-          2'b11   : cu_if.byte_en = 4'b1000;
-          default : cu_if.byte_en = 4'b0000;
-        endcase
-      end
-      LH : begin
-        unique case(cu_if.byte_offset)
-          2'b00   : cu_if.byte_en = 4'b0011;
-          2'b10   : cu_if.byte_en = 4'b1100;
-          default : cu_if.byte_en = 4'b0000;
-        endcase
-      end
-      LHU : begin
-        unique case(cu_if.byte_offset)
-          2'b00   : cu_if.byte_en = 4'b0011;
-          2'b10   : cu_if.byte_en = 4'b1100;
-          default : cu_if.byte_en = 4'b0000;
-        endcase
-      end
-      LW:           cu_if.byte_en = 4'b1111;
-      default :     cu_if.byte_en = 4'b0000;
-    endcase
-  end
-
   // Assign memory read/write enables
   assign cu_if.dwen = (cu_if.opcode == STORE);
   assign cu_if.dren = (cu_if.opcode == LOAD);

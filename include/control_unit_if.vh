@@ -33,20 +33,18 @@ interface control_unit_if;
   logic dwen, dren, j_sel, branch, jump, ex_pc_sel, imm_shamt_sel, halt, wen;
   aluop_t alu_op;
   logic [1:0] alu_a_sel, alu_b_sel, w_sel;
-  logic [3:0] byte_en;
   logic [4:0] shamt;
   logic [11:0] imm_I, imm_S, imm_UJ;
   logic [12:0] imm_SB;
   word_t instr, imm_U;
   load_t load_type;
   branch_t branch_type;
-  logic [1:0] byte_offset;
   opcode_t opcode; 
 
   modport control_unit(
-    input instr, byte_offset,
+    input instr, 
     output dwen, dren, j_sel, branch, jump, ex_pc_sel, alu_a_sel,
-    alu_b_sel, w_sel, byte_en, load_type, branch_type, shamt,
+    alu_b_sel, w_sel, load_type, branch_type, shamt,
     imm_I, imm_S, imm_SB, imm_UJ, imm_U, imm_shamt_sel, alu_op, 
     opcode, halt, wen
   );
