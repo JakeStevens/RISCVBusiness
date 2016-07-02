@@ -183,6 +183,7 @@ def clean_spike_output(file_name):
     short_name = file_name.split(ARCH+'/')[1][:-2]
     output_dir = './run/' + ARCH + '/' + short_name + '/'
 
+    # clean the hex memory dump
     spike_output = output_dir + short_name + '_spike.hex'
     cleaned_location = output_dir + short_name + '_spike_clean.hex'
     addr = 0x200
@@ -210,7 +211,45 @@ def clean_spike_output(file_name):
         cleaned_file.close()
     subprocess.call(['rm', spike_output])
     subprocess.call(['mv', cleaned_location, spike_output])
+
+    # clean the trace 
+    trace_output = output_dir + short_name + '_spike.trace'
+    cleaned_output = '' 
+    with open(trace_output, 'r') as trace_file:
+        for line in trace_file:
+            broken_line_arr = line.split()
+            if 'csrwi' == broken_line_arr[4]:
+                break
+            new_line = broken_line_arr[0] + ' ' + broken_line_arr[1] + ' '
+            new_line += broken_line_arr[2] + ' ' + broken_line_arr[3] + ' '
+            new_line += broken_line_arr[4] + '\n'
+            cleaned_output += new_line
+    with open(trace_output, 'w') as trace_file:
+        trace_file.write(cleaned_output) 
+    
     return
+
+def clean_sim_trace(file_name):
+    short_name = file_name.split(ARCH+'/')[1][:-2]
+    output_dir = './run/' + ARCH + '/' + short_name + '/'
+ 
+    # clean the trace 
+    trace_output = output_dir + short_name + '_sim.trace'
+    cleaned_output = '' 
+    with open('build/trace.log', 'r') as trace_file:
+        for line in trace_file:
+            broken_line_arr = line.split()
+            if 'csrwi' == broken_line_arr[4]:
+                break
+            new_line = broken_line_arr[0] + ' ' + broken_line_arr[1] + ' '
+            new_line += broken_line_arr[2] + ' ' + broken_line_arr[3] + ' '
+            new_line += broken_line_arr[4] + '\n'
+            cleaned_output += new_line
+    with open(trace_output, 'w') as trace_file:
+        trace_file.write(cleaned_output) 
+    
+    return
+
 
 def run_sim(file_name):
     short_name = file_name.split(ARCH+'/')[1][:-2]

@@ -137,7 +137,7 @@ module cpu_tracker(
 
   always_ff @ (posedge CLK) begin
     if (!wb_stall && instr != 0) begin
-      $sformat(output_str, "core%d: 0x%h (Ox%h) %s\n", CPUID, pc64, instr, instr_mnemonic);
+      $sformat(output_str, "core%d: 0x%h (0x%h) %s\n", CPUID, pc64, instr, instr_mnemonic);
       $fwrite(fptr, output_str);
     end
   end
