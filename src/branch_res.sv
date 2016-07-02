@@ -20,7 +20,7 @@
 *   Email:        jskubic@purdue.edu
 *   Date Created: 06/14/2016
 *   Description:  Determines if a branch should be taken and outputs
-*                 the target address. 
+*                 the target address.  Optimized to use only one adder 
 */
 
 `include "branch_res_if.vh"
@@ -32,18 +32,43 @@ module branch_res (
   import rv32i_types_pkg::*;
   
   word_t offset;
+  logic lt, eq, ltu;
+  logic sign_1, sign_2, sign_r, carry_out;
+  logic [WORD_SIZE : 0] adder_out, op_1_ext, op_2_ext;
 
+  // target addr generation
   assign offset = $signed(br_if.imm_sb);
   assign br_if.branch_addr = br_if.pc + offset;
 
+  //sign bits
+  assign sign_1 = br_if.rs1_data[WORD_SIZE-1];
+  assign sign_2 = br_if.rs2_data[WORD_SIZE-1];
+  assign sign_r = adder_out[WORD_SIZE-1];
+  
+  //build operands
+  assign op_1_ext[WORD_SIZE-1:0] = br_if.rs1_data;
+  assign op_2_ext[WORD_SIZE-1:0] = (~br_if.rs2_data) + 1;
+  assign op_1_ext[WORD_SIZE] = 1'b0;
+  assign op_2_ext[WORD_SIZE] = 1'b0;
+
+  //adder
+  assign adder_out = op_1_ext + op_2_ext;
+  assign carry_out = adder_out[WORD_SIZE];
+
+  // condition calculations
+  assign eq = br_if.rs1_data == br_if.rs2_data;
+  assign lt = (sign_1 & ~sign_2) ? 1 :
+              ((~sign_1 & sign_2) ? 0 : sign_r);
+  assign ltu = ~carry_out;
+
   always_comb begin
     casez (br_if.branch_type) 
-      BEQ   : br_if.branch_taken = (br_if.rs1_data == br_if.rs2_data);
-      BNE   : br_if.branch_taken = (br_if.rs1_data != br_if.rs2_data);
-      BLT   : br_if.branch_taken = ($signed(br_if.rs1_data) <  $signed(br_if.rs2_data));
-      BGE   : br_if.branch_taken = ($signed(br_if.rs1_data) >= $signed(br_if.rs2_data));
-      BLTU  : br_if.branch_taken = (br_if.rs1_data < br_if.rs2_data);
-      BGEU  : br_if.branch_taken = (br_if.rs1_data >= br_if.rs2_data);
+      BEQ   : br_if.branch_taken = eq;
+      BNE   : br_if.branch_taken = ~eq;
+      BLT   : br_if.branch_taken = lt;
+      BGE   : br_if.branch_taken = ~lt;
+      BLTU  : br_if.branch_taken = ltu;
+      BGEU  : br_if.branch_taken = ~ltu;
       default : br_if.branch_taken = 1'b0;
     endcase
   end
