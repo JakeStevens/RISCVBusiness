@@ -31,10 +31,6 @@ module ram_wrapper (
   ram_if.ram ram_if
 );
 
-  ram #(.LAT(0)) v_lat_ram (
-    .CLK(CLK),
-    .nRST(nRST),
-    .ram_if(ram_if)
-  );
+  ram #(.LAT(0)) v_lat_ram (.*);
 
 endmodule

@@ -40,33 +40,9 @@ module tspp (
   hazard_unit_if        hazard_if();
 
   //module instantiations
-  fetch_stage fetch_stage_i (
-    .CLK(CLK),
-    .nRST(nRST),
-    .fetch_ex_if(fetch_ex_if),
-    .hazard_if(hazard_if),
-    .predict_if(predict_if),
-    .iram_if(iram_if)
-  );
-
-  execute_stage execute_stage_i (
-    .CLK(CLK),
-    .nRST(nRST),
-    .fetch_ex_if(fetch_ex_if),
-    .hazard_if(hazard_if),
-    .predict_if(predict_if),
-    .dram_if(dram_if),
-    .halt(halt)
-  );
-
-  hazard_unit hazard_unit_i (
-    .hazard_if(hazard_if)
-  );
-
-  branch_predictor branch_predictor_i (
-    .CLK(CLK),
-    .nRST(nRST),
-    .predict_if(predict_if)
-  );
+  fetch_stage fetch_stage_i (.*);
+  execute_stage execute_stage_i (.*);
+  hazard_unit hazard_unit_i (.*);
+  branch_predictor branch_predictor_i (.*);
 
 endmodule

@@ -47,25 +47,11 @@ module execute_stage(
   branch_res_if     branch_if(); 
  
   // Module instantiations
-  control_unit cu (
-    .cu_if(cu_if),
-    .rf_if(rf_if)
-  );
-
-  rv32i_reg_file rf (
-    .CLK(CLK),
-    .nRST(nRST),
-    .rf_if(rf_if)
-  );
-
-  alu alu (
-    .alu_if(alu_if)
-  );
-
-  jump_calc jump_calc (
-    .jump_if(jump_if)
-  );
-
+  control_unit cu (.*);
+  rv32i_reg_file rf (.*);
+  alu alu (.*);
+  jump_calc jump_calc (.*);
+  
   branch_res branch_res (
     .br_if(branch_if)
   ); 
