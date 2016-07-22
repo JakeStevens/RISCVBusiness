@@ -58,7 +58,26 @@ module tb_RISCVBusiness ();
     .CLK(CLK),
     .nRST(nRST),
     .ram_if(ram_if)
-  ); 
+  );
+
+  bind execute_stage cpu_tracker cpu_track1 (
+    .CLK(CLK),
+    .wb_stall(hazard_if.if_ex_stall & ~hazard_if.jump & ~hazard_if.branch),
+    .instr(fetch_ex_if.fetch_ex_reg.instr),
+    .pc(fetch_ex_if.fetch_ex_reg.pc),
+    .opcode(cu_if.opcode),
+    .funct3(cu_if.instr[14:12]),
+    .rs1(rf_if.rs1),
+    .rs2(rf_if.rs2),
+    .rd(rf_if.rd),
+    .imm_S(cu_if.imm_S),
+    .imm_I(cu_if.imm_I),
+    .imm_U(cu_if.imm_U),
+    .imm_UJ(cu_if.imm_UJ),
+    .imm_SB(cu_if.imm_SB),
+    .instr_30(fetch_ex_if.fetch_ex_reg.instr[30])
+    );
+     
 
   //Ramif Mux
   always_comb begin
