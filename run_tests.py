@@ -220,9 +220,13 @@ def clean_spike_output(file_name):
             broken_line_arr = line.split()
             if 'csrwi' == broken_line_arr[4]:
                 break
-            new_line = broken_line_arr[0] + ' ' + broken_line_arr[1] + ' '
-            new_line += broken_line_arr[2] + ' ' + broken_line_arr[3] + ' '
-            new_line += broken_line_arr[4] + '\n'
+            if '0x' == broken_line_arr[6][0:2]:
+              imm = int(broken_line_arr[6], 16)
+              broken_line_arr[6] = str(imm)
+            if len(broken_line_arr) > 8 and '0x' == broken_line_arr[8][0:2]:
+              imm = int(broken_line_arr[8], 16)
+              broken_line_arr[8] = str(imm)
+            new_line = ' '.join(broken_line_arr) + '\n'
             cleaned_output += new_line
     with open(trace_output, 'w') as trace_file:
         trace_file.write(cleaned_output) 
@@ -241,9 +245,7 @@ def clean_sim_trace(file_name):
             broken_line_arr = line.split()
             if 'csrwi' == broken_line_arr[4]:
                 break
-            new_line = broken_line_arr[0] + ' ' + broken_line_arr[1] + ' '
-            new_line += broken_line_arr[2] + ' ' + broken_line_arr[3] + ' '
-            new_line += broken_line_arr[4] + '\n'
+            new_line = ' '.join(broken_line_arr) + '\n'
             cleaned_output += new_line
     with open(trace_output, 'w') as trace_file:
         trace_file.write(cleaned_output) 
@@ -297,6 +299,9 @@ def compare_results(f):
     fail_msg = '{0:<40}{1:>20}'.format(short_name,START_RED + '[FAILED]' + END_COLOR)
     failure = subprocess.call(['diff', sim_name, spike_name],
                 stdout=FNULL, stderr=subprocess.STDOUT)
+    cmd_arr = ['diff', output_dir + short_name + '_spike.trace']
+    cmd_arr += [output_dir + short_name + '_sim.trace']
+    #subprocess.call(cmd_arr)
     if failure:
         print fail_msg
         return 1
@@ -329,6 +334,7 @@ if __name__ == '__main__':
                 sys.exit(1)
             clean_spike_output(f)
             ret = run_sim(f)
+            clean_sim_trace(f)
             if ret != 0:
                 if ret == -1:
                   print "An error has occurred while setting waf's top level"

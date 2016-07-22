@@ -27,21 +27,43 @@
 
 import rv32i_types_pkg::*;
 module cpu_tracker(
-  input logic CLK, wb_stall,
+  input logic CLK, wb_stall, instr_30,
   input word_t instr, pc,
   input opcode_t opcode,
-  input logic [2:0] funct3
+  input logic [2:0] funct3,
+  input logic [4:0] rs1, rs2, rd,
+  input logic [12:0] imm_SB,
+  input logic [11:0] imm_S, imm_I,
+  input logic [20:0] imm_UJ,
+  input logic [31:0] imm_U 
 );
   parameter CPUID = 0;
 
   integer fptr;
-  string instr_mnemonic, output_str;
-  logic [2:0] branch_funct, load_funct, store_funct;
-  logic [2:0] imm_funct, regreg_funct, system_funct;
+  string instr_mnemonic, output_str, src1, src2, dest, operands, temp_str;
   logic [63:0] pc64;
   assign pc64 = {{32{1'b0}}, pc};
   initial begin: INIT_FILE
     fptr = $fopen(`TRACE_FILE_NAME, "w");
+  end
+
+  always_comb begin
+    src1 = registerAssign(rs1);
+    src2 = registerAssign(rs2);
+    dest = registerAssign(rd);
+  end
+
+  always_comb begin
+    case (opcode)
+      LUI, AUIPC: $sformat(operands, "%s, %d", dest, imm_U[31:12]);
+      JAL:        $sformat(operands, "%s, pc + %d", dest, signed'(imm_UJ));
+      JALR:       $sformat(operands, "%s, %s, %d", dest, src1, signed'(imm_I));
+      BRANCH:     $sformat(operands, "%s, %s, pc + %d", src1, src2, signed'(imm_SB));
+      STORE:      $sformat(operands, "%s, %d(%s)", src2, signed'(imm_S), src1);
+      LOAD:       $sformat(operands, "%s, %d(%s)", dest, signed'(imm_I), src1);
+      IMMED:      $sformat(operands, "%s, %s, %d", dest, src1, signed'(imm_I));
+      REGREG:     $sformat(operands, "%s, %s, %s", dest, src1, src2);
+    endcase
   end
 
   always_comb begin
@@ -89,7 +111,7 @@ module cpu_tracker(
           ANDI:     instr_mnemonic = "andi";
           SLLI:     instr_mnemonic = "slli";
           SRI: begin
-            if (instr[30])
+            if (instr_30)
                     instr_mnemonic = "srai";
             else
                     instr_mnemonic = "srli";
@@ -100,7 +122,7 @@ module cpu_tracker(
       REGREG: begin
         case(regreg_t'(funct3))
           ADDSUB: begin
-            if (instr[30])
+            if (instr_30)
                     instr_mnemonic = "sub";
             else
                     instr_mnemonic = "add";
@@ -110,7 +132,7 @@ module cpu_tracker(
           SLTU:     instr_mnemonic = "sltu";
           XOR:      instr_mnemonic = "xor";
           SR: begin
-            if (instr[30])
+            if (instr_30)
                     instr_mnemonic = "sra";
             else
                     instr_mnemonic = "srl";
@@ -135,9 +157,47 @@ module cpu_tracker(
     endcase
   end
 
+  function string registerAssign(input logic [4:0] register);
+    case (register)
+      5'd0:   registerAssign = "zero";
+      5'd1:   registerAssign = "ra";
+      5'd2:   registerAssign = "sp";
+      5'd3:   registerAssign = "gp";
+      5'd4:   registerAssign = "tp";
+      5'd5:   registerAssign = "t0";
+      5'd6:   registerAssign = "t1";
+      5'd7:   registerAssign = "t2";
+      5'd8:   registerAssign = "s0";
+      5'd9:   registerAssign = "s1";
+      5'd10:  registerAssign = "a0";
+      5'd11:  registerAssign = "a1";
+      5'd12:  registerAssign = "a2";
+      5'd13:  registerAssign = "a3";
+      5'd14:  registerAssign = "a4";
+      5'd15:  registerAssign = "a5";
+      5'd16:  registerAssign = "a6";
+      5'd17:  registerAssign = "a7";
+      5'd18:  registerAssign = "s2";
+      5'd19:  registerAssign = "s3";
+      5'd20:  registerAssign = "s4";
+      5'd21:  registerAssign = "s5";
+      5'd22:  registerAssign = "s6";
+      5'd23:  registerAssign = "s7";
+      5'd24:  registerAssign = "s8";
+      5'd25:  registerAssign = "s9";
+      5'd26:  registerAssign = "s10";
+      5'd27:  registerAssign = "s11";
+      5'd28:  registerAssign = "t3";
+      5'd29:  registerAssign = "t4";
+      5'd30:  registerAssign = "t5";
+      5'd31:  registerAssign = "t6";
+    endcase
+  endfunction
+
   always_ff @ (posedge CLK) begin
     if (!wb_stall && instr != 0) begin
-      $sformat(output_str, "core%d: 0x%h (0x%h) %s\n", CPUID, pc64, instr, instr_mnemonic);
+      $sformat(temp_str, "core%d: 0x%h (0x%h)", CPUID, pc64, instr);
+      $sformat(output_str, "%s %s %s\n", temp_str, instr_mnemonic, operands);
       $fwrite(fptr, output_str);
     end
   end
