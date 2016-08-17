@@ -33,14 +33,14 @@ module control_unit
 );
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;
+  import machine_mode_types_pkg::*;
 
-  stype_t   instr_s;
-  itype_t   instr_i;
-  rtype_t   instr_r;
-  sbtype_t  instr_sb;
-  utype_t   instr_u;
-  ujtype_t  instr_uj;
-  load_t    load_type;
+  stype_t         instr_s;
+  itype_t         instr_i;
+  rtype_t         instr_r;
+  sbtype_t        instr_sb;
+  utype_t         instr_u;
+  ujtype_t        instr_uj;
 
   assign instr_s = stype_t'(cu_if.instr);
   assign instr_i = itype_t'(cu_if.instr);
@@ -179,6 +179,34 @@ module control_unit
 
   // HALT HACK. TODO: FIX ME WHEN IMPLEMENTING INTERRUPTS
   assign cu_if.halt = (cu_if.instr == 32'h7800d073);
+  // Privilege Control Signals
+  assign cu_if.fault_insn = 'b0;
+ 
+  always_comb begin
+    case(cu_if.opcode)
+      LUI, AUIPC, JAL, JALR,
+      BRANCH, LOAD, STORE,
+      IMMED, REGREG, SYSTEM   : cu_if.illegal_insn = 1'b0;
+      default                 : cu_if.illegal_insn = 1'b1;
+    endcase
+  end
+ 
+  always_comb begin
+    cu_if.ret_insn = 1'b0;
+    cu_if.prv_ret = U_MODE;
+    if (cu_if.opcode == SYSTEM) begin
+      if (rv32i_system_t'(instr_i.funct3) == NONCSR & instr_i[21] == 1'b1)
+      begin
+        cu_if.ret_insn = 1'b1;
+        case(instr_i[29:28])
+          2'd0: cu_if.prv_ret = U_MODE;
+          2'd1: cu_if.prv_ret = S_MODE;
+          2'd2: cu_if.prv_ret = H_MODE;
+          2'd3: cu_if.prv_ret = M_MODE; 
+        endcase 
+      end
+    end
+  end
 
 endmodule
 

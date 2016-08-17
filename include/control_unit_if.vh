@@ -29,6 +29,7 @@
 interface control_unit_if;
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;
+  import machine_mode_types_pkg::*;
 
   logic dwen, dren, j_sel, branch, jump, ex_pc_sel, imm_shamt_sel, halt, wen;
   aluop_t alu_op;
@@ -41,12 +42,16 @@ interface control_unit_if;
   branch_t branch_type;
   opcode_t opcode; 
 
+  // Privilege control signals
+  logic fault_insn, illegal_insn, ret_insn;
+  prv_lvl_t prv_ret; 
+
   modport control_unit(
     input instr, 
     output dwen, dren, j_sel, branch, jump, ex_pc_sel, alu_a_sel,
     alu_b_sel, w_sel, load_type, branch_type, shamt,
     imm_I, imm_S, imm_SB, imm_UJ, imm_U, imm_shamt_sel, alu_op, 
-    opcode, halt, wen
+    opcode, halt, wen, fault_insn, illegal_insn, ret_insn
   );
 
 endinterface

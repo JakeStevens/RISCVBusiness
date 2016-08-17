@@ -29,31 +29,32 @@ module pipeline_control
   logic [1:0] prv_intr, prv_ret,
   word_t [1:0] xtvec, xepc_r,
   output logic insert_pc,
-  word_t npc,
+  word_t priv_pc,
   logic intr_out
 );
-
-assign intr_out = intr;
-assign insert_pc = ret || pipe_clear;
-
-
-always_comb begin
-  if(intr)
-    case(prv_intr)
-      2'b00:  npc = xtvec[2'b00];
-      2'b01:  npc = xtvec[2'b01];
-      2'b10:  npc = xtvec[2'b10];
-      2'b11:  npc = xtvec[2'b11]; 
-    endcase
-  else if (ret)
-    case(prv_ret)
-      2'b00:  npc = xepc_r[2'b00];
-      2'b01:  npc = xepc_r[2'b01];
-      2'b10:  npc = xepc_r[2'b10];
-      2'b11:  npc = xepc_r[2'b11];
-    endcase
-  else
-    npc = 32'b0;
-end
+  import rv32i_types_pkg::*;
+  
+  assign intr_out = intr;
+  assign insert_pc = ret || pipe_clear;
+  
+  
+  always_comb begin
+    if(intr)
+      case(prv_intr)
+        2'b00:  priv_pc = xtvec[2'b00];
+        2'b01:  priv_pc = xtvec[2'b01];
+        2'b10:  priv_pc = xtvec[2'b10];
+        2'b11:  priv_pc = xtvec[2'b11]; 
+      endcase
+    else if (ret)
+      case(prv_ret)
+        2'b00:  priv_pc = xepc_r[2'b00];
+        2'b01:  priv_pc = xepc_r[2'b01];
+        2'b10:  priv_pc = xepc_r[2'b10];
+        2'b11:  priv_pc = xepc_r[2'b11];
+      endcase
+    else
+      priv_pc = 32'b0;
+  end
 
 endmodule

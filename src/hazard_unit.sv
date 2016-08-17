@@ -30,10 +30,18 @@ module hazard_unit
 );
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;
+  
+  // Pipeline hazard signals
   logic dmem_access;
   logic branch_jump;
   logic wait_for_imem;
   logic wait_for_dmem;
+
+  // IRQ/Exception hazard signals
+  logic ex_flush_hazard; 
+  logic[1:0] pc;
+  assign pc = hazard_unit.pc[3:2];
+  
 
   assign dmem_access = (hazard_if.dren || hazard_if.dwen);
   assign branch_jump = hazard_if.jump || 
@@ -46,11 +54,19 @@ module hazard_unit
   assign hazard_if.pc_en = (~wait_for_dmem&~wait_for_imem&~hazard_if.halt) |
                             branch_jump; 
 
-  assign hazard_if.if_ex_flush = branch_jump |
+  assign hazard_if.if_ex_flush = ex_flush_hazard | branch_jump |
                                  (wait_for_imem & dmem_access &
                                     ~hazard_if.d_ram_busy);
 
-  assign hazard_if.if_ex_stall = wait_for_dmem ||
+  assign hazard_if.if_ex_stall = (wait_for_dmem ||
                                  (wait_for_imem & ~dmem_access) ||
-                                 hazard_if.halt;
+                                 hazard_if.halt) & ~ex_flush_hazard;
+
+
+  assign hazard_if.mal_instr = !(pc == 2'b00 || pc == 2'b01 ||
+                                  pc == 2'b10 || pc == 2'b11);
+  /* Hazards due to Interrupts/Exceptions */
+  assign hazard_if.priv_sel = hazard_if.insert_pc;
+  assign hazard_if.pipeline_finish = hazard_if.interrupt;
+  assign ex_flush_hazard = hazard_if.ex_excptn;
 endmodule
