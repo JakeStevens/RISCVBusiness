@@ -143,7 +143,7 @@ module cpu_tracker(
         endcase
       end
       SYSTEM: begin
-        case(system_t'(funct3))
+        case(rv32i_system_t'(funct3))
           CSRRW:    instr_mnemonic = "csrrw";
           CSRRS:    instr_mnemonic = "csrrs";
           CSRRC:    instr_mnemonic = "csrrc";
