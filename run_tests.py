@@ -86,7 +86,7 @@ def compile_asm(file_name):
     cmd_arr = ['riscv64-unknown-elf-gcc', '-m32', '-static',
                 '-mcmodel=medany', '-fvisibility=hidden', '-nostdlib',
                 '-nostartfiles', '-T./verification/asm-env/link.ld',
-                '-I./verification/asm-env', file_name, '-o', output_name]
+                '-I./verification/asm-env/asm', file_name, '-o', output_name]
     failure = subprocess.call(cmd_arr)
     if failure:
         return -1
