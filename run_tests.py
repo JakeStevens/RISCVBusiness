@@ -334,13 +334,13 @@ if __name__ == '__main__':
                 sys.exit(1)
             clean_spike_output(f)
             ret = run_sim(f)
-            clean_sim_trace(f)
             if ret != 0:
                 if ret == -1:
                   print "An error has occurred while setting waf's top level"
                 elif ret == -2:
                     print "An error has occurred while running " + f
                 sys.exit(1)
+            clean_sim_trace(f)
             failures += compare_results(f)
     # C comparison testing
     elif TEST_TYPE == "c":
