@@ -196,15 +196,7 @@ module control_unit
     cu_if.prv_ret = U_MODE;
     if (cu_if.opcode == SYSTEM) begin
       if (rv32i_system_t'(instr_i.funct3) == NONCSR & instr_i[21] == 1'b1)
-      begin
-        cu_if.ret_insn = 1'b1;
-        case(instr_i[29:28])
-          2'd0: cu_if.prv_ret = U_MODE;
-          2'd1: cu_if.prv_ret = S_MODE;
-          2'd2: cu_if.prv_ret = H_MODE;
-          2'd3: cu_if.prv_ret = M_MODE; 
-        endcase 
-      end
+        cu_if.prv_ret = prv_lvl_t'(instr_i[29:28]);
     end
   end
 

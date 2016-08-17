@@ -51,7 +51,7 @@ interface control_unit_if;
     output dwen, dren, j_sel, branch, jump, ex_pc_sel, alu_a_sel,
     alu_b_sel, w_sel, load_type, branch_type, shamt,
     imm_I, imm_S, imm_SB, imm_UJ, imm_U, imm_shamt_sel, alu_op, 
-    opcode, halt, wen, fault_insn, illegal_insn, ret_insn
+    opcode, halt, wen, fault_insn, illegal_insn, ret_insn, prv_ret
   );
 
 endinterface
