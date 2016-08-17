@@ -107,16 +107,18 @@ package rv32i_types_pkg;
   } regreg_t;
 
   typedef enum logic [2:0] {
+    // Non CSR contains ECALL, EBREAK, and xRET instructions
     // ECALL/EBREAK based on bit 20 of instruction
-    //  0   /   1
-    EOP     = 3'b000,
-    CSRRW   = 3'b001,
-    CSRRS   = 3'b010,
-    CSRRC   = 3'b011,
-    CSRRWI  = 3'b101,
-    CSRRSI  = 3'b110,
-    CSRRCI  = 3'b111
-  } system_t;
+    //   0  /   1 
+    //   xRET based on bits 28 and 29 of instruction
+    NONCSR      = 3'b000,
+    CSRRW       = 3'b001,
+    CSRRS       = 3'b010,
+    CSRRC       = 3'b011,
+    CSRRWI      = 3'b101,
+    CSRRSI      = 3'b110,
+    CSRRCI      = 3'b111
+  } rv32i_system_t;
 
   typedef struct packed {
     logic [6:0] funct7;
