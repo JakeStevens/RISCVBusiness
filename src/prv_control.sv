@@ -19,117 +19,124 @@
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 08/17/2016
-*   Description:  <add description here>
+*   Description:  Main control for the priv isa block 
 */
 
+`include "prv_ex_int_if.vh"
+`include "csr_prv_if.vh"
+
 module prv_control (
+  prv_ext_int_if.prv  ext_int_if,
+  csr_prv_if.prv      csr_if
+);
   import rv32i_types_pkg::*;
   import machine_mode_types_pkg::*;
-
-  // exception sources
-  input logic fault_insn, mal_insn, illegal_insn, 
-              fault_l, mal_l, fault_s, mal_s, 
-              breakpoint, env_m,
-  input word_t curr_epc,
-
-  // interrupt sources
-  input logic timer_int, 
-  input prv_lvl_t timer_prv,
-  input logic soft_int,
-  input prv_lvl_t soft_prv,
-  input logic ext_int,
-  input prv_lvl_t ext_prv,
-
-  // return signals
-  input logic ret,
-  input prv_lvl_t prv_ret,
-  
-  //signaling interrupt
-  output intr, 
-  output prv_lvl_t intr_prv,
-
-  //outputs to csr 
-  output logic mip_rup, mbadaddr_rup, mcause_rup, mepc_rup, mstatus_rup,
-  output mip_t mip_next, mip,
-  output mbadaddr_t mbadaddr_next, mbadaddr,
-  output mcause_t mcause_next, mcause, 
-  output mstatus_t mstatus_next, mstatus,
-
-  //input from csr
-  input mbadaddr_t mbadaddr,
-  input mip_t mip,
-  input mcause_t mcause,
-  input mstatus_t mstatus, 
-  
-);
 
   ex_code_t ex_src;
   logic exception;
   
-  int_code_t int_src;
+  int_code_t intr_src;
   logic interrupt;
 
   always_comb begin
     interrupt = 1'b1;
-    int_src = USER_SOFT_INT;
+    intr_src = USER_SOFT_INT;
 
-    if (timer_int) begin
-      casez (timer_prv) 
-        U_MODE : int_src = USER_TIMER_INT;
-        S_MODE : int_src = SUPER_TIMER_INT;
-        H_MODE : int_src = HYPER_TIMER_INT;
-        M_MODE : int_src = MACH_TIMER_INT;
+    if (ext_int_if.timer_int) begin
+      casez (ext_int_if.timer_prv) 
+        U_MODE : intr_src = USER_TIMER_INT;
+        S_MODE : intr_src = SUPER_TIMER_INT;
+        H_MODE : intr_src = HYPER_TIMER_INT;
+        M_MODE : intr_src = MACH_TIMER_INT;
       endcase
     end
-    else if (soft_int) begin
-      casez (soft_prv) 
-        U_MODE : int_src = USER_SOFT_INT;
-        S_MODE : int_src = SUPER_SOFT_INT;
-        H_MODE : int_src = HYPER_SOFT_INT;
-        M_MODE : int_src = MACH_SOFT_INT;
+    else if (ext_int_if.soft_int) begin
+      casez (ext_int_if.soft_prv) 
+        U_MODE : intr_src = USER_SOFT_INT;
+        S_MODE : intr_src = SUPER_SOFT_INT;
+        H_MODE : intr_src = HYPER_SOFT_INT;
+        M_MODE : intr_src = MACH_SOFT_INT;
       endcase
     end
-    else if (ext_int) begin
-      casez (ext_prv) 
-        U_MODE : int_src = USER_EXT_INT;
-        S_MODE : int_src = SUPER_EXT_INT;
-        H_MODE : int_src = HYPER_EXT_INT;
-        M_MODE : int_src = MACH_EXT_INT;
+    else if (ext_int_if.ext_int) begin
+      casez (ext_int_if.ext_prv) 
+        U_MODE : intr_src = USER_EXT_INT;
+        S_MODE : intr_src = SUPER_EXT_INT;
+        H_MODE : intr_src = HYPER_EXT_INT;
+        M_MODE : intr_src = MACH_EXT_INT;
       endcase
     end
     else
       interrupt = 1'b0;
   end
 
+  assign csr_if.mip_rup = interrupt;
+  always_comb begin
+    csr_if.mip_next = csr_if.mip;
+    if (ext_int_if.timer_int) csr_if.mip_next.mtip = 1'b1;
+    if (ext_int_if.soft_int) csr_if.mip_next.msip = 1'b1;
+    if (ext_int_if.ext_int) csr_if.mip_next.meip = 1'b1;
+  end
+
   always_comb begin
     exception = 1'b1;
     ex_src = INSN_MAL;
 
-    if (fault_l)
+    if (ext_int_if.fault_l)
       ex_src = L_FAULT;
-    else if (mal_l)
+    else if (ext_int_if.mal_l)
       ex_src = L_ADDR_MAL;
-    else if (fault_s) 
+    else if (ext_int_if.fault_s) 
       ex_src = S_FAULT;
-    else if (mal_s) 
+    else if (ext_int_if.mal_s) 
       ex_src = S_ADDR_MAL;
-    else if (breakpoint)
+    else if (ext_int_if.breakpoint)
       ex_src = BREAKPOINT;
-    else if (env_m) 
+    else if (ext_int_if.env_m) 
       ex_src = ENV_CALL_M;
-    else if (illegal_insn) 
+    else if (ext_int_if.illegal_insn) 
       ex_src = ILLEGAL_INSN;
-    else if (fault_insn)
+    else if (ext_int_if.fault_insn)
       ex_src = INSN_FAULT;
-    else if (mal_insn)
+    else if (ext_int_if.mal_insn)
       ex_src = INSN_MAL;
-    else begin
+    else 
       exception = 1'b0;
   end
 
   //output to pipeline control
-  assign intr = exception | interrupt;
-  assign intr_prv = M_MODE; /*TODO: Only Machine Mode supported for now*/
+  assign ex_int_if.intr = exception | (csr_if.mstatus.mie &  ((csr_if.mie.mtie & csr_if.mip.mtip) | 
+                                                              (csr_if.mie.msie & csr_if.mip.msip) |
+                                                              (csr_if.mie.meie & csr_if.mip.meip)));
+  assign ex_int_if.intr_prv = M_MODE;
+ 
+  // Register Updates on Interrupt/Exception
+  assign csr_prv_if.mcause_rup = ex_int_if.intr;
+  assign csr_prv_if.mcause_next.interrupt = ~exception;
+  assign csr_prv_if.mcause_next.cause = exception ? ex_src : intr_src;
 
+  assign csr_prv_if.mstatus_rup = ex_int_if.intr;
 
+  always_comb begin
+    if (ex_int_if.intr) begin
+      csr_prv_if.mstatus_next.mpie = 1'b1;
+      csr_prv_if.mstatus_next.mie = 1'b0; 
+      csr_prv_if.mstatus_next.mpp = M_MODE;  
+    end else if (ex_int_if.ret) begin
+      csr_prv_if.mstatus_next.mie = csr_prv_if.mstatus.mpie;
+      csr_prv_if.mstatus_next.mpie = 1'b0;
+      csr_prv_if.mstatus_next.mpp = M_MODE;
+    end
+    else begin
+      csr_prv_if.mstatus_next.mie = csr_prv_if.mstatus.mie;
+      csr_prv_if.mstatus_next.mpie = csr_prv_if.mstatus.mpie;
+      csr_prv_if.mstatus_next.mpp = csr_prv_if.mstatus.mpp;
+    end
+  end
+
+  assign csr_prv_if.mepc_rup = ex_int_if.intr;
+  assign csr_prv_if.mepc_next = (exception & (ex_int_if.breakpoint | ex_int_if.env_m)) ? ext_int_if.curr_epc_p4 : ext_int_if.curr_epc;
+
+  assign csr_prv_if.mbadaddr_rup = (ext_int_if.mal_l | ext_int_if.fault_l | ext_int_if.mal_s | ext_int_if.fault_s | 
+                                    ext_int_if.illegal_insn | ext_int_if.fault_imsn | ext_int_if.mal_insn);
 endmodule

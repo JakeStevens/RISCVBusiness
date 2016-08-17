@@ -36,9 +36,9 @@ interface csr_prv_if;
   logic mstatus_rup;
   logic timer_int;
 
-  mip_t       mip_next;
+  mip_t       mip, mip_next;
   mbadaddr_t  mbadaddr_next;
-  mcause_t    mcause_next;
+  mcause_t    mcause, mcause_next;
   mepc_t      mepc, mepc_next;
   mstatus_t   mstatus, mstatus_next;
 
@@ -48,13 +48,13 @@ interface csr_prv_if;
   modport csr (
     input mip_rup, mbadaddr_rup, mcause_rup, mepc_rup, mstatus_rup,
       mip_next, mbadaddr_next, mcause_next, mepc_next, mstatus_next, 
-    output mtvec, mepc, mie, timer_int
+    output mtvec, mepc, mie, timer_int, mip, mcause
   );
 
   modport prv (
     output mip_rup, mbadaddr_rup, mcause_rup, mepc_rup, mstatus_rup,
-      mip_next, mbadaddr_next, mcause_next, mepc_next, mstatus_next, 
-    input mtvec, mepc, mie, timer_int
+      mip_next, mcause_next, mepc_next, mstatus_next, 
+    input mepc, mie, mip, mcause, mstatus
   );
 
 endinterface

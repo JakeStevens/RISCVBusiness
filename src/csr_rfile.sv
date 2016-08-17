@@ -280,5 +280,7 @@ module csr_rfile (
   assign csr_prv_if.mie       = mie;
   assign csr_prv_if.timer_int = 0;
   assign csr_prv_if.mstatus   = mstatus;
+  assign csr_prv_if.mcause    = mcause;
+  assign csr_prv_if.mip       = mip;
 
 endmodule
