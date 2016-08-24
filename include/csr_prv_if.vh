@@ -48,7 +48,7 @@ interface csr_prv_if;
   modport csr (
     input mip_rup, mbadaddr_rup, mcause_rup, mepc_rup, mstatus_rup,
       mip_next, mbadaddr_next, mcause_next, mepc_next, mstatus_next, 
-    output mtvec, mepc, mie, timer_int, mip, mcause
+    output mtvec, mepc, mie, timer_int, mip, mcause, mstatus
   );
 
   modport prv (

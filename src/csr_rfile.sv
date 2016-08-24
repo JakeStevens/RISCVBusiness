@@ -25,8 +25,8 @@
 
 module csr_rfile (
   input CLK, nRST,
-  csr_pipe_if.csr csr_pipe_if,
-  csr_prv_if.csr  csr_prv_if
+  csr_pipe_if.csr csr_pi_if,
+  csr_prv_if.csr  csr_pr_if
 );
   import machine_mode_types_pkg::*;
   import rv32i_types_pkg::*;
@@ -56,12 +56,12 @@ module csr_rfile (
   assign mstatus.zero = '0;
 
   // mstatus bits set due to only Machine Mode Implemented
-  assign mstatus.priv   = M_MODE;
-  assign mstatus.priv1  = M_MODE;
+  assign mstatus.prv   = M_MODE;
+  assign mstatus.prv1  = M_MODE;
   assign mstatus.ie1    = 1'b0;
-  assign mstatus.mpriv2 = M_MODE;
+  assign mstatus.prv2 = M_MODE;
   assign mstatus.ie2    = 1'b0;
-  assign mstatus.mpriv3 = M_MODE;
+  assign mstatus.prv3 = M_MODE;
   assign mstatus.ie3    = 1'b0;
 
   // No memory protection
@@ -86,9 +86,6 @@ module csr_rfile (
   assign mie.stie = 1'b0;
   assign mie.hsie = 1'b0;
   assign mie.ssie = 1'b0;
-
-  //Timer not implemented
-  assign mie.mtie = 1'b0;
 
  /* Machine Trap Handling */
  
@@ -133,18 +130,16 @@ module csr_rfile (
       mstatus.ie <= 1'b1;
       mip.msip    <= 1'b0;
       mip.mtip    <= 1'b0;
-      mie.meie    <= 1'b1;
       mcause      <= '0;
       mepc        <= '0;
       mbadaddr    <= '0;
       mscratch    <= '0;
       mtohost     <= '0;
       mfromhost   <= '0;
-    end else begin 
+    end else begin      
       mstatus. ie <= mstatus_next.ie;
       mip.msip    <= mip_next.msip; // interrupt
       mip.mtip    <= mip_next.mtip; // interrupt
-      mie.meie    <= mie_next.meie; // external interrupt enable
       mcause      <= mcause_next;
       mepc        <= mepc_next;
       mbadaddr    <= mbadaddr_next;
@@ -161,82 +156,82 @@ module csr_rfile (
   logic csr_op;
   word_t rup_data;
 
-  assign csr_op = csr_pipe_if.swap | csr_pipe_if.clr | csr_pipe_if.set;
-  assign csr_pipe_if.invalid_csr = csr_op & ~valid_csr_addr;
-  assign rup_data = csr_pipe_if.swap ? csr_pipe_if.rdata : (
-                      csr_pipe_if.clr ? csr_pipe_if.rdata & ~csr_pipe_if.wdata : 
-                      csr_pipe_if.rdata | csr_pipe_if.wdata //csr_pipe_if.set is default
+  assign csr_op = csr_pi_if.swap | csr_pi_if.clr | csr_pi_if.set;
+  assign csr_pi_if.invalid_csr = csr_op & ~valid_csr_addr;
+  assign rup_data = csr_pi_if.swap ? csr_pi_if.rdata : (
+                      csr_pi_if.clr ? csr_pi_if.rdata & ~csr_pi_if.wdata : 
+                      csr_pi_if.rdata | csr_pi_if.wdata //csr_pi_if.set is default
                       );
 
   // Readonly by pipeline, rw by prv
-  assign mip_next       = csr_prv_if.mip_rup ? csr_prv_if.mip_next : mip;
-  assign mbadaddr_next  = csr_prv_if.mbadaddr_rup ? csr_prv_if.mbadaddr_next : mbadaddr;
-  assign mcause_next    = csr_prv_if.mcause_rup ? csr_prv_if.mcause_next : mcause;
-  assign mepc_next      = csr_prv_if.mepc_rup ? csr_prv_if.mepc_next : mepc;
+  assign mip_next       = csr_pr_if.mip_rup ? csr_pr_if.mip_next : mip;
+  assign mbadaddr_next  = csr_pr_if.mbadaddr_rup ? csr_pr_if.mbadaddr_next : mbadaddr;
+  assign mcause_next    = csr_pr_if.mcause_rup ? csr_pr_if.mcause_next : mcause;
+  assign mepc_next      = csr_pr_if.mepc_rup ? csr_pr_if.mepc_next : mepc;
 
   // Read and write by pipeline and prv
-  assign mstatus_next   = (csr_pipe_if.addr == 12'h300) ? mstatus_t'(rup_data) : (
-                            csr_prv_if.mstatus_rup ? csr_prv_if.mstatus_next :
+  assign mstatus_next   = (csr_pi_if.addr == 12'h300) ? mstatus_t'(rup_data) : (
+                            csr_pr_if.mstatus_rup ? csr_pr_if.mstatus_next :
                             mstatus
                           );
 
   // Read and write by pipeline
-  assign mie_next       = (csr_pipe_if.addr == 12'h304) ? mie_t'(rup_data) : mie;
-  assign mscratch_next  = (csr_pipe_if.addr == 12'h340) ? mscratch_t'(rup_data) : mscratch;
-  assign mtohost_next   = (csr_pipe_if.addr == 12'h780) ? mtohost_t'(rup_data) : mtohost;
+  assign mie_next       = (csr_pi_if.addr == 12'h304) ? mie_t'(rup_data) : mie;
+  assign mscratch_next  = (csr_pi_if.addr == 12'h340) ? mscratch_t'(rup_data) : mscratch;
+  assign mtohost_next   = (csr_pi_if.addr == 12'h780) ? mtohost_t'(rup_data) : mtohost;
 
   always_comb begin
     valid_csr_addr = 1'b1;
-    casez (csr_pipe_if.addr)
-      12'hf00   : csr_pipe_if.rdata = mcpuid; 
-      12'hf01   : csr_pipe_if.rdata = mimpid;
-      12'hf10   : csr_pipe_if.rdata = mhartid;
+    casez (csr_pi_if.addr)
+      12'hf00   : csr_pi_if.rdata = mcpuid; 
+      12'hf01   : csr_pi_if.rdata = mimpid;
+      12'hf10   : csr_pi_if.rdata = mhartid;
       
-      12'h300 : csr_pipe_if.rdata = mstatus;
-      12'h301 : csr_pipe_if.rdata = mtvec;
-      12'h302 : csr_pipe_if.rdata = mtdeleg; 
-      12'h304 : csr_pipe_if.rdata = mie;
+      12'h300 : csr_pi_if.rdata = mstatus;
+      12'h301 : csr_pi_if.rdata = mtvec;
+      12'h302 : csr_pi_if.rdata = mtdeleg; 
+      12'h304 : csr_pi_if.rdata = mie;
       
-      12'h340 : csr_pipe_if.rdata = mscratch;
-      12'h341 : csr_pipe_if.rdata = mepc;
-      12'h342 : csr_pipe_if.rdata = mcause;
-      12'h343 : csr_pipe_if.rdata = mbadaddr;
-      12'h344 : csr_pipe_if.rdata = mip; 
+      12'h340 : csr_pi_if.rdata = mscratch;
+      12'h341 : csr_pi_if.rdata = mepc;
+      12'h342 : csr_pi_if.rdata = mcause;
+      12'h343 : csr_pi_if.rdata = mbadaddr;
+      12'h344 : csr_pi_if.rdata = mip; 
      
       //machine protection and translation not present 
-      12'h380 : csr_pipe_if.rdata = '0;
-      12'h381 : csr_pipe_if.rdata = '0;
-      12'h382 : csr_pipe_if.rdata = '0;
-      12'h383 : csr_pipe_if.rdata = '0;
-      12'h384 : csr_pipe_if.rdata = '0;
-      12'h385 : csr_pipe_if.rdata = '0;
+      12'h380 : csr_pi_if.rdata = '0;
+      12'h381 : csr_pi_if.rdata = '0;
+      12'h382 : csr_pi_if.rdata = '0;
+      12'h383 : csr_pi_if.rdata = '0;
+      12'h384 : csr_pi_if.rdata = '0;
+      12'h385 : csr_pi_if.rdata = '0;
 
       //only machine mode
-      12'hb01 : csr_pipe_if.rdata = '0;
-      12'hb81 : csr_pipe_if.rdata = '0;
+      12'hb01 : csr_pi_if.rdata = '0;
+      12'hb81 : csr_pi_if.rdata = '0;
             
       //Timers unimplemented
-      12'h321 : csr_pipe_if.rdata = '0;
-      12'h701 : csr_pipe_if.rdata = '0;
-      12'h741 : csr_pipe_if.rdata = '0;
+      12'h321 : csr_pi_if.rdata = '0;
+      12'h701 : csr_pi_if.rdata = '0;
+      12'h741 : csr_pi_if.rdata = '0;
       
       // Non-Standard mtohost/mfromhost
-      12'h780 : csr_pipe_if.rdata = mtohost;
-      12'h781 : csr_pipe_if.rdata = mfromhost;
+      12'h780 : csr_pi_if.rdata = mtohost;
+      12'h781 : csr_pi_if.rdata = mfromhost;
   
       default : begin
         valid_csr_addr = 1'b0;
-        csr_pipe_if.rdata = '0;
+        csr_pi_if.rdata = '0;
       end
     endcase
   end
 
-  assign csr_prv_if.mtvec     = mtvec;
-  assign csr_prv_if.mepc      = mepc;
-  assign csr_prv_if.mie       = mie;
-  assign csr_prv_if.timer_int = 0;
-  assign csr_prv_if.mstatus   = mstatus;
-  assign csr_prv_if.mcause    = mcause;
-  assign csr_prv_if.mip       = mip;
+  assign csr_pr_if.mtvec     = mtvec;
+  assign csr_pr_if.mepc      = mepc;
+  assign csr_pr_if.mie       = mie;
+  assign csr_pr_if.timer_int = 0;
+  assign csr_pr_if.mstatus   = mstatus;
+  assign csr_pr_if.mcause    = mcause;
+  assign csr_pr_if.mip       = mip;
 
 endmodule

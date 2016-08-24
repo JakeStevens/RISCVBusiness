@@ -128,7 +128,7 @@ package machine_mode_types_pkg;
   /* mip and mie types */
 
   typedef struct packed {
-    logic [23:0]  zero_3;
+    logic [23:0]  zero_2;
     logic         mtip;
     logic         htip;
     logic         stip;
@@ -140,7 +140,7 @@ package machine_mode_types_pkg;
   } mip_t;
 
   typedef struct packed {
-    logic [23:0]  zero_3;
+    logic [23:0]  zero_2;
     logic         mtie;
     logic         htie;
     logic         stie;

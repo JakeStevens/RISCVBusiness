@@ -37,7 +37,8 @@ module execute_stage(
   hazard_unit_if.execute hazard_if,
   predictor_pipeline_if.update predict_if,
   ram_if.cpu dram_if,
-  csr_pipe_if.pipe  csr_p_if,
+  csr_pipe_if.pipe  csr_pi_if,
+  
   output halt 
 );
 
@@ -130,8 +131,8 @@ module execute_stage(
       3'd1    : rf_if.w_data = fetch_ex_if.fetch_ex_reg.pc4;
       3'd2    : rf_if.w_data = cu_if.imm_U;
       3'd3    : rf_if.w_data = alu_if.port_out;
-      3'd4    : rf_if.w_data = csr_p_if.rdata;
-      default : rf_if.w_data = '0;
+      3'd4    : rf_if.w_data = csr_pi_if.rdata;
+      default : rf_if.w_data = '0; 
     endcase
   end
 
@@ -234,11 +235,30 @@ module execute_stage(
   /*******************************************************
   *** CSR / Priv Interface Logic 
   *******************************************************/ 
-  assign csr_p_if.swap  = cu_if.csr_swap  & cu_if.csr_rw_valid;
-  assign csr_p_if.clr   = cu_if.csr_clr   & cu_if.csr_rw_valid;
-  assign csr_p_if.set   = cu_if.csr_set   & cu_if.csr_rw_valid;
-  assign csr_p_if.wdata = cu_if.csr_imm ? {27'h0, cu_if.zimm} : rf_if.rs1_data;
-  assign csr_p_if.addr  = cu_if.csr_addr;
+  assign csr_pi_if.swap  = cu_if.csr_swap  & cu_if.csr_rw_valid;
+  assign csr_pi_if.clr   = cu_if.csr_clr   & cu_if.csr_rw_valid;
+  assign csr_pi_if.set   = cu_if.csr_set   & cu_if.csr_rw_valid;
+  assign csr_pi_if.wdata = cu_if.csr_imm ? {27'h0, cu_if.zimm} : rf_if.rs1_data;
+  assign csr_pi_if.addr  = cu_if.csr_addr;
+  
+  logic mal_addr;
+  always_comb begin
+    if(byte_en == 4'hf) 
+      mal_addr = (dram_if.addr[1:0] != 2'b00);
+    else if (byte_en == 4'h3 || byte_en == 4'hc) begin
+      mal_addr = (dram_if.addr[1:0] == 2'b01 || dram_if.addr[1:0] == 2'b11);
+    end
+  end
+
+  //Send exceptions to Hazard Unit
+  assign hazard_if.illegal_insn = cu_if.illegal_insn | csr_pi_if.invalid_csr;
+  assign hazard_if.fault_l      = 1'b0; 
+  assign hazard_if.mal_l        = cu_if.dren & mal_addr;
+  assign hazard_if.fault_s      = 1'b0;
+  assign hazard_if.mal_s        = cu_if.dren & mal_addr;
+  assign hazard_if.breakpoint   = cu_if.breakpoint;
+  assign hazard_if.env_m        = cu_if.ecall_insn;
+  assign hazard_if.ret          = cu_if.ret_insn;
 
 endmodule
 

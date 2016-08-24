@@ -83,6 +83,13 @@ module fetch_stage (
     end
   end
 
+  //Send exceptions to Hazard Unit
+  logic mal_addr;
+  
+  assign mal_addr = (iram_if.addr[1:0] != 2'b00);
+  assign hazard_if.fault_insn = 1'b0;
+  assign hazard_if.mal_insn = iram_if.ren & mal_addr; 
+
 endmodule
 
 

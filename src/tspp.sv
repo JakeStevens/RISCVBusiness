@@ -27,6 +27,8 @@
 `include "predictor_pipeline_if.vh"
 `include "ram_if.vh"
 `include "csr_pipe_if.vh"
+`include "csr_prv_if.vh"
+`include "prv_ex_int_if.vh"
 
 module tspp (
   input logic CLK, nRST,
@@ -39,13 +41,16 @@ module tspp (
   fetch_execute_if      fetch_ex_if();
   predictor_pipeline_if predict_if();
   hazard_unit_if        hazard_if();
-  csr_pipe_if           csr_p_if();
+  csr_pipe_if           csr_pi_if();
+  csr_prv_if            csr_pr_if();
+  prv_ex_int_if         ex_int_if();
 
   //module instantiations
   fetch_stage fetch_stage_i (.*);
   execute_stage execute_stage_i (.*);
   hazard_unit hazard_unit_i (.*);
   branch_predictor branch_predictor_i (.*);
-  
+  csr_rfile csr_rfile_i (.*);
+  prv_control prv_control_i(.*); 
 
 endmodule

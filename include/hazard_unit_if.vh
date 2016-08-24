@@ -33,6 +33,10 @@ interface hazard_unit_if();
   logic if_ex_flush, mispredict, halt;
   word_t pc; 
 
+  //Pipeline Exceptions
+  logic fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s,
+        breakpoint, env_m, ret;
+
   modport hazard_unit (
     input i_ram_busy, d_ram_busy, dren, dwen, iren, jump,
           branch, mispredict, halt, interrupt, pc, ex_excptn, insert_pc,
@@ -42,12 +46,13 @@ interface hazard_unit_if();
 
   modport fetch (
     input pc_en, npc_sel, if_ex_stall, if_ex_flush,
-    output i_ram_busy, iren
+    output i_ram_busy, iren, fault_insn, mal_insn
   );
 
   modport execute (
     input if_ex_stall, npc_sel,
-    output d_ram_busy, dren, dwen, jump, branch, mispredict, halt
+    output d_ram_busy, dren, dwen, jump, branch, mispredict, halt,
+    illegal_insn, fault_l, mal_l, fault_s, mal_s, breakpoint, env_m, ret
   );
  
 endinterface
