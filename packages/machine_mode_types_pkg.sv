@@ -47,6 +47,12 @@ package machine_mode_types_pkg;
     BASE_RV128  = 2'h3
   } mcpuid_base_t;
 
+  typedef struct packed {
+    mcpuid_base_t base;
+    logic [3:0] zero;
+    logic [25:0] extensions;
+  } mcpuid_t;
+
   parameter MCPUID_EXT_A   = 26'h1 << 0;
   parameter MCPUID_EXT_B   = 26'h1 << 1;
   parameter MCPUID_EXT_C   = 26'h1 << 2;
@@ -74,11 +80,6 @@ package machine_mode_types_pkg;
   parameter MCPUID_EXT_Y   = 26'h1 << 24;
   parameter MCPUID_EXT_Z   = 26'h1 << 25;
 
-  typedef struct packed {
-    mcpuid_base_t   base;
-    logic [5:0]     wiri;
-    logic [25:0]    extensions;
-  } misa_t;
 
   /* mstatus types */
 
@@ -109,59 +110,45 @@ package machine_mode_types_pkg;
   
   typedef struct packed {
     logic       sd;    
-    logic [1:0] wpri_1;
+    logic [8:0] zero;
     vm_t        vm; 
-    logic [3:0] wpri_0;
-    logic       mxr;
-    logic       pum;
     logic       mprv;
     xs_t        xs;
     fs_t        fs;
-    prv_lvl_t   mpp;
-    prv_lvl_t   hpp;
-    logic       spp;
-    logic       mpie; 
-    logic       hpie;
-    logic       spie;
-    logic       upie; 
-    logic       mie; 
-    logic       hie;
-    logic       sie;
-    logic       uie;
+    prv_lvl_t   prv3;
+    logic       ie3; 
+    prv_lvl_t   prv2;
+    logic       ie2;
+    prv_lvl_t   prv1;
+    logic       ie1;
+    prv_lvl_t   prv;
+    logic       ie;
   } mstatus_t;
 
   /* mip and mie types */
 
   typedef struct packed {
-    logic [19:0]  wiri;
-    logic         meip;
-    logic         heip;
-    logic         seip;
-    logic         ueip;
+    logic [23:0]  zero_3;
     logic         mtip;
     logic         htip;
-    logic         stip; 
-    logic         utip;
+    logic         stip;
+    logic         zero_1;
     logic         msip;
     logic         hsip;
     logic         ssip;
-    logic         usip;
+    logic         zero_0; 
   } mip_t;
 
   typedef struct packed {
-    logic [19:0]  wiri;
-    logic         meie;
-    logic         heie;
-    logic         seie;
-    logic         ueie;
+    logic [23:0]  zero_3;
     logic         mtie;
     logic         htie;
-    logic         stie; 
-    logic         utie;
+    logic         stie;
+    logic         zero_1;
     logic         msie;
     logic         hsie;
     logic         ssie;
-    logic         usie;
+    logic         zero_0; 
   } mie_t;
 
   /* mcause register variables */
@@ -189,18 +176,9 @@ package machine_mode_types_pkg;
   } ex_code_t;
 
   typedef enum logic [30:0] {
-    USER_SOFT_INT     = 31'h0,
-    SUPER_SOFT_INT    = 31'h1,
-    HYPER_SOFT_INT    = 31'h2,
-    MACH_SOFT_INT     = 31'h3,
-    USER_TIMER_INT    = 31'h4,
-    SUPER_TIMER_INT   = 31'h5,
-    HYPER_TIMER_INT   = 31'h6,
-    MACH_TIMER_INT    = 31'h7,
-    USER_EXT_INT      = 31'h8,
-    SUPER_EXT_INT     = 31'h9,
-    HYPER_EXT_INT     = 31'ha,
-    MACH_EXT_INT      = 31'hb
+    SOFT_INT          = 31'h0,
+    TIMER_INT         = 31'h1,
+    EXT_INT           = 31'hb //NON-STANDARD in priv-1.7
   } int_code_t;
 
   /* Simple registers */
@@ -211,12 +189,9 @@ package machine_mode_types_pkg;
   typedef logic [31:0] mtimecmp_t;
   typedef logic [31:0] mscratch_t;
   typedef logic [31:0] mbadaddr_t;
-  typedef logic [31:0] mvendorid_t;
-  typedef logic [31:0] marchid_t;
   typedef logic [31:0] mimpid_t;
   typedef logic [31:0] mhartid_t;
-  typedef logic [31:0] mideleg_t;
-  typedef logic [31:0] medeleg_t;
+  typedef logic [31:0] mtdeleg_t;
   typedef logic [31:0] mtvec_t;
   typedef logic [31:0] mepc_t;
 

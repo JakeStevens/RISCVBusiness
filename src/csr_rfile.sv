@@ -33,19 +33,13 @@ module csr_rfile (
  
   /* Machine Information Registers */
   
-  misa_t      misa;
-  mvendorid_t mvendorid;
-  marchid_t   marchid;
+  mcpuid_t    mcpuid;
   mimpid_t    mimpid;
   mhartid_t   mhartid;
 
-  assign misa.base        = BASE_RV32;
-  assign misa.wiri        = '0;
-  assign misa.extensions  = MCPUID_EXT_I;
-
-  assign mvendorid        = '0;
-
-  assign marchid          = '0; //TODO: Open Source ID
+  assign mcpuid.base          = BASE_RV32;
+  assign mcpuid.zero          = '0;
+  assign mcpuid.extensions  = MCPUID_EXT_I;
 
   assign mimpid           = '0; //TODO: Version Numbering Convention
 
@@ -55,31 +49,24 @@ module csr_rfile (
   /* Machine Trap Setup Registers */
 
   mstatus_t mstatus, mstatus_next;
-  medeleg_t medeleg;
-  mideleg_t mideleg;
+  mtdeleg_t mtdeleg;
   mie_t     mie, mie_next;
   mtvec_t   mtvec;
 
-  assign mstatus.wpri_0 = '0;
-  assign mstatus.wpri_1 = '0;
+  assign mstatus.zero = '0;
 
   // mstatus bits set due to only Machine Mode Implemented
-  assign mstatus.mpp    = M_MODE;
-  assign mstatus.hpp    = M_MODE;
-  assign mstatus.spp    = 1'b1;
-  assign mstatus.hie    = 1'b0;
-  assign mstatus.uie    = 1'b0;
-  assign mstatus.sie    = 1'b0;
-  assign mstatus.hpie   = 1'b0;
-  assign mstatus.upie   = 1'b0;
-  assign mstatus.spie   = 1'b0;
-  assign mstatus_mpie   = 1'b1;
+  assign mstatus.priv   = M_MODE;
+  assign mstatus.priv1  = M_MODE;
+  assign mstatus.ie1    = 1'b0;
+  assign mstatus.mpriv2 = M_MODE;
+  assign mstatus.ie2    = 1'b0;
+  assign mstatus.mpriv3 = M_MODE;
+  assign mstatus.ie3    = 1'b0;
 
   // No memory protection
   assign mstatus.vm     = VM_MBARE;
   assign mstatus.mprv   = 1'b0;
-  assign mstatus.pum    = 1'b0;
-  assign mstatus.mxr    = 1'b0;
 
   // No FPU or Extensions
   assign mstatus.xs     = XS_ALL_OFF;
@@ -88,19 +75,18 @@ module csr_rfile (
 
   assign mtvec = `MTVEC_ADDR;
 
-  // Deleg Registers Zero in Machine Mode Only
-  assign medeleg = '0;
-  assign mideleg = '0;
+  // Deleg Register Zero in Machine Mode Only
+  assign mtdeleg = '0;
 
-  assign mie.heie = 1'b0;
-  assign mie.seie = 1'b0;
-  assign mie.ueie = 1'b0;
+  assign mie.zero_0 = '0;
+  assign mie.zero_1 = '0;
+  assign mie.zero_2 = '0;
+  assign mie.mtie = 1'b0;
   assign mie.htie = 1'b0;
   assign mie.stie = 1'b0;
-  assign mie.utie = 1'b0;
   assign mie.hsie = 1'b0;
   assign mie.ssie = 1'b0;
-  assign mie.usie = 1'b0;
+
   //Timer not implemented
   assign mie.mtie = 1'b0;
 
@@ -112,16 +98,13 @@ module csr_rfile (
   mbadaddr_t  mbadaddr, mbadaddr_next;
   mip_t       mip, mip_next;
  
-  assign mip.wiri = '0;
-  assign mip.heip = 1'b0;
-  assign mip.seip = 1'b0;
-  assign mip.ueip = 1'b0;
+  assign mip.zero_0 = '0;
+  assign mip.zero_1 = '0;
+  assign mip.zero_2 = '0;
   assign mip.htip = 1'b0;
   assign mip.stip = 1'b0;
-  assign mip.utip = 1'b0;
   assign mip.hsip = 1'b0;
   assign mip.ssip = 1'b0;
-  assign mip.usip = 1'b0;
 
 
   /* Machine Protection and Translation */
@@ -147,10 +130,9 @@ module csr_rfile (
  
   always_ff @ (posedge CLK, negedge nRST) begin
     if (~nRST) begin
-      mstatus.mie <= 1'b1;
-      mip.msip    <= 1'b1;
-      mip.mtip    <= 1'b1;
-      mip.meip    <= 1'b1;
+      mstatus.ie <= 1'b1;
+      mip.msip    <= 1'b0;
+      mip.mtip    <= 1'b0;
       mie.meie    <= 1'b1;
       mcause      <= '0;
       mepc        <= '0;
@@ -159,10 +141,9 @@ module csr_rfile (
       mtohost     <= '0;
       mfromhost   <= '0;
     end else begin 
-      mstatus.mie <= mstatus_next.mie;
-      mip.msip    <= mip_next.msip; // software interrupt
-      mip.mtip    <= mip_next.mtip; // timer interrupt
-      mip.meip    <= mip_next.meip; // external interrupt
+      mstatus. ie <= mstatus_next.ie;
+      mip.msip    <= mip_next.msip; // interrupt
+      mip.mtip    <= mip_next.mtip; // interrupt
       mie.meie    <= mie_next.meie; // external interrupt enable
       mcause      <= mcause_next;
       mepc        <= mepc_next;
@@ -207,24 +188,22 @@ module csr_rfile (
   always_comb begin
     valid_csr_addr = 1'b1;
     casez (csr_pipe_if.addr)
-      12'hf10 : csr_pipe_if.rdata = misa;
-      12'hf11 : csr_pipe_if.rdata = mvendorid;
-      12'hf12 : csr_pipe_if.rdata = marchid;
-      12'hf13 : csr_pipe_if.rdata = mimpid;
-      12'hf14 : csr_pipe_if.rdata = mhartid;
+      12'hf00   : csr_pipe_if.rdata = mcpuid; 
+      12'hf01   : csr_pipe_if.rdata = mimpid;
+      12'hf10   : csr_pipe_if.rdata = mhartid;
       
       12'h300 : csr_pipe_if.rdata = mstatus;
-      12'h302 : csr_pipe_if.rdata = medeleg;
-      12'h303 : csr_pipe_if.rdata = mideleg;
+      12'h301 : csr_pipe_if.rdata = mtvec;
+      12'h302 : csr_pipe_if.rdata = mtdeleg; 
       12'h304 : csr_pipe_if.rdata = mie;
-      12'h305 : csr_pipe_if.rdata = mtvec;
-
+      
       12'h340 : csr_pipe_if.rdata = mscratch;
       12'h341 : csr_pipe_if.rdata = mepc;
       12'h342 : csr_pipe_if.rdata = mcause;
       12'h343 : csr_pipe_if.rdata = mbadaddr;
-      12'h344 : csr_pipe_if.rdata = mip;
-      
+      12'h344 : csr_pipe_if.rdata = mip; 
+     
+      //machine protection and translation not present 
       12'h380 : csr_pipe_if.rdata = '0;
       12'h381 : csr_pipe_if.rdata = '0;
       12'h382 : csr_pipe_if.rdata = '0;
@@ -232,41 +211,18 @@ module csr_rfile (
       12'h384 : csr_pipe_if.rdata = '0;
       12'h385 : csr_pipe_if.rdata = '0;
 
-      12'hf00 : csr_pipe_if.rdata = '0;
-      12'hf01 : csr_pipe_if.rdata = '0;
-      12'hf02 : csr_pipe_if.rdata = '0;
-      12'hf80 : csr_pipe_if.rdata = '0;
-      12'hf81 : csr_pipe_if.rdata = '0;
-      12'hf82 : csr_pipe_if.rdata = '0;
-      
-      12'h310 : csr_pipe_if.rdata = '0;
-      12'h311 : csr_pipe_if.rdata = '0; 
-      12'h312 : csr_pipe_if.rdata = '0;
-      
-      12'h700 : csr_pipe_if.rdata = '0;
+      //only machine mode
+      12'hb01 : csr_pipe_if.rdata = '0;
+      12'hb81 : csr_pipe_if.rdata = '0;
+            
+      //Timers unimplemented
+      12'h321 : csr_pipe_if.rdata = '0;
       12'h701 : csr_pipe_if.rdata = '0;
-      12'h702 : csr_pipe_if.rdata = '0;
+      12'h741 : csr_pipe_if.rdata = '0;
       
-      12'h704 : csr_pipe_if.rdata = '0;
-      12'h705 : csr_pipe_if.rdata = '0;
-      12'h706 : csr_pipe_if.rdata = '0;
-      
-      12'h708 : csr_pipe_if.rdata = '0;
-      12'h709 : csr_pipe_if.rdata = '0;
-      12'h70a : csr_pipe_if.rdata = '0;
-
       // Non-Standard mtohost/mfromhost
       12'h780 : csr_pipe_if.rdata = mtohost;
       12'h781 : csr_pipe_if.rdata = mfromhost;
-      12'h782 : csr_pipe_if.rdata = '0;
-  
-      12'h784 : csr_pipe_if.rdata = '0;
-      12'h785 : csr_pipe_if.rdata = '0;
-      12'h786 : csr_pipe_if.rdata = '0;
-
-      12'h788 : csr_pipe_if.rdata = '0;
-      12'h789 : csr_pipe_if.rdata = '0;
-      12'h78a : csr_pipe_if.rdata = '0;
   
       default : begin
         valid_csr_addr = 1'b0;

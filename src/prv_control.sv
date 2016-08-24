@@ -40,31 +40,16 @@ module prv_control (
 
   always_comb begin
     interrupt = 1'b1;
-    intr_src = USER_SOFT_INT;
+    intr_src = SOFT_INT;
 
     if (ext_int_if.timer_int) begin
-      casez (ext_int_if.timer_prv) 
-        U_MODE : intr_src = USER_TIMER_INT;
-        S_MODE : intr_src = SUPER_TIMER_INT;
-        H_MODE : intr_src = HYPER_TIMER_INT;
-        M_MODE : intr_src = MACH_TIMER_INT;
-      endcase
+      intr_src = TIMER_INT;
     end
     else if (ext_int_if.soft_int) begin
-      casez (ext_int_if.soft_prv) 
-        U_MODE : intr_src = USER_SOFT_INT;
-        S_MODE : intr_src = SUPER_SOFT_INT;
-        H_MODE : intr_src = HYPER_SOFT_INT;
-        M_MODE : intr_src = MACH_SOFT_INT;
-      endcase
+      intr_src = SOFT_INT;
     end
     else if (ext_int_if.ext_int) begin
-      casez (ext_int_if.ext_prv) 
-        U_MODE : intr_src = USER_EXT_INT;
-        S_MODE : intr_src = SUPER_EXT_INT;
-        H_MODE : intr_src = HYPER_EXT_INT;
-        M_MODE : intr_src = MACH_EXT_INT;
-      endcase
+      intr_src = EXT_INT;
     end
     else
       interrupt = 1'b0;
@@ -75,7 +60,7 @@ module prv_control (
     csr_if.mip_next = csr_if.mip;
     if (ext_int_if.timer_int) csr_if.mip_next.mtip = 1'b1;
     if (ext_int_if.soft_int) csr_if.mip_next.msip = 1'b1;
-    if (ext_int_if.ext_int) csr_if.mip_next.meip = 1'b1;
+    if (ext_int_if.ext_int) csr_if.mip_next.msip = 1'b1; //external interrupts not specified in 1.7
   end
 
   always_comb begin
@@ -105,9 +90,8 @@ module prv_control (
   end
 
   //output to pipeline control
-  assign ex_int_if.intr = exception | (csr_if.mstatus.mie &  ((csr_if.mie.mtie & csr_if.mip.mtip) | 
-                                                              (csr_if.mie.msie & csr_if.mip.msip) |
-                                                              (csr_if.mie.meie & csr_if.mip.meip)));
+  assign ex_int_if.intr = exception | (csr_if.mstatus.ie &   ((csr_if.mie.mtie & csr_if.mip.mtip) | 
+                                                              (csr_if.mie.msie & csr_if.mip.msip)));
   assign ex_int_if.intr_prv = M_MODE;
  
   // Register Updates on Interrupt/Exception
@@ -119,18 +103,12 @@ module prv_control (
 
   always_comb begin
     if (ex_int_if.intr) begin
-      csr_prv_if.mstatus_next.mpie = 1'b1;
-      csr_prv_if.mstatus_next.mie = 1'b0; 
-      csr_prv_if.mstatus_next.mpp = M_MODE;  
+      csr_prv_if.mstatus_next.ie = 1'b0; 
     end else if (ex_int_if.ret) begin
-      csr_prv_if.mstatus_next.mie = csr_prv_if.mstatus.mpie;
-      csr_prv_if.mstatus_next.mpie = 1'b0;
-      csr_prv_if.mstatus_next.mpp = M_MODE;
+      csr_prv_if.mstatus_next.ie = 1'b1;
     end
     else begin
-      csr_prv_if.mstatus_next.mie = csr_prv_if.mstatus.mie;
-      csr_prv_if.mstatus_next.mpie = csr_prv_if.mstatus.mpie;
-      csr_prv_if.mstatus_next.mpp = csr_prv_if.mstatus.mpp;
+      csr_prv_if.mstatus_next.ie = csr_prv_if.mstatus.ie;
     end
   end
 
