@@ -39,7 +39,7 @@ interface csr_pipe_if;
     output rdata, invalid_csr
   );
 
-  modport csr (
+  modport pipe (
     output swap, clr, set, wdata, addr,
     input  rdata, invalid_csr
   );

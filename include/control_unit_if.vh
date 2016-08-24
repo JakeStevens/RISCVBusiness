@@ -33,7 +33,8 @@ interface control_unit_if;
 
   logic dwen, dren, j_sel, branch, jump, ex_pc_sel, imm_shamt_sel, halt, wen;
   aluop_t alu_op;
-  logic [1:0] alu_a_sel, alu_b_sel, w_sel;
+  logic [1:0] alu_a_sel, alu_b_sel;
+  logic [2:0] w_sel;
   logic [4:0] shamt;
   logic [11:0] imm_I, imm_S, imm_UJ;
   logic [12:0] imm_SB;
@@ -43,15 +44,19 @@ interface control_unit_if;
   opcode_t opcode; 
 
   // Privilege control signals
-  logic fault_insn, illegal_insn, ret_insn;
-  prv_lvl_t prv_ret; 
+  logic fault_insn, illegal_insn, ret_insn, breakpoint, ecall_insn;
+  logic csr_swap, csr_set, csr_clr, csr_imm, csr_rw_valid;
+  csr_addr_t csr_addr;
+  logic [4:0] zimm;
 
   modport control_unit(
     input instr, 
     output dwen, dren, j_sel, branch, jump, ex_pc_sel, alu_a_sel,
     alu_b_sel, w_sel, load_type, branch_type, shamt,
     imm_I, imm_S, imm_SB, imm_UJ, imm_U, imm_shamt_sel, alu_op, 
-    opcode, halt, wen, fault_insn, illegal_insn, ret_insn, prv_ret
+    opcode, halt, wen, fault_insn, illegal_insn, ret_insn, breakpoint, 
+    ecall_insn, csr_swap, csr_set, csr_clr, csr_imm, csr_rw_valid,
+    csr_addr, zimm
   );
 
 endinterface

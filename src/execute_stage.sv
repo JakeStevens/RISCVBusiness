@@ -29,6 +29,7 @@
 `include "rv32i_reg_file_if.vh"
 `include "ram_if.vh"
 `include "alu_if.vh"
+`include "csr_pipe_if.vh"
 
 module execute_stage(
   input logic CLK, nRST,
@@ -36,6 +37,7 @@ module execute_stage(
   hazard_unit_if.execute hazard_if,
   predictor_pipeline_if.update predict_if,
   ram_if.cpu dram_if,
+  csr_pipe_if.pipe  csr_p_if,
   output halt 
 );
 
@@ -124,10 +126,12 @@ module execute_stage(
 
   always_comb begin
     case(cu_if.w_sel)
-      2'd0: rf_if.w_data = dload_ext;
-      2'd1: rf_if.w_data = fetch_ex_if.fetch_ex_reg.pc4;
-      2'd2: rf_if.w_data = cu_if.imm_U;
-      2'd3: rf_if.w_data = alu_if.port_out;
+      3'd0    : rf_if.w_data = dload_ext;
+      3'd1    : rf_if.w_data = fetch_ex_if.fetch_ex_reg.pc4;
+      3'd2    : rf_if.w_data = cu_if.imm_U;
+      3'd3    : rf_if.w_data = alu_if.port_out;
+      3'd4    : rf_if.w_data = csr_p_if.rdata;
+      default : rf_if.w_data = '0;
     endcase
   end
 
@@ -226,6 +230,15 @@ module execute_stage(
   assign hazard_if.halt    = halt;
   
   assign halt = cu_if.halt;
+
+  /*******************************************************
+  *** CSR / Priv Interface Logic 
+  *******************************************************/ 
+  assign csr_p_if.swap  = cu_if.csr_swap  & cu_if.csr_rw_valid;
+  assign csr_p_if.clr   = cu_if.csr_clr   & cu_if.csr_rw_valid;
+  assign csr_p_if.set   = cu_if.csr_set   & cu_if.csr_rw_valid;
+  assign csr_p_if.wdata = cu_if.csr_imm ? {27'h0, cu_if.zimm} : rf_if.rs1_data;
+  assign csr_p_if.addr  = cu_if.csr_addr;
 
 endmodule
 

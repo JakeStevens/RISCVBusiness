@@ -103,11 +103,12 @@ module control_unit
   // Assign write select
   always_comb begin
     case(cu_if.opcode)
-      LOAD                  : cu_if.w_sel   = 2'd0;
-      JAL, JALR             : cu_if.w_sel   = 2'd1;
-      LUI                   : cu_if.w_sel   = 2'd2;
-      IMMED, AUIPC, REGREG  : cu_if.w_sel   = 2'd3;
-      default               : cu_if.w_sel   = 2'd0;
+      LOAD                  : cu_if.w_sel   = 3'd0;
+      JAL, JALR             : cu_if.w_sel   = 3'd1;
+      LUI                   : cu_if.w_sel   = 3'd2;
+      IMMED, AUIPC, REGREG  : cu_if.w_sel   = 3'd3;
+      SYSTEM                : cu_if.w_sel   = 3'd4;
+      default               : cu_if.w_sel   = 3'd0;
     endcase
   end
 
@@ -118,6 +119,7 @@ module control_unit
       IMMED, LUI, AUIPC,
       REGREG, JAL, JALR,
       LOAD                : cu_if.wen   = 1'b1;
+      SYSTEM              : cu_if.wen   = cu_if.csr_rw_valid;
       default:  cu_if.wen   = 1'b0;
     endcase
   end
@@ -191,14 +193,55 @@ module control_unit
     endcase
   end
  
+  //Decoding of System Priv Instructions
   always_comb begin
     cu_if.ret_insn = 1'b0;
-    cu_if.prv_ret = U_MODE;
+    cu_if.breakpoint = 1'b0;
+    cu_if.ecall_insn = 1'b0;
+
     if (cu_if.opcode == SYSTEM) begin
-      if (rv32i_system_t'(instr_i.funct3) == NONCSR & instr_i[21] == 1'b1)
-        cu_if.prv_ret = prv_lvl_t'(instr_i[29:28]);
+      if (rv32i_system_t'(instr_i.funct3) == NONCSR) begin
+        if (priv_insn_t'(instr_i.imm11_00) == ERET)
+          cu_if.ret_insn = 1'b1;
+        if (priv_insn_t'(instr_i.imm11_00) == EBREAK)
+          cu_if.breakpoint = 1'b1;
+        if (priv_insn_t'(instr_i.imm11_00) == ECALL)
+          cu_if.ecall_insn = 1'b1;
+      end
     end
   end
+
+  //CSR Insns
+  always_comb begin
+    cu_if.csr_swap  = 1'b0;
+    cu_if.csr_clr   = 1'b0;
+    cu_if.csr_set   = 1'b0;
+    cu_if.csr_imm   = 1'b0;
+ 
+    if (cu_if.opcode == SYSTEM) begin
+      if (rv32i_system_t'(instr_i.funct3) == CSRRW) begin
+        cu_if.csr_swap  = 1'b1;
+      end else if (rv32i_system_t'(instr_i.funct3) == CSRRS) begin
+        cu_if.csr_set   = 1'b1;
+      end else if (rv32i_system_t'(instr_i.funct3) == CSRRC) begin 
+        cu_if.csr_clr = 1'b1; 
+      end else if (rv32i_system_t'(instr_i.funct3) == CSRRWI) begin
+        cu_if.csr_swap  = 1'b1;
+        cu_if.csr_imm   = 1'b1; 
+      end else if (rv32i_system_t'(instr_i.funct3) == CSRRSI) begin
+        cu_if.csr_set   = 1'b1;
+        cu_if.csr_imm   = 1'b1; 
+      end else if (rv32i_system_t'(instr_i.funct3) == CSRRCI) begin
+        cu_if.csr_clr = 1'b1; 
+        cu_if.csr_imm   = 1'b1; 
+      end
+    end   
+  end
+
+  assign cu_if.csr_rw_valid = (instr_r.rs1 != 0) && (cu_if.csr_swap | cu_if.csr_set | cu_if.csr_clr);
+
+  assign cu_if.csr_addr = csr_addr_t'(instr_i.imm11_00);
+  assign cu_if.zimm     = cu_if.instr[19:15];
 
 endmodule
 

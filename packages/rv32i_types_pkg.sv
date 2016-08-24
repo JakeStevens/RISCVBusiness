@@ -120,6 +120,12 @@ package rv32i_types_pkg;
     CSRRCI      = 3'b111
   } rv32i_system_t;
 
+  typedef enum logic [11:0] {
+    ECALL   = 12'h0,
+    EBREAK  = 12'h1,
+    ERET    = 12'h2
+  } priv_insn_t;
+
   typedef struct packed {
     logic [6:0] funct7;
     logic [4:0] rs2;
