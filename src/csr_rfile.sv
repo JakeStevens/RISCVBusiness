@@ -237,4 +237,7 @@ module csr_rfile (
   assign csr_pr_if.mcause    = mcause;
   assign csr_pr_if.mip       = mip;
 
+  assign prv_pipe_if.xtvec[2'b11]   = mtvec;
+  assign prv_pipe_if.xepc_r[2'b11]  = mepc;
+
 endmodule

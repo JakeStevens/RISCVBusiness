@@ -37,8 +37,9 @@ interface prv_pipeline_if();
   logic timer_int, soft_int, ext_int;
 
   // exception / interrupt control
-  word_t npc, epc;
+  word_t epc, priv_pc;
   logic insert_pc, intr, pipe_clear;
+  word_t [1:0] xtvec, xepc_r;
 
   // csr rw
   logic       swap, clr, set;
@@ -47,11 +48,10 @@ interface prv_pipeline_if();
   word_t      rdata, wdata;
 
   modport hazard (
-    input npc, insert_pc, intr,
+    input priv_pc, insert_pc, intr,
     output pipe_clear, ret, epc, fault_insn, mal_insn, 
             illegal_insn, fault_l, mal_l, fault_s, mal_s,
             breakpoint, env_m
-    
   );
 
   modport pipe (
@@ -63,12 +63,17 @@ interface prv_pipeline_if();
     input pipe_clear, ret, epc, fault_insn, mal_insn, 
             illegal_insn, fault_l, mal_l, fault_s, mal_s,
             breakpoint, env_m, timer_int, soft_int, ext_int,
-    output npc, insert_pc, intr
+    output  intr
+  );
+
+  modport pipe_ctrl (
+    input intr, ret, pipe_clear, xtvec, xepc_r,
+    output insert_pc, priv_pc 
   );
   
   modport csr (
     input  swap, clr, set, wdata, addr,
-    output rdata, invalid_csr
+    output rdata, invalid_csr, xtvec, xepc_r
   );
 
 endinterface

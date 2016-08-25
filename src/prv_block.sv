@@ -32,9 +32,16 @@ module prv_block (
 );
   csr_prv_if    csr_pr_if();
   prv_ex_int_if ex_int_if();
+
+  logic [1:0] prv_intr, prv_ret;
   
   csr_rfile csr_rfile_i(.*);
   prv_control prv_control_i(.*);
+  pipeline_control pipeline_control_i(.*);
+
+  //Machine Mode Only
+  assign prv_intr = 2'b11;
+  assign prv_ret  = 2'b11;
 
   assign prv_pipe_if.soft_int = 1'b0;
   //TODO: PIC (Programmable Interrupt Controller) 
