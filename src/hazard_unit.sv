@@ -80,4 +80,6 @@ module hazard_unit
   assign prv_pipe_if.breakpoint    = hazard_if.breakpoint;
   assign prv_pipe_if.env_m        = hazard_if.env_m;
 
+  assign prv_pipe_if.epc = (hazard_if.mal_insn | hazard_if.fault_insn) ? hazard_if.epc_f : hazard_if.epc_e;
+
 endmodule

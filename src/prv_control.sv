@@ -112,7 +112,7 @@ module prv_control (
   end
 
   assign csr_pr_if.mepc_rup = prv_pipe_if.intr;
-  assign csr_pr_if.mepc_next = (exception & (prv_pipe_if.breakpoint | prv_pipe_if.env_m)) ? prv_pipe_if.curr_epc_p4 : prv_pipe_if.curr_epc;
+  assign csr_pr_if.mepc_next = prv_pipe_if.epc;
 
   assign csr_pr_if.mbadaddr_rup = (prv_pipe_if.mal_l | prv_pipe_if.fault_l | prv_pipe_if.mal_s | prv_pipe_if.fault_s | 
                                     prv_pipe_if.illegal_insn | prv_pipe_if.fault_insn | prv_pipe_if.mal_insn);

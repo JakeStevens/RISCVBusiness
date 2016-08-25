@@ -37,7 +37,7 @@ interface prv_pipeline_if();
   logic timer_int, soft_int, ext_int;
 
   // exception / interrupt control
-  word_t npc, curr_epc, curr_epc_p4;
+  word_t npc, epc;
   logic insert_pc, intr, pipe_clear;
 
   // csr rw
@@ -48,7 +48,7 @@ interface prv_pipeline_if();
 
   modport hazard (
     input npc, insert_pc, intr,
-    output pipe_clear, ret, curr_epc, curr_epc_p4, fault_insn, mal_insn, 
+    output pipe_clear, ret, epc, fault_insn, mal_insn, 
             illegal_insn, fault_l, mal_l, fault_s, mal_s,
             breakpoint, env_m
     
@@ -60,7 +60,7 @@ interface prv_pipeline_if();
   );
 
   modport prv (
-    input pipe_clear, ret, curr_epc, curr_epc_p4, fault_insn, mal_insn, 
+    input pipe_clear, ret, epc, fault_insn, mal_insn, 
             illegal_insn, fault_l, mal_l, fault_s, mal_s,
             breakpoint, env_m, timer_int, soft_int, ext_int,
     output npc, insert_pc, intr
