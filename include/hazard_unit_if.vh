@@ -27,21 +27,22 @@
 interface hazard_unit_if();
 
   import rv32i_types_pkg::word_t;
-  logic pc_en, npc_sel, i_ram_busy, d_ram_busy, dren, dwen, iren, interrupt;
-  logic ex_excptn, insert_pc, mal_instr, priv_sel, pipeline_finish;
+  logic pc_en, npc_sel, i_ram_busy, d_ram_busy, dren, dwen, iren, interrupt, ret;
+  logic ex_excptn, insert_pc, pipeline_finish;
   logic branch_taken, prediction, jump, branch, if_ex_stall;
   logic if_ex_flush, mispredict, halt;
   word_t pc; 
 
   //Pipeline Exceptions
   logic fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s,
-        breakpoint, env_m, ret;
+        breakpoint, env_m;
 
   modport hazard_unit (
     input i_ram_busy, d_ram_busy, dren, dwen, iren, jump,
-          branch, mispredict, halt, interrupt, pc, ex_excptn, insert_pc,
-          pipeline_finish,
-    output pc_en, npc_sel, if_ex_stall, if_ex_flush, mal_instr, priv_sel
+          branch, mispredict, halt, pc, ex_excptn, insert_pc,
+          pipeline_finish, fault_insn, mal_insn, illegal_insn, fault_l, 
+          mal_l, fault_s, mal_s, breakpoint, env_m, ret, interrupt, 
+    output pc_en, npc_sel, if_ex_stall, if_ex_flush
   );
 
   modport fetch (

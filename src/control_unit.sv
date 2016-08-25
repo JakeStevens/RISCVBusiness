@@ -188,7 +188,8 @@ module control_unit
     case(cu_if.opcode)
       LUI, AUIPC, JAL, JALR,
       BRANCH, LOAD, STORE,
-      IMMED, REGREG, SYSTEM   : cu_if.illegal_insn = 1'b0;
+      IMMED, REGREG, SYSTEM,
+      opcode_t'('0)           : cu_if.illegal_insn = 1'b0;
       default                 : cu_if.illegal_insn = 1'b1;
     endcase
   end

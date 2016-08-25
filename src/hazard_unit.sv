@@ -65,11 +65,19 @@ module hazard_unit
                                  (wait_for_imem & ~dmem_access) ||
                                  hazard_if.halt) & ~ex_flush_hazard;
 
-
-  assign hazard_if.mal_instr = !(pc == 2'b00 || pc == 2'b01 ||
-                                  pc == 2'b10 || pc == 2'b11);
   /* Hazards due to Interrupts/Exceptions */
-  assign hazard_if.priv_sel = hazard_if.insert_pc;
-  assign hazard_if.pipeline_finish = hazard_if.interrupt;
-  assign ex_flush_hazard = hazard_if.ex_excptn;
+  assign hazard_if.pipeline_finish = hazard_if.interrupt;//TODO: diff signal?
+  assign ex_flush_hazard = prv_pipe_if.intr;
+
+  /* Send Exception notifications to Prv Block */
+  assign prv_pipe_if.fault_insn = hazard_if.fault_insn;
+  assign prv_pipe_if.mal_insn   = hazard_if.mal_insn;
+  assign prv_pipe_if.illegal_insn = hazard_if.illegal_insn;
+  assign prv_pipe_if.fault_l      = hazard_if.fault_l;
+  assign prv_pipe_if.mal_l        = hazard_if.mal_l;
+  assign prv_pipe_if.fault_s      = hazard_if.fault_s;
+  assign prv_pipe_if.mal_s        = hazard_if.mal_s;
+  assign prv_pipe_if.breakpoint    = hazard_if.breakpoint;
+  assign prv_pipe_if.env_m        = hazard_if.env_m;
+
 endmodule
