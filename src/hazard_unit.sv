@@ -24,9 +24,12 @@
 */
 
 `include "hazard_unit_if.vh"
+`include "prv_pipeline_if.vh"
+
 module hazard_unit
 (
-  hazard_unit_if.hazard_unit hazard_if
+  hazard_unit_if.hazard_unit hazard_if,
+  prv_pipeline_if.hazard  prv_pipe_if
 );
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;

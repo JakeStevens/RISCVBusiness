@@ -22,11 +22,11 @@
 *   Description:  Main control for the priv isa block 
 */
 
-`include "prv_ex_int_if.vh"
 `include "csr_prv_if.vh"
+`include "prv_pipeline_if.vh"
 
 module prv_control (
-  prv_ex_int_if.prv  ex_int_if,
+  prv_pipeline_if.prv  prv_pipe_if,
   csr_prv_if.prv      csr_pr_if
 );
   import rv32i_types_pkg::*;
@@ -42,13 +42,13 @@ module prv_control (
     interrupt = 1'b1;
     intr_src = SOFT_INT;
 
-    if (ex_int_if.timer_int) begin
+    if (prv_pipe_if.timer_int) begin
       intr_src = TIMER_INT;
     end
-    else if (ex_int_if.soft_int) begin
+    else if (prv_pipe_if.soft_int) begin
       intr_src = SOFT_INT;
     end
-    else if (ex_int_if.ext_int) begin
+    else if (prv_pipe_if.ext_int) begin
       intr_src = EXT_INT;
     end
     else
@@ -58,53 +58,52 @@ module prv_control (
   assign csr_pr_if.mip_rup = interrupt;
   always_comb begin
     csr_pr_if.mip_next = csr_pr_if.mip;
-    if (ex_int_if.timer_int) csr_pr_if.mip_next.mtip = 1'b1;
-    if (ex_int_if.soft_int) csr_pr_if.mip_next.msip = 1'b1;
-    if (ex_int_if.ext_int) csr_pr_if.mip_next.msip = 1'b1; //external interrupts not specified in 1.7
+    if (prv_pipe_if.timer_int) csr_pr_if.mip_next.mtip = 1'b1;
+    if (prv_pipe_if.soft_int) csr_pr_if.mip_next.msip = 1'b1;
+    if (prv_pipe_if.ext_int) csr_pr_if.mip_next.msip = 1'b1; //external interrupts not specified in 1.7
   end
 
   always_comb begin
     exception = 1'b1;
     ex_src = INSN_MAL;
 
-    if (ex_int_if.fault_l)
+    if (prv_pipe_if.fault_l)
       ex_src = L_FAULT;
-    else if (ex_int_if.mal_l)
+    else if (prv_pipe_if.mal_l)
       ex_src = L_ADDR_MAL;
-    else if (ex_int_if.fault_s) 
+    else if (prv_pipe_if.fault_s) 
       ex_src = S_FAULT;
-    else if (ex_int_if.mal_s) 
+    else if (prv_pipe_if.mal_s) 
       ex_src = S_ADDR_MAL;
-    else if (ex_int_if.breakpoint)
+    else if (prv_pipe_if.breakpoint)
       ex_src = BREAKPOINT;
-    else if (ex_int_if.env_m) 
+    else if (prv_pipe_if.env_m) 
       ex_src = ENV_CALL_M;
-    else if (ex_int_if.illegal_insn) 
+    else if (prv_pipe_if.illegal_insn) 
       ex_src = ILLEGAL_INSN;
-    else if (ex_int_if.fault_insn)
+    else if (prv_pipe_if.fault_insn)
       ex_src = INSN_FAULT;
-    else if (ex_int_if.mal_insn)
+    else if (prv_pipe_if.mal_insn)
       ex_src = INSN_MAL;
     else 
       exception = 1'b0;
   end
 
   //output to pipeline control
-  assign ex_int_if.intr = exception | (csr_pr_if.mstatus.ie &   ((csr_pr_if.mie.mtie & csr_pr_if.mip.mtip) | 
+  assign prv_pipe_if.intr = exception | (csr_pr_if.mstatus.ie &   ((csr_pr_if.mie.mtie & csr_pr_if.mip.mtip) | 
                                                               (csr_pr_if.mie.msie & csr_pr_if.mip.msip)));
-  assign ex_int_if.intr_prv = M_MODE;
  
   // Register Updates on Interrupt/Exception
-  assign csr_pr_if.mcause_rup = ex_int_if.intr;
+  assign csr_pr_if.mcause_rup = prv_pipe_if.intr;
   assign csr_pr_if.mcause_next.interrupt = ~exception;
   assign csr_pr_if.mcause_next.cause = exception ? ex_src : intr_src;
 
-  assign csr_pr_if.mstatus_rup = ex_int_if.intr;
+  assign csr_pr_if.mstatus_rup = prv_pipe_if.intr;
 
   always_comb begin
-    if (ex_int_if.intr) begin
+    if (prv_pipe_if.intr) begin
       csr_pr_if.mstatus_next.ie = 1'b0; 
-    end else if (ex_int_if.ret) begin
+    end else if (prv_pipe_if.ret) begin
       csr_pr_if.mstatus_next.ie = 1'b1;
     end
     else begin
@@ -112,9 +111,9 @@ module prv_control (
     end
   end
 
-  assign csr_pr_if.mepc_rup = ex_int_if.intr;
-  assign csr_pr_if.mepc_next = (exception & (ex_int_if.breakpoint | ex_int_if.env_m)) ? ex_int_if.curr_epc_p4 : ex_int_if.curr_epc;
+  assign csr_pr_if.mepc_rup = prv_pipe_if.intr;
+  assign csr_pr_if.mepc_next = (exception & (prv_pipe_if.breakpoint | prv_pipe_if.env_m)) ? prv_pipe_if.curr_epc_p4 : prv_pipe_if.curr_epc;
 
-  assign csr_pr_if.mbadaddr_rup = (ex_int_if.mal_l | ex_int_if.fault_l | ex_int_if.mal_s | ex_int_if.fault_s | 
-                                    ex_int_if.illegal_insn | ex_int_if.fault_insn | ex_int_if.mal_insn);
+  assign csr_pr_if.mbadaddr_rup = (prv_pipe_if.mal_l | prv_pipe_if.fault_l | prv_pipe_if.mal_s | prv_pipe_if.fault_s | 
+                                    prv_pipe_if.illegal_insn | prv_pipe_if.fault_insn | prv_pipe_if.mal_insn);
 endmodule

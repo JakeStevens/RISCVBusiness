@@ -29,7 +29,7 @@
 `include "rv32i_reg_file_if.vh"
 `include "ram_if.vh"
 `include "alu_if.vh"
-`include "csr_pipe_if.vh"
+`include "prv_pipeline_if.vh"
 
 module execute_stage(
   input logic CLK, nRST,
@@ -37,8 +37,7 @@ module execute_stage(
   hazard_unit_if.execute hazard_if,
   predictor_pipeline_if.update predict_if,
   ram_if.cpu dram_if,
-  csr_pipe_if.pipe  csr_pi_if,
-  
+  prv_pipeline_if.pipe  prv_pipe_if,
   output halt 
 );
 
@@ -131,7 +130,7 @@ module execute_stage(
       3'd1    : rf_if.w_data = fetch_ex_if.fetch_ex_reg.pc4;
       3'd2    : rf_if.w_data = cu_if.imm_U;
       3'd3    : rf_if.w_data = alu_if.port_out;
-      3'd4    : rf_if.w_data = csr_pi_if.rdata;
+      3'd4    : rf_if.w_data = prv_pipe_if.rdata;
       default : rf_if.w_data = '0; 
     endcase
   end
@@ -235,11 +234,11 @@ module execute_stage(
   /*******************************************************
   *** CSR / Priv Interface Logic 
   *******************************************************/ 
-  assign csr_pi_if.swap  = cu_if.csr_swap  & cu_if.csr_rw_valid;
-  assign csr_pi_if.clr   = cu_if.csr_clr   & cu_if.csr_rw_valid;
-  assign csr_pi_if.set   = cu_if.csr_set   & cu_if.csr_rw_valid;
-  assign csr_pi_if.wdata = cu_if.csr_imm ? {27'h0, cu_if.zimm} : rf_if.rs1_data;
-  assign csr_pi_if.addr  = cu_if.csr_addr;
+  assign prv_pipe_if.swap  = cu_if.csr_swap  & cu_if.csr_rw_valid;
+  assign prv_pipe_if.clr   = cu_if.csr_clr   & cu_if.csr_rw_valid;
+  assign prv_pipe_if.set   = cu_if.csr_set   & cu_if.csr_rw_valid;
+  assign prv_pipe_if.wdata = cu_if.csr_imm ? {27'h0, cu_if.zimm} : rf_if.rs1_data;
+  assign prv_pipe_if.addr  = cu_if.csr_addr;
   
   logic mal_addr;
   always_comb begin
@@ -251,7 +250,7 @@ module execute_stage(
   end
 
   //Send exceptions to Hazard Unit
-  assign hazard_if.illegal_insn = cu_if.illegal_insn | csr_pi_if.invalid_csr;
+  assign hazard_if.illegal_insn = cu_if.illegal_insn | prv_pipe_if.invalid_csr;
   assign hazard_if.fault_l      = 1'b0; 
   assign hazard_if.mal_l        = cu_if.dren & mal_addr;
   assign hazard_if.fault_s      = 1'b0;

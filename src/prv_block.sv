@@ -14,36 +14,30 @@
 *   limitations under the License.
 *
 *
-*   Filename:     csr_pipe_if.vh
+*   Filename:     prv_block.sv
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
-*   Date Created: 07/27/2016
-*   Description:  Interface between the csr register file and pipeline 
+*   Date Created: 08/24/2016
+*   Description:  <add description here>
 */
 
-`ifndef CSR_PIPE_IF_VH
-`define CSR_PIPE_IF_VH
+`include "csr_prv_if.vh"
+`include "prv_ex_int_if.vh"
+`include "prv_pipeline_if.vh"
 
-interface csr_pipe_if;
-  import machine_mode_types_pkg::*;
-  import rv32i_types_pkg::*;
+module prv_block (
+  input logic CLK, nRST,
+  prv_pipeline_if prv_pipe_if
+);
+  csr_prv_if    csr_pr_if();
+  prv_ex_int_if ex_int_if();
   
-  logic       swap, clr, set;
-  logic       invalid_csr;
-  csr_addr_t  addr;
-  word_t      rdata, wdata;
+  csr_rfile csr_rfile_i(.*);
+  prv_control prv_control_i(.*);
 
-  modport csr (
-    input  swap, clr, set, wdata, addr,
-    output rdata, invalid_csr
-  );
-
-  modport pipe (
-    output swap, clr, set, wdata, addr,
-    input  rdata, invalid_csr
-  );
-
-endinterface
-
-`endif //CSR_PIPE_IF_VH
+  assign prv_pipe_if.soft_int = 1'b0;
+  //TODO: PIC (Programmable Interrupt Controller) 
+  assign prv_pipe_if.ext_int =  1'b0;
+  
+endmodule
