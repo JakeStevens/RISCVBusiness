@@ -187,6 +187,7 @@ package rv32i_types_pkg;
   } systype_t;
 
   typedef struct packed {
+    logic         token;
     word_t        pc;
     word_t        pc4;
     word_t        instr;

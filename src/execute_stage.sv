@@ -258,8 +258,9 @@ module execute_stage(
   assign hazard_if.breakpoint   = cu_if.breakpoint;
   assign hazard_if.env_m        = cu_if.ecall_insn;
   assign hazard_if.ret          = cu_if.ret_insn;
+  assign hazard_if.badaddr_e    = dram_if.addr;
 
   assign hazard_if.epc_e = (hazard_if.breakpoint | hazard_if.env_m) ? fetch_ex_if.fetch_ex_reg.pc4 : fetch_ex_if.fetch_ex_reg.pc;
-
+  assign hazard_if.token_ex = fetch_ex_if.fetch_ex_reg.token;
 endmodule
 

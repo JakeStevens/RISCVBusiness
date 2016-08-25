@@ -19,7 +19,7 @@
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 08/24/2016
-*   Description:  <add description here>
+*   Description:  Top level block for the priv logic. 
 */
 
 `include "csr_prv_if.vh"

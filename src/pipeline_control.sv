@@ -27,13 +27,14 @@
 
 module pipeline_control
 (
+  input logic CLK, nRST,
   input logic [1:0] prv_intr, prv_ret,
   prv_pipeline_if.pipe_ctrl prv_pipe_if
 );
   import rv32i_types_pkg::*;
   
-  assign prv_pipe_if.insert_pc = prv_pipe_if.ret || prv_pipe_if.pipe_clear;
-  
+  assign prv_pipe_if.insert_pc = prv_pipe_if.ret | (prv_pipe_if.pipe_clear & prv_pipe_if.intr);
+ 
   always_comb begin
     if(prv_pipe_if.intr)
       case(prv_intr)

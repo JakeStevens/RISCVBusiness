@@ -90,11 +90,11 @@ module prv_control (
   end
 
   //output to pipeline control
-  assign prv_pipe_if.intr = exception | (csr_pr_if.mstatus.ie &   ((csr_pr_if.mie.mtie & csr_pr_if.mip.mtip) | 
+  assign prv_pipe_if.intr = exception | (csr_pr_if.mstatus.ie & ((csr_pr_if.mie.mtie & csr_pr_if.mip.mtip) | 
                                                               (csr_pr_if.mie.msie & csr_pr_if.mip.msip)));
  
   // Register Updates on Interrupt/Exception
-  assign csr_pr_if.mcause_rup = prv_pipe_if.intr;
+  assign csr_pr_if.mcause_rup = prv_pipe_if.intr & prv_pipe_if.pipe_clear;
   assign csr_pr_if.mcause_next.interrupt = ~exception;
   assign csr_pr_if.mcause_next.cause = exception ? ex_src : intr_src;
 
@@ -111,9 +111,11 @@ module prv_control (
     end
   end
 
-  assign csr_pr_if.mepc_rup = prv_pipe_if.intr;
+  assign csr_pr_if.mepc_rup = prv_pipe_if.intr & prv_pipe_if.pipe_clear;
   assign csr_pr_if.mepc_next = prv_pipe_if.epc;
 
   assign csr_pr_if.mbadaddr_rup = (prv_pipe_if.mal_l | prv_pipe_if.fault_l | prv_pipe_if.mal_s | prv_pipe_if.fault_s | 
-                                    prv_pipe_if.illegal_insn | prv_pipe_if.fault_insn | prv_pipe_if.mal_insn);
+                                  prv_pipe_if.illegal_insn | prv_pipe_if.fault_insn | prv_pipe_if.mal_insn) 
+                                  & prv_pipe_if.pipe_clear;
+  assign csr_pr_if.mbadaddr_next = prv_pipe_if.badaddr;
 endmodule

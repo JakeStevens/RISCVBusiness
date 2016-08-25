@@ -53,7 +53,7 @@ interface csr_prv_if;
 
   modport prv (
     output mip_rup, mbadaddr_rup, mcause_rup, mepc_rup, mstatus_rup,
-      mip_next, mcause_next, mepc_next, mstatus_next, 
+      mip_next, mcause_next, mepc_next, mstatus_next, mbadaddr_next, 
     input mepc, mie, mip, mcause, mstatus
   );
 

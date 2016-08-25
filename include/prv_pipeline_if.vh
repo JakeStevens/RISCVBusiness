@@ -19,7 +19,10 @@
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 08/24/2016
-*   Description:  <add description here>
+*   Description:  Interface connecting the priv block to the pipeline.
+*                 Contains connections between modules inside the priv block. 
+*                 TODO: These two functionalities should be split into
+*                 separate interfaces.
 */
 
 `ifndef PRV_PIPELINE_IF_VH
@@ -37,8 +40,8 @@ interface prv_pipeline_if();
   logic timer_int, soft_int, ext_int;
 
   // exception / interrupt control
-  word_t epc, priv_pc;
-  logic insert_pc, intr, pipe_clear;
+  word_t epc, priv_pc, badaddr;
+  logic insert_pc, intr, pipe_clear, notify_intr;
   word_t [1:0] xtvec, xepc_r;
 
   // csr rw
@@ -51,7 +54,7 @@ interface prv_pipeline_if();
     input priv_pc, insert_pc, intr,
     output pipe_clear, ret, epc, fault_insn, mal_insn, 
             illegal_insn, fault_l, mal_l, fault_s, mal_s,
-            breakpoint, env_m
+            breakpoint, env_m, badaddr
   );
 
   modport pipe (
@@ -60,15 +63,16 @@ interface prv_pipeline_if();
   );
 
   modport prv (
-    input pipe_clear, ret, epc, fault_insn, mal_insn, 
+    input   pipe_clear, ret, epc, fault_insn, mal_insn, 
             illegal_insn, fault_l, mal_l, fault_s, mal_s,
             breakpoint, env_m, timer_int, soft_int, ext_int,
+            badaddr,
     output  intr
   );
 
   modport pipe_ctrl (
     input intr, ret, pipe_clear, xtvec, xepc_r,
-    output insert_pc, priv_pc 
+    output insert_pc, priv_pc, notify_intr 
   );
   
   modport csr (
