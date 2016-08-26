@@ -3,69 +3,37 @@
 #ifndef RISCV_CSR_ENCODING_H
 #define RISCV_CSR_ENCODING_H
 
-#define MSTATUS_UIE         0x00000001
-#define MSTATUS_SIE         0x00000002
-#define MSTATUS_HIE         0x00000004
-#define MSTATUS_MIE         0x00000008
-#define MSTATUS_UPIE        0x00000010
-#define MSTATUS_SPIE        0x00000020
-#define MSTATUS_HPIE        0x00000040
-#define MSTATUS_MPIE        0x00000080
-#define MSTATUS_SPP         0x00000100
-#define MSTATUS_HPP         0x00000600
-#define MSTATUS_MPP         0x00001800
-#define MSTATUS_FS          0x00006000
-#define MSTATUS_XS          0x00018000
-#define MSTATUS_MPRV        0x00020000
-#define MSTATUS_PUM         0x00040000
-#define MSTATUS_MXR         0x00080000
-#define MSTATUS_VM          0x1F000000
+#define MSTATUS_IE          0x00000001
+#define MSTATUS_PRV         0x00000006
+#define MSTATUS_IE1         0x00000008
+#define MSTATUS_PRV1        0x00000030
+#define MSTATUS_IE2         0x00000040
+#define MSTATUS_PRV2        0x00000180
+#define MSTATUS_IE3         0x00000200
+#define MSTATUS_PRV3        0x00000C00
+#define MSTATUS_FS          0x00003000
+#define MSTATUS_XS          0x0000C000
+#define MSTATUS_MPRV        0x00010000
+#define MSTATUS_VM          0x003E0000
 #define MSTATUS32_SD        0x80000000
 #define MSTATUS64_SD        0x8000000000000000
 
-#define SSTATUS_UIE         0x00000001
-#define SSTATUS_SIE         0x00000002
-#define SSTATUS_UPIE        0x00000010
-#define SSTATUS_SPIE        0x00000020
-#define SSTATUS_SPP         0x00000100
-#define SSTATUS_FS          0x00006000
-#define SSTATUS_XS          0x00018000
-#define SSTATUS_PUM         0x00040000
+#define SSTATUS_IE          0x00000001
+#define SSTATUS_PIE         0x00000008
+#define SSTATUS_PS          0x00000010
+#define SSTATUS_FS          0x00003000
+#define SSTATUS_XS          0x0000C000
+#define SSTATUS_MPRV        0x00010000
+#define SSTATUS_TIE         0x01000000
 #define SSTATUS32_SD        0x80000000
 #define SSTATUS64_SD        0x8000000000000000
 
-#define DCSR_XDEBUGVER      (3U<<30)
-#define DCSR_NDRESET        (1<<29)
-#define DCSR_FULLRESET      (1<<28)
-#define DCSR_HWBPCOUNT      (0xfff<<16)
-#define DCSR_EBREAKM        (1<<15)
-#define DCSR_EBREAKH        (1<<14)
-#define DCSR_EBREAKS        (1<<13)
-#define DCSR_EBREAKU        (1<<12)
-#define DCSR_STOPCYCLE      (1<<10)
-#define DCSR_STOPTIME       (1<<9)
-#define DCSR_CAUSE          (7<<6)
-#define DCSR_DEBUGINT       (1<<5)
-#define DCSR_HALT           (1<<3)
-#define DCSR_STEP           (1<<2)
-#define DCSR_PRV            (3<<0)
-
-#define DCSR_CAUSE_NONE     0
-#define DCSR_CAUSE_SWBP     1
-#define DCSR_CAUSE_HWBP     2
-#define DCSR_CAUSE_DEBUGINT 3
-#define DCSR_CAUSE_STEP     4
-#define DCSR_CAUSE_HALT     5
-
-#define MIP_SSIP            (1 << IRQ_S_SOFT)
-#define MIP_HSIP            (1 << IRQ_H_SOFT)
-#define MIP_MSIP            (1 << IRQ_M_SOFT)
-#define MIP_STIP            (1 << IRQ_S_TIMER)
-#define MIP_HTIP            (1 << IRQ_H_TIMER)
-#define MIP_MTIP            (1 << IRQ_M_TIMER)
-#define MIP_SEIP            (1 << IRQ_S_EXT)
-#define MIP_HEIP            (1 << IRQ_H_EXT)
-#define MIP_MEIP            (1 << IRQ_M_EXT)
+#define MIP_SSIP            0x00000002
+#define MIP_HSIP            0x00000004
+#define MIP_MSIP            0x00000008
+#define MIP_STIP            0x00000020
+#define MIP_HTIP            0x00000040
+#define MIP_MTIP            0x00000080
 
 #define SIP_SSIP MIP_SSIP
 #define SIP_STIP MIP_STIP
@@ -82,56 +50,57 @@
 #define VM_SV39  9
 #define VM_SV48  10
 
-#define IRQ_S_SOFT   1
-#define IRQ_H_SOFT   2
-#define IRQ_M_SOFT   3
-#define IRQ_S_TIMER  5
-#define IRQ_H_TIMER  6
-#define IRQ_M_TIMER  7
-#define IRQ_S_EXT    9
-#define IRQ_H_EXT    10
-#define IRQ_M_EXT    11
-#define IRQ_COP      12
-#define IRQ_HOST     13
+#define UA_RV32  0
+#define UA_RV64  4
+#define UA_RV128 8
 
-#define DEFAULT_RSTVEC     0x00001000
-#define DEFAULT_NMIVEC     0x00001004
-#define DEFAULT_MTVEC      0x00001010
-#define CONFIG_STRING_ADDR 0x0000100C
-#define EXT_IO_BASE        0x40000000
-#define DRAM_BASE          0x80000000
+#define IRQ_SOFT   0
+#define IRQ_TIMER  1
+#define IRQ_HOST   2
+#define IRQ_COP    3
 
-// breakpoint control fields
-#define BPCONTROL_X           0x00000001
-#define BPCONTROL_W           0x00000002
-#define BPCONTROL_R           0x00000004
-#define BPCONTROL_U           0x00000008
-#define BPCONTROL_S           0x00000010
-#define BPCONTROL_H           0x00000020
-#define BPCONTROL_M           0x00000040
-#define BPCONTROL_BPMATCH     0x00000780
-#ifdef __riscv64
-# define BPCONTROL_BPAMASKMAX 0x0F80000000000000
-# define BPCONTROL_TDRTYPE    0xF000000000000000
-#else
-# define BPCONTROL_BPAMASKMAX 0x0F800000
-# define BPCONTROL_TDRTYPE    0xF0000000
-#endif
+#define IMPL_ROCKET 1
+
+#define DEFAULT_MTVEC 0x100
 
 // page table entry (PTE) fields
 #define PTE_V     0x001 // Valid
-#define PTE_R     0x002 // Read
-#define PTE_W     0x004 // Write
-#define PTE_X     0x008 // Execute
-#define PTE_U     0x010 // User
-#define PTE_G     0x020 // Global
-#define PTE_A     0x040 // Accessed
-#define PTE_D     0x080 // Dirty
-#define PTE_SOFT  0x300 // Reserved for Software
+#define PTE_TYPE  0x01E // Type
+#define PTE_R     0x020 // Referenced
+#define PTE_D     0x040 // Dirty
+#define PTE_SOFT  0x380 // Reserved for Software
+
+#define PTE_TYPE_TABLE        0x00
+#define PTE_TYPE_TABLE_GLOBAL 0x02
+#define PTE_TYPE_URX_SR       0x04
+#define PTE_TYPE_URWX_SRW     0x06
+#define PTE_TYPE_UR_SR        0x08
+#define PTE_TYPE_URW_SRW      0x0A
+#define PTE_TYPE_URX_SRX      0x0C
+#define PTE_TYPE_URWX_SRWX    0x0E
+#define PTE_TYPE_SR           0x10
+#define PTE_TYPE_SRW          0x12
+#define PTE_TYPE_SRX          0x14
+#define PTE_TYPE_SRWX         0x16
+#define PTE_TYPE_SR_GLOBAL    0x18
+#define PTE_TYPE_SRW_GLOBAL   0x1A
+#define PTE_TYPE_SRX_GLOBAL   0x1C
+#define PTE_TYPE_SRWX_GLOBAL  0x1E
 
 #define PTE_PPN_SHIFT 10
 
-#define PTE_TABLE(PTE) (((PTE) & (PTE_V | PTE_R | PTE_W | PTE_X)) == PTE_V)
+#define PTE_TABLE(PTE) ((0x0000000AU >> ((PTE) & 0x1F)) & 1)
+#define PTE_UR(PTE)    ((0x0000AAA0U >> ((PTE) & 0x1F)) & 1)
+#define PTE_UW(PTE)    ((0x00008880U >> ((PTE) & 0x1F)) & 1)
+#define PTE_UX(PTE)    ((0x0000A0A0U >> ((PTE) & 0x1F)) & 1)
+#define PTE_SR(PTE)    ((0xAAAAAAA0U >> ((PTE) & 0x1F)) & 1)
+#define PTE_SW(PTE)    ((0x88888880U >> ((PTE) & 0x1F)) & 1)
+#define PTE_SX(PTE)    ((0xA0A0A000U >> ((PTE) & 0x1F)) & 1)
+
+#define PTE_CHECK_PERM(PTE, SUPERVISOR, STORE, FETCH) \
+  ((STORE) ? ((SUPERVISOR) ? PTE_SW(PTE) : PTE_UW(PTE)) : \
+   (FETCH) ? ((SUPERVISOR) ? PTE_SX(PTE) : PTE_UX(PTE)) : \
+             ((SUPERVISOR) ? PTE_SR(PTE) : PTE_UR(PTE)))
 
 #ifdef __riscv
 
@@ -155,28 +124,22 @@
   asm volatile ("csrr %0, " #reg : "=r"(__tmp)); \
   __tmp; })
 
-#define write_csr(reg, val) ({ \
-  if (__builtin_constant_p(val) && (unsigned long)(val) < 32) \
-    asm volatile ("csrw " #reg ", %0" :: "i"(val)); \
-  else \
-    asm volatile ("csrw " #reg ", %0" :: "r"(val)); })
+#define write_csr(reg, val) \
+  asm volatile ("csrw " #reg ", %0" :: "r"(val))
 
-#define swap_csr(reg, val) ({ unsigned long __tmp; \
-  if (__builtin_constant_p(val) && (unsigned long)(val) < 32) \
-    asm volatile ("csrrw %0, " #reg ", %1" : "=r"(__tmp) : "i"(val)); \
-  else \
-    asm volatile ("csrrw %0, " #reg ", %1" : "=r"(__tmp) : "r"(val)); \
+#define swap_csr(reg, val) ({ long __tmp; \
+  asm volatile ("csrrw %0, " #reg ", %1" : "=r"(__tmp) : "r"(val)); \
   __tmp; })
 
 #define set_csr(reg, bit) ({ unsigned long __tmp; \
-  if (__builtin_constant_p(bit) && (unsigned long)(bit) < 32) \
+  if (__builtin_constant_p(bit) && (bit) < 32) \
     asm volatile ("csrrs %0, " #reg ", %1" : "=r"(__tmp) : "i"(bit)); \
   else \
     asm volatile ("csrrs %0, " #reg ", %1" : "=r"(__tmp) : "r"(bit)); \
   __tmp; })
 
 #define clear_csr(reg, bit) ({ unsigned long __tmp; \
-  if (__builtin_constant_p(bit) && (unsigned long)(bit) < 32) \
+  if (__builtin_constant_p(bit) && (bit) < 32) \
     asm volatile ("csrrc %0, " #reg ", %1" : "=r"(__tmp) : "i"(bit)); \
   else \
     asm volatile ("csrrc %0, " #reg ", %1" : "=r"(__tmp) : "r"(bit)); \
@@ -368,24 +331,22 @@
 #define MASK_LR_D  0xf9f0707f
 #define MATCH_SC_D 0x1800302f
 #define MASK_SC_D  0xf800707f
-#define MATCH_ECALL 0x73
-#define MASK_ECALL  0xffffffff
-#define MATCH_EBREAK 0x100073
-#define MASK_EBREAK  0xffffffff
-#define MATCH_URET 0x200073
-#define MASK_URET  0xffffffff
-#define MATCH_SRET 0x10200073
+#define MATCH_SCALL 0x73
+#define MASK_SCALL  0xffffffff
+#define MATCH_SBREAK 0x100073
+#define MASK_SBREAK  0xffffffff
+#define MATCH_SRET 0x10000073
 #define MASK_SRET  0xffffffff
-#define MATCH_HRET 0x20200073
-#define MASK_HRET  0xffffffff
-#define MATCH_MRET 0x30200073
-#define MASK_MRET  0xffffffff
-#define MATCH_DRET 0x7b200073
-#define MASK_DRET  0xffffffff
-#define MATCH_SFENCE_VM 0x10400073
+#define MATCH_SFENCE_VM 0x10100073
 #define MASK_SFENCE_VM  0xfff07fff
-#define MATCH_WFI 0x10500073
+#define MATCH_WFI 0x10200073
 #define MASK_WFI  0xffffffff
+#define MATCH_MRTH 0x30600073
+#define MASK_MRTH  0xffffffff
+#define MATCH_MRTS 0x30500073
+#define MASK_MRTS  0xffffffff
+#define MATCH_HRTS 0x20500073
+#define MASK_HRTS  0xffffffff
 #define MATCH_CSRRW 0x1073
 #define MASK_CSRRW  0x707f
 #define MATCH_CSRRS 0x2073
@@ -660,64 +621,66 @@
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01
 #define CSR_INSTRET 0xc02
+#define CSR_STATS 0xc0
+#define CSR_UARCH0 0xcc0
+#define CSR_UARCH1 0xcc1
+#define CSR_UARCH2 0xcc2
+#define CSR_UARCH3 0xcc3
+#define CSR_UARCH4 0xcc4
+#define CSR_UARCH5 0xcc5
+#define CSR_UARCH6 0xcc6
+#define CSR_UARCH7 0xcc7
+#define CSR_UARCH8 0xcc8
+#define CSR_UARCH9 0xcc9
+#define CSR_UARCH10 0xcca
+#define CSR_UARCH11 0xccb
+#define CSR_UARCH12 0xccc
+#define CSR_UARCH13 0xccd
+#define CSR_UARCH14 0xcce
+#define CSR_UARCH15 0xccf
 #define CSR_SSTATUS 0x100
+#define CSR_STVEC 0x101
 #define CSR_SIE 0x104
-#define CSR_STVEC 0x105
 #define CSR_SSCRATCH 0x140
 #define CSR_SEPC 0x141
-#define CSR_SCAUSE 0x142
-#define CSR_SBADADDR 0x143
 #define CSR_SIP 0x144
 #define CSR_SPTBR 0x180
-#define CSR_SCYCLE 0xd00
+#define CSR_SASID 0x181
+#define CSR_CYCLEW 0x900
+#define CSR_TIMEW 0x901
+#define CSR_INSTRETW 0x902
 #define CSR_STIME 0xd01
-#define CSR_SINSTRET 0xd02
+#define CSR_SCAUSE 0xd42
+#define CSR_SBADADDR 0xd43
+#define CSR_STIMEW 0xa01
 #define CSR_MSTATUS 0x300
-#define CSR_MEDELEG 0x302
-#define CSR_MIDELEG 0x303
+#define CSR_MTVEC 0x301
+#define CSR_MTDELEG 0x302
 #define CSR_MIE 0x304
-#define CSR_MTVEC 0x305
+#define CSR_MTIMECMP 0x321
 #define CSR_MSCRATCH 0x340
 #define CSR_MEPC 0x341
 #define CSR_MCAUSE 0x342
 #define CSR_MBADADDR 0x343
 #define CSR_MIP 0x344
-#define CSR_MUCOUNTEREN 0x310
-#define CSR_MSCOUNTEREN 0x311
-#define CSR_MUCYCLE_DELTA 0x700
-#define CSR_MUTIME_DELTA 0x701
-#define CSR_MUINSTRET_DELTA 0x702
-#define CSR_MSCYCLE_DELTA 0x704
-#define CSR_MSTIME_DELTA 0x705
-#define CSR_MSINSTRET_DELTA 0x706
-#define CSR_TDRSELECT 0x7a0
-#define CSR_TDRDATA1 0x7a1
-#define CSR_TDRDATA2 0x7a2
-#define CSR_TDRDATA3 0x7a3
-#define CSR_DCSR 0x7b0
-#define CSR_DPC 0x7b1
-#define CSR_DSCRATCH 0x7b2
-#define CSR_MCYCLE 0xf00
-#define CSR_MTIME 0xf01
-#define CSR_MINSTRET 0xf02
-#define CSR_MISA 0xf10
-#define CSR_MVENDORID 0xf11
-#define CSR_MARCHID 0xf12
-#define CSR_MIMPID 0xf13
-#define CSR_MHARTID 0xf14
-#define CSR_MRESET 0x7c2
+#define CSR_MTIME 0x701
+#define CSR_MCPUID 0xf00
+#define CSR_MIMPID 0xf01
+#define CSR_MHARTID 0xf10
+#define CSR_MTOHOST 0x780
+#define CSR_MFROMHOST 0x781
+#define CSR_MRESET 0x782
+#define CSR_SEND_IPI 0x783
 #define CSR_CYCLEH 0xc80
 #define CSR_TIMEH 0xc81
 #define CSR_INSTRETH 0xc82
-#define CSR_MUCYCLE_DELTAH 0x780
-#define CSR_MUTIME_DELTAH 0x781
-#define CSR_MUINSTRET_DELTAH 0x782
-#define CSR_MSCYCLE_DELTAH 0x784
-#define CSR_MSTIME_DELTAH 0x785
-#define CSR_MSINSTRET_DELTAH 0x786
-#define CSR_MCYCLEH 0xf80
-#define CSR_MTIMEH 0xf81
-#define CSR_MINSTRETH 0xf82
+#define CSR_CYCLEHW 0x980
+#define CSR_TIMEHW 0x981
+#define CSR_INSTRETHW 0x982
+#define CSR_STIMEH 0xd81
+#define CSR_STIMEHW 0xa81
+#define CSR_MTIMECMPH 0x361
+#define CSR_MTIMEH 0x741
 #define CAUSE_MISALIGNED_FETCH 0x0
 #define CAUSE_FAULT_FETCH 0x1
 #define CAUSE_ILLEGAL_INSTRUCTION 0x2
@@ -818,15 +781,14 @@ DECLARE_INSN(amomaxu_d, MATCH_AMOMAXU_D, MASK_AMOMAXU_D)
 DECLARE_INSN(amoswap_d, MATCH_AMOSWAP_D, MASK_AMOSWAP_D)
 DECLARE_INSN(lr_d, MATCH_LR_D, MASK_LR_D)
 DECLARE_INSN(sc_d, MATCH_SC_D, MASK_SC_D)
-DECLARE_INSN(ecall, MATCH_ECALL, MASK_ECALL)
-DECLARE_INSN(ebreak, MATCH_EBREAK, MASK_EBREAK)
-DECLARE_INSN(uret, MATCH_URET, MASK_URET)
+DECLARE_INSN(scall, MATCH_SCALL, MASK_SCALL)
+DECLARE_INSN(sbreak, MATCH_SBREAK, MASK_SBREAK)
 DECLARE_INSN(sret, MATCH_SRET, MASK_SRET)
-DECLARE_INSN(hret, MATCH_HRET, MASK_HRET)
-DECLARE_INSN(mret, MATCH_MRET, MASK_MRET)
-DECLARE_INSN(dret, MATCH_DRET, MASK_DRET)
 DECLARE_INSN(sfence_vm, MATCH_SFENCE_VM, MASK_SFENCE_VM)
 DECLARE_INSN(wfi, MATCH_WFI, MASK_WFI)
+DECLARE_INSN(mrth, MATCH_MRTH, MASK_MRTH)
+DECLARE_INSN(mrts, MATCH_MRTS, MASK_MRTS)
+DECLARE_INSN(hrts, MATCH_HRTS, MASK_HRTS)
 DECLARE_INSN(csrrw, MATCH_CSRRW, MASK_CSRRW)
 DECLARE_INSN(csrrs, MATCH_CSRRS, MASK_CSRRS)
 DECLARE_INSN(csrrc, MATCH_CSRRC, MASK_CSRRC)
@@ -969,64 +931,66 @@ DECLARE_CSR(fcsr, CSR_FCSR)
 DECLARE_CSR(cycle, CSR_CYCLE)
 DECLARE_CSR(time, CSR_TIME)
 DECLARE_CSR(instret, CSR_INSTRET)
+DECLARE_CSR(stats, CSR_STATS)
+DECLARE_CSR(uarch0, CSR_UARCH0)
+DECLARE_CSR(uarch1, CSR_UARCH1)
+DECLARE_CSR(uarch2, CSR_UARCH2)
+DECLARE_CSR(uarch3, CSR_UARCH3)
+DECLARE_CSR(uarch4, CSR_UARCH4)
+DECLARE_CSR(uarch5, CSR_UARCH5)
+DECLARE_CSR(uarch6, CSR_UARCH6)
+DECLARE_CSR(uarch7, CSR_UARCH7)
+DECLARE_CSR(uarch8, CSR_UARCH8)
+DECLARE_CSR(uarch9, CSR_UARCH9)
+DECLARE_CSR(uarch10, CSR_UARCH10)
+DECLARE_CSR(uarch11, CSR_UARCH11)
+DECLARE_CSR(uarch12, CSR_UARCH12)
+DECLARE_CSR(uarch13, CSR_UARCH13)
+DECLARE_CSR(uarch14, CSR_UARCH14)
+DECLARE_CSR(uarch15, CSR_UARCH15)
 DECLARE_CSR(sstatus, CSR_SSTATUS)
-DECLARE_CSR(sie, CSR_SIE)
 DECLARE_CSR(stvec, CSR_STVEC)
+DECLARE_CSR(sie, CSR_SIE)
 DECLARE_CSR(sscratch, CSR_SSCRATCH)
 DECLARE_CSR(sepc, CSR_SEPC)
-DECLARE_CSR(scause, CSR_SCAUSE)
-DECLARE_CSR(sbadaddr, CSR_SBADADDR)
 DECLARE_CSR(sip, CSR_SIP)
 DECLARE_CSR(sptbr, CSR_SPTBR)
-DECLARE_CSR(scycle, CSR_SCYCLE)
+DECLARE_CSR(sasid, CSR_SASID)
+DECLARE_CSR(cyclew, CSR_CYCLEW)
+DECLARE_CSR(timew, CSR_TIMEW)
+DECLARE_CSR(instretw, CSR_INSTRETW)
 DECLARE_CSR(stime, CSR_STIME)
-DECLARE_CSR(sinstret, CSR_SINSTRET)
+DECLARE_CSR(scause, CSR_SCAUSE)
+DECLARE_CSR(sbadaddr, CSR_SBADADDR)
+DECLARE_CSR(stimew, CSR_STIMEW)
 DECLARE_CSR(mstatus, CSR_MSTATUS)
-DECLARE_CSR(medeleg, CSR_MEDELEG)
-DECLARE_CSR(mideleg, CSR_MIDELEG)
-DECLARE_CSR(mie, CSR_MIE)
 DECLARE_CSR(mtvec, CSR_MTVEC)
+DECLARE_CSR(mtdeleg, CSR_MTDELEG)
+DECLARE_CSR(mie, CSR_MIE)
+DECLARE_CSR(mtimecmp, CSR_MTIMECMP)
 DECLARE_CSR(mscratch, CSR_MSCRATCH)
 DECLARE_CSR(mepc, CSR_MEPC)
 DECLARE_CSR(mcause, CSR_MCAUSE)
 DECLARE_CSR(mbadaddr, CSR_MBADADDR)
 DECLARE_CSR(mip, CSR_MIP)
-DECLARE_CSR(mucounteren, CSR_MUCOUNTEREN)
-DECLARE_CSR(mscounteren, CSR_MSCOUNTEREN)
-DECLARE_CSR(mucycle_delta, CSR_MUCYCLE_DELTA)
-DECLARE_CSR(mutime_delta, CSR_MUTIME_DELTA)
-DECLARE_CSR(muinstret_delta, CSR_MUINSTRET_DELTA)
-DECLARE_CSR(mscycle_delta, CSR_MSCYCLE_DELTA)
-DECLARE_CSR(mstime_delta, CSR_MSTIME_DELTA)
-DECLARE_CSR(msinstret_delta, CSR_MSINSTRET_DELTA)
-DECLARE_CSR(tdrselect, CSR_TDRSELECT)
-DECLARE_CSR(tdrdata1, CSR_TDRDATA1)
-DECLARE_CSR(tdrdata2, CSR_TDRDATA2)
-DECLARE_CSR(tdrdata3, CSR_TDRDATA3)
-DECLARE_CSR(dcsr, CSR_DCSR)
-DECLARE_CSR(dpc, CSR_DPC)
-DECLARE_CSR(dscratch, CSR_DSCRATCH)
-DECLARE_CSR(mcycle, CSR_MCYCLE)
 DECLARE_CSR(mtime, CSR_MTIME)
-DECLARE_CSR(minstret, CSR_MINSTRET)
-DECLARE_CSR(misa, CSR_MISA)
-DECLARE_CSR(mvendorid, CSR_MVENDORID)
-DECLARE_CSR(marchid, CSR_MARCHID)
+DECLARE_CSR(mcpuid, CSR_MCPUID)
 DECLARE_CSR(mimpid, CSR_MIMPID)
 DECLARE_CSR(mhartid, CSR_MHARTID)
+DECLARE_CSR(mtohost, CSR_MTOHOST)
+DECLARE_CSR(mfromhost, CSR_MFROMHOST)
 DECLARE_CSR(mreset, CSR_MRESET)
+DECLARE_CSR(send_ipi, CSR_SEND_IPI)
 DECLARE_CSR(cycleh, CSR_CYCLEH)
 DECLARE_CSR(timeh, CSR_TIMEH)
 DECLARE_CSR(instreth, CSR_INSTRETH)
-DECLARE_CSR(mucycle_deltah, CSR_MUCYCLE_DELTAH)
-DECLARE_CSR(mutime_deltah, CSR_MUTIME_DELTAH)
-DECLARE_CSR(muinstret_deltah, CSR_MUINSTRET_DELTAH)
-DECLARE_CSR(mscycle_deltah, CSR_MSCYCLE_DELTAH)
-DECLARE_CSR(mstime_deltah, CSR_MSTIME_DELTAH)
-DECLARE_CSR(msinstret_deltah, CSR_MSINSTRET_DELTAH)
-DECLARE_CSR(mcycleh, CSR_MCYCLEH)
+DECLARE_CSR(cyclehw, CSR_CYCLEHW)
+DECLARE_CSR(timehw, CSR_TIMEHW)
+DECLARE_CSR(instrethw, CSR_INSTRETHW)
+DECLARE_CSR(stimeh, CSR_STIMEH)
+DECLARE_CSR(stimehw, CSR_STIMEHW)
+DECLARE_CSR(mtimecmph, CSR_MTIMECMPH)
 DECLARE_CSR(mtimeh, CSR_MTIMEH)
-DECLARE_CSR(minstreth, CSR_MINSTRETH)
 #endif
 #ifdef DECLARE_CAUSE
 DECLARE_CAUSE("misaligned fetch", CAUSE_MISALIGNED_FETCH)
