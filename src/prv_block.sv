@@ -23,7 +23,6 @@
 */
 
 `include "csr_prv_if.vh"
-`include "prv_ex_int_if.vh"
 `include "prv_pipeline_if.vh"
 
 module prv_block (
@@ -31,7 +30,6 @@ module prv_block (
   prv_pipeline_if prv_pipe_if
 );
   csr_prv_if    csr_pr_if();
-  prv_ex_int_if ex_int_if();
 
   logic [1:0] prv_intr, prv_ret;
   
