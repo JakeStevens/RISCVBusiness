@@ -44,6 +44,7 @@ module prv_block (
   assign prv_ret  = 2'b11;
 
   assign prv_pipe_if.soft_int = 1'b0;
+  assign prv_pipe_if.timer_int = 1'b0;
   //TODO: PIC (Programmable Interrupt Controller) 
   assign prv_pipe_if.ext_int =  1'b0;
   

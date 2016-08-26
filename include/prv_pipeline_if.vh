@@ -21,7 +21,7 @@
 *   Date Created: 08/24/2016
 *   Description:  Interface connecting the priv block to the pipeline.
 *                 Contains connections between modules inside the priv block. 
-*                 TODO: These two functionalities should be split into
+*                 TODO: These two functionalities should be split into two
 *                 separate interfaces.
 */
 
@@ -41,8 +41,8 @@ interface prv_pipeline_if();
 
   // exception / interrupt control
   word_t epc, priv_pc, badaddr;
-  logic insert_pc, intr, pipe_clear, notify_intr;
-  word_t [1:0] xtvec, xepc_r;
+  logic insert_pc, intr, pipe_clear;
+  word_t [3:0] xtvec, xepc_r;
 
   // csr rw
   logic       swap, clr, set;
@@ -72,7 +72,7 @@ interface prv_pipeline_if();
 
   modport pipe_ctrl (
     input intr, ret, pipe_clear, xtvec, xepc_r,
-    output insert_pc, priv_pc, notify_intr 
+    output insert_pc, priv_pc 
   );
   
   modport csr (
