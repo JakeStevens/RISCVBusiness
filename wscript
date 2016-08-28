@@ -23,6 +23,12 @@ def configure(ctx):
       tb = 'tb_RISCVBusiness',
       tb_includes = ['include']
     )
+    ctx.setup_hdl_module('RISCVBusiness_self_test',
+      includes = ['include'],
+      src_dir = ['packages','src'],
+      tb = 'tb_RISCVBusiness_self_test',
+      tb_includes = ['include']
+    )
     ctx.setup_hdl_module('alu', 
       includes = ['include'],
       src_dir = ['packages','src'],

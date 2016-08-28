@@ -170,12 +170,16 @@ module csr_rfile (
   assign mip_next       = csr_pr_if.mip_rup ? csr_pr_if.mip_next : mip;
   assign mbadaddr_next  = csr_pr_if.mbadaddr_rup ? csr_pr_if.mbadaddr_next : mbadaddr;
   assign mcause_next    = csr_pr_if.mcause_rup ? csr_pr_if.mcause_next : mcause;
-  assign mepc_next      = csr_pr_if.mepc_rup ? csr_pr_if.mepc_next : mepc;
 
   // Read and write by pipeline and prv
   assign mstatus_next   = (prv_pipe_if.addr == 12'h300) ? mstatus_t'(rup_data) : (
                             csr_pr_if.mstatus_rup ? csr_pr_if.mstatus_next :
                             mstatus
+                          );
+
+  assign mepc_next      = (prv_pipe_if.addr == 12'h341)  ? mepc_t'(rup_data) : (
+                            csr_pr_if.mepc_rup ? csr_pr_if.mepc_next : 
+                            mepc
                           );
 
   // Read and write by pipeline

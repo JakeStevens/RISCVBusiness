@@ -180,7 +180,7 @@ module control_unit
   end
 
   // HALT HACK. TODO: FIX ME WHEN IMPLEMENTING INTERRUPTS
-  assign cu_if.halt = (cu_if.instr == 32'h7800d073);
+  assign cu_if.halt = (cu_if.instr == 32'h7800d073) || (cu_if.instr == 32'h780e1073);
   // Privilege Control Signals
   assign cu_if.fault_insn = 'b0;
  
@@ -189,7 +189,7 @@ module control_unit
       LUI, AUIPC, JAL, JALR,
       BRANCH, LOAD, STORE,
       IMMED, REGREG, SYSTEM,
-      opcode_t'('0)           : cu_if.illegal_insn = 1'b0;
+      FENCE, opcode_t'('0)           : cu_if.illegal_insn = 1'b0;
       default                 : cu_if.illegal_insn = 1'b1;
     endcase
   end
@@ -220,26 +220,26 @@ module control_unit
     cu_if.csr_imm   = 1'b0;
  
     if (cu_if.opcode == SYSTEM) begin
-      if (rv32i_system_t'(instr_i.funct3) == CSRRW) begin
+      if (rv32i_system_t'(instr_r.funct3) == CSRRW) begin
         cu_if.csr_swap  = 1'b1;
-      end else if (rv32i_system_t'(instr_i.funct3) == CSRRS) begin
+      end else if (rv32i_system_t'(instr_r.funct3) == CSRRS) begin
         cu_if.csr_set   = 1'b1;
-      end else if (rv32i_system_t'(instr_i.funct3) == CSRRC) begin 
+      end else if (rv32i_system_t'(instr_r.funct3) == CSRRC) begin 
         cu_if.csr_clr = 1'b1; 
-      end else if (rv32i_system_t'(instr_i.funct3) == CSRRWI) begin
+      end else if (rv32i_system_t'(instr_r.funct3) == CSRRWI) begin
         cu_if.csr_swap  = 1'b1;
         cu_if.csr_imm   = 1'b1; 
-      end else if (rv32i_system_t'(instr_i.funct3) == CSRRSI) begin
+      end else if (rv32i_system_t'(instr_r.funct3) == CSRRSI) begin
         cu_if.csr_set   = 1'b1;
         cu_if.csr_imm   = 1'b1; 
-      end else if (rv32i_system_t'(instr_i.funct3) == CSRRCI) begin
+      end else if (rv32i_system_t'(instr_r.funct3) == CSRRCI) begin
         cu_if.csr_clr = 1'b1; 
         cu_if.csr_imm   = 1'b1; 
       end
     end   
   end
 
-  assign cu_if.csr_rw_valid = (instr_r.rs1 != 0) && (cu_if.csr_swap | cu_if.csr_set | cu_if.csr_clr);
+  assign cu_if.csr_rw_valid = (cu_if.csr_swap | cu_if.csr_set | cu_if.csr_clr);
 
   assign cu_if.csr_addr = csr_addr_t'(instr_i.imm11_00);
   assign cu_if.zimm     = cu_if.instr[19:15];

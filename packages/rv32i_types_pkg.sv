@@ -52,7 +52,8 @@ package rv32i_types_pkg;
     // All register-register instructions share an opcode
     REGREG  = 7'b0110011,
     // All system instructions share an opcode
-    SYSTEM  = 7'b1110011
+    SYSTEM  = 7'b1110011,
+    FENCE   = 7'b0001111
   } opcode_t;
 
   typedef enum logic [BR_W-1:0] {
