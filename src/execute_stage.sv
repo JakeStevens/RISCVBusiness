@@ -247,6 +247,8 @@ module execute_stage(
     else if (byte_en == 4'h3 || byte_en == 4'hc) begin
       mal_addr = (dram_if.addr[1:0] == 2'b01 || dram_if.addr[1:0] == 2'b11);
     end
+    else 
+      mal_addr = 1'b0;
   end
 
   //Send exceptions to Hazard Unit
