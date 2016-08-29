@@ -60,9 +60,9 @@ module alu (
 
   always_comb begin 
     casez (alu_if.aluop)
-      ALU_SLL   : alu_if.port_out = alu_if.port_a << alu_if.port_b;
-      ALU_SRL   : alu_if.port_out = alu_if.port_a >> alu_if.port_b;
-      ALU_SRA   : alu_if.port_out = $signed(alu_if.port_a) >>> alu_if.port_b;
+      ALU_SLL   : alu_if.port_out = alu_if.port_a << alu_if.port_b[4:0];
+      ALU_SRL   : alu_if.port_out = alu_if.port_a >> alu_if.port_b[4:0];
+      ALU_SRA   : alu_if.port_out = $signed(alu_if.port_a) >>> alu_if.port_b[4:0];
       ALU_AND   : alu_if.port_out = alu_if.port_a & alu_if.port_b;
       ALU_OR    : alu_if.port_out = alu_if.port_a | alu_if.port_b;
       ALU_XOR   : alu_if.port_out = alu_if.port_a ^ alu_if.port_b;
