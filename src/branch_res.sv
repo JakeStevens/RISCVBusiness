@@ -48,18 +48,28 @@ module branch_res (
   //build operands
   assign op_1_ext[WORD_SIZE-1:0] = br_if.rs1_data;
   assign op_2_ext[WORD_SIZE-1:0] = (~br_if.rs2_data) + 1;
-  assign op_1_ext[WORD_SIZE] = 1'b0;
-  assign op_2_ext[WORD_SIZE] = 1'b0;
+
+  always_comb begin
+    if(br_if.branch_type == BLTU || br_if.branch_type == BGEU) begin
+      op_1_ext[WORD_SIZE] = 1'b0;
+      op_2_ext[WORD_SIZE] = 1'b0;
+    end
+    else begin
+      op_1_ext[WORD_SIZE] = op_1_ext[WORD_SIZE-1];
+      op_2_ext[WORD_SIZE] = op_2_ext[WORD_SIZE-1];
+    end
+  end
 
   //adder
   assign adder_out = op_1_ext + op_2_ext;
   assign carry_out = adder_out[WORD_SIZE];
-
+  
   // condition calculations
   assign eq = br_if.rs1_data == br_if.rs2_data;
   assign lt = (sign_1 & ~sign_2) ? 1 :
               ((~sign_1 & sign_2) ? 0 : sign_r);
-  assign ltu = ~carry_out;
+
+  assign ltu = ~carry_out & |(op_2_ext);
 
   always_comb begin
     casez (br_if.branch_type) 

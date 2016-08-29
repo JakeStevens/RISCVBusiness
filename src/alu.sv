@@ -70,7 +70,7 @@ module alu (
         alu_if.port_out = (sign_a & !sign_b) ? 1 : 
                           ((!sign_a & sign_b) ? 0 : sign_r);
       end
-      ALU_SLTU  : alu_if.port_out = !carry_out;
+      ALU_SLTU  : alu_if.port_out = ~carry_out & |(op_b_ext);
       ALU_ADD   : alu_if.port_out = adder_result;
       ALU_SUB   : alu_if.port_out = adder_result;
       default   : alu_if.port_out = '0;
