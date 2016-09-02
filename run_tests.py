@@ -118,7 +118,7 @@ def compile_asm_for_self(file_name):
 
     cmd_arr = ['riscv64-unknown-elf-gcc', '-m32', '-static',
                 '-mcmodel=medany', '-fvisibility=hidden', '-nostdlib',
-                '-nostartfiles', '-T./verification/asm-env/link_selfasm.ld',
+                '-nostartfiles', '-T./verification/asm-env/link.ld',
                 '-I./verification/asm-env/selfasm', file_name, '-o',
                 output_name]
     failure = subprocess.call(cmd_arr)
@@ -197,7 +197,7 @@ def clean_init_hex(file_name):
                 if new_data_word != "00000000":
                     out = ":04" + addr_str + "00" + new_data_word + checksum + '\n'
                     # ignore the ELF header
-                    if addr >= 0x200:
+                    if addr >= 0x100:
                         cleaned_file.write(out)
                 addr += 0x4
         # add the EOL record to the file
@@ -263,7 +263,7 @@ def clean_spike_output(file_name):
     # clean the hex memory dump
     spike_output = output_dir + short_name + '_spike.hex'
     cleaned_location = output_dir + short_name + '_spike_clean.hex'
-    addr = 0x200
+    addr = 0x100
     with open(spike_output, 'r') as spike_file:
         cleaned_file = open(cleaned_location, 'w')
         for line in spike_file:
