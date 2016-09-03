@@ -124,7 +124,7 @@ package rv32i_types_pkg;
   typedef enum logic [11:0] {
     ECALL   = 12'h0,
     EBREAK  = 12'h1,
-    ERET    = 12'h2
+    ERET    = 12'h100
   } priv_insn_t;
 
   typedef struct packed {

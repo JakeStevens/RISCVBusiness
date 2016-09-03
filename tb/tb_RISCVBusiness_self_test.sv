@@ -129,7 +129,8 @@ module tb_RISCVBusiness_self_test ();
       clk_count++;
     end
 
-    //dump_ram();
+    dump_ram();
+
     // Check Register 28 to see if test passed or failed
     if (clk_count == `CLK_TIMEOUT)
       $display("ERROR: Test timed out");
@@ -152,7 +153,7 @@ module tb_RISCVBusiness_self_test ();
 
     fptr = $fopen(`OUTPUT_FILE_NAME, "w");
 
-    for(addr = 32'h200; addr < 32'h1000; addr+=4) begin
+    for(addr = 32'h100; addr < 32'h2000; addr+=4) begin
       read_ram(addr, data);
       hexdump_temp = {8'h04, addr[15:0]>>2, 8'h00, data};
       checksum = calculate_crc(hexdump_temp);

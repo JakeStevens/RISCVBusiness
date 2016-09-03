@@ -297,7 +297,7 @@ def clean_spike_output(file_name):
             broken_line_arr = line.split()
             if 'csrwi' == broken_line_arr[4]:
                 break
-            if '0x' == broken_line_arr[6][0:2]:
+            if len(broken_line_arr) > 6 and '0x' == broken_line_arr[6][0:2]:
               imm = int(broken_line_arr[6], 16)
               broken_line_arr[6] = str(imm)
             if len(broken_line_arr) > 8 and '0x' == broken_line_arr[8][0:2]:

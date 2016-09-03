@@ -105,6 +105,7 @@ module execute_stage(
   word_t imm_or_shamt;
   assign imm_or_shamt = (cu_if.imm_shamt_sel == 1'b1) ? cu_if.shamt : imm_I_ext;
   assign alu_if.aluop = cu_if.alu_op;
+  logic mal_addr;
  
   always_comb begin
     case (cu_if.alu_a_sel)
@@ -135,7 +136,7 @@ module execute_stage(
     endcase
   end
 
-  assign rf_if.wen = cu_if.wen & (~hazard_if.if_ex_stall | hazard_if.npc_sel); 
+  assign rf_if.wen = cu_if.wen & (~hazard_if.if_ex_stall | hazard_if.npc_sel) & ~(cu_if.dren & mal_addr); 
   /*******************************************************
   *** Branch Target Resolution and Associated Logic 
   *******************************************************/
@@ -160,8 +161,8 @@ module execute_stage(
   *******************************************************/
   logic [1:0] byte_offset;
 
-  assign dram_if.ren           = cu_if.dren;
-  assign dram_if.wen           = cu_if.dwen;
+  assign dram_if.ren           = cu_if.dren & ~mal_addr;
+  assign dram_if.wen           = cu_if.dwen & ~mal_addr;
   assign dram_if.byte_en       = cu_if.dren ? byte_en:
                                 {byte_en[0], byte_en[1], byte_en[2], byte_en[3]};
   assign dram_if.addr          = alu_if.port_out;
@@ -240,7 +241,6 @@ module execute_stage(
   assign prv_pipe_if.wdata = cu_if.csr_imm ? {27'h0, cu_if.zimm} : rf_if.rs1_data;
   assign prv_pipe_if.addr  = cu_if.csr_addr;
   
-  logic mal_addr;
   always_comb begin
     if(byte_en == 4'hf) 
       mal_addr = (dram_if.addr[1:0] != 2'b00);
@@ -256,7 +256,7 @@ module execute_stage(
   assign hazard_if.fault_l      = 1'b0; 
   assign hazard_if.mal_l        = cu_if.dren & mal_addr;
   assign hazard_if.fault_s      = 1'b0;
-  assign hazard_if.mal_s        = cu_if.dren & mal_addr;
+  assign hazard_if.mal_s        = cu_if.dwen & mal_addr;
   assign hazard_if.breakpoint   = cu_if.breakpoint;
   assign hazard_if.env_m        = cu_if.ecall_insn;
   assign hazard_if.ret          = cu_if.ret_insn;

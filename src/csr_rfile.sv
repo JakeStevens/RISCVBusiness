@@ -161,7 +161,7 @@ module csr_rfile (
 
   assign csr_op = prv_pipe_if.swap | prv_pipe_if.clr | prv_pipe_if.set;
   assign prv_pipe_if.invalid_csr = csr_op & ~valid_csr_addr;
-  assign rup_data = prv_pipe_if.swap ? prv_pipe_if.rdata : (
+  assign rup_data = prv_pipe_if.swap ? prv_pipe_if.wdata : (
                       prv_pipe_if.clr ? prv_pipe_if.rdata & ~prv_pipe_if.wdata : 
                       prv_pipe_if.rdata | prv_pipe_if.wdata //prv_pipe_if.set is default
                       );

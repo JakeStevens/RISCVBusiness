@@ -195,7 +195,7 @@ package machine_mode_types_pkg;
   typedef logic [31:0] mtvec_t;
   typedef logic [31:0] mepc_t;
 
-  `define MTVEC_ADDR 32'h100
+  `define MTVEC_ADDR 32'h1C0
 
   //Non Standard Extentions 
   typedef logic [31:0] mtohost_t;
