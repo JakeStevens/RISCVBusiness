@@ -14,12 +14,12 @@
 *   limitations under the License.
 *
 *
-*   Filename:     mal_data.S
+*   Filename:     breakpoint.S
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 07/01/2016
-*   Description:  Creates a misaligned data transaction
+*   Description:  Creates a breakpoint
 */
 
 #include "riscv_test.h"
@@ -47,7 +47,7 @@ main:
   ori x4, x0, 1
   la  x3, tdat4
   la  x5, tdat3
-  sw  x2, 1(x3)
+  ebreak 
   sw  x4, 0(x5)
   
 
@@ -60,7 +60,6 @@ tdat1:  .word 0xbadc0de1
 tdat2:  .word 0x00000000
 tdat3:  .word 0x00000000
 tdat4:  .word 0x00000000
-tdat5:  .word 0x00000000
 
 RVTEST_DATA_DUMP_END
 
