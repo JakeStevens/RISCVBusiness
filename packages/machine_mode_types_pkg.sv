@@ -27,7 +27,39 @@
 
 package machine_mode_types_pkg;
 
-  typedef logic [11:0] csr_addr_t;
+  typedef enum logic [11:0] {
+    MCPUID_ADDR     = 12'hF00,
+    MIMPID_ADDR     = 12'hF01,
+    MHARTID_ADDR    = 12'hF10,
+ 
+    MSTATUS_ADDR    = 12'h300,
+    MTVEC_ADDR      = 12'h301,
+    MTDELEG_ADDR    = 12'h302,
+    MIE_ADDR        = 12'h304,
+ 
+    MSCRATCH_ADDR   = 12'h340,
+    MEPC_ADDR       = 12'h341,
+    MCAUSE_ADDR     = 12'h342,
+    MBADADDR_ADDR   = 12'h343,
+    MIP_ADDR        = 12'h344,
+
+    MBASE_ADDR      = 12'h380,
+    MBOUND_ADDR     = 12'h381,
+    MIBASE_ADDR     = 12'h382,
+    MIBOUND_ADDR    = 12'h383,
+    MDBASE_ADDR     = 12'h384,
+    MDBOUND_ADDR    = 12'h385,
+
+    HTIMEW_ADDR     = 12'hB01,
+    HTIMEHW_ADDR    = 12'hB81,
+
+    MTIMECMP_ADDR   = 12'h321,
+    MTIME_ADDR      = 12'h701,
+    MTIMEH_ADDR     = 12'h741,
+
+    MTOHOST_ADDR    = 12'h780,
+    MFROMHOST_ADDR  = 12'h781
+  } csr_addr_t;
 
   /* Priv Levels */
   typedef enum logic [1:0] {

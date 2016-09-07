@@ -172,60 +172,60 @@ module csr_rfile (
   assign mcause_next    = csr_pr_if.mcause_rup ? csr_pr_if.mcause_next : mcause;
 
   // Read and write by pipeline and prv
-  assign mstatus_next   = (prv_pipe_if.addr == 12'h300) ? mstatus_t'(rup_data) : (
+  assign mstatus_next   = (prv_pipe_if.addr == MSTATUS_ADDR) ? mstatus_t'(rup_data) : (
                             csr_pr_if.mstatus_rup ? csr_pr_if.mstatus_next :
                             mstatus
                           );
 
-  assign mepc_next      = (prv_pipe_if.addr == 12'h341)  ? mepc_t'(rup_data) : (
+  assign mepc_next      = (prv_pipe_if.addr == MEPC_ADDR)  ? mepc_t'(rup_data) : (
                             csr_pr_if.mepc_rup ? csr_pr_if.mepc_next : 
                             mepc
                           );
 
   // Read and write by pipeline
-  assign mie_next       = (prv_pipe_if.addr == 12'h304) ? mie_t'(rup_data) : mie;
-  assign mscratch_next  = (prv_pipe_if.addr == 12'h340) ? mscratch_t'(rup_data) : mscratch;
-  assign mtohost_next   = (prv_pipe_if.addr == 12'h780) ? mtohost_t'(rup_data) : mtohost;
+  assign mie_next       = (prv_pipe_if.addr == MIE_ADDR) ? mie_t'(rup_data) : mie;
+  assign mscratch_next  = (prv_pipe_if.addr == MSCRATCH_ADDR) ? mscratch_t'(rup_data) : mscratch;
+  assign mtohost_next   = (prv_pipe_if.addr == MTOHOST_ADDR) ? mtohost_t'(rup_data) : mtohost;
 
   always_comb begin
     valid_csr_addr = 1'b1;
     casez (prv_pipe_if.addr)
-      12'hf00   : prv_pipe_if.rdata = mcpuid; 
-      12'hf01   : prv_pipe_if.rdata = mimpid;
-      12'hf10   : prv_pipe_if.rdata = mhartid;
+      MCPUID_ADDR     : prv_pipe_if.rdata = mcpuid; 
+      MIMPID_ADDR     : prv_pipe_if.rdata = mimpid;
+      MHARTID_ADDR    : prv_pipe_if.rdata = mhartid;
       
-      12'h300 : prv_pipe_if.rdata = mstatus;
-      12'h301 : prv_pipe_if.rdata = mtvec;
-      12'h302 : prv_pipe_if.rdata = mtdeleg; 
-      12'h304 : prv_pipe_if.rdata = mie;
+      MSTATUS_ADDR    : prv_pipe_if.rdata = mstatus;
+      MTVEC_ADDR      : prv_pipe_if.rdata = mtvec;
+      MTDELEG_ADDR    : prv_pipe_if.rdata = mtdeleg; 
+      MIE_ADDR        : prv_pipe_if.rdata = mie;
       
-      12'h340 : prv_pipe_if.rdata = mscratch;
-      12'h341 : prv_pipe_if.rdata = mepc;
-      12'h342 : prv_pipe_if.rdata = mcause;
-      12'h343 : prv_pipe_if.rdata = mbadaddr;
-      12'h344 : prv_pipe_if.rdata = mip; 
+      MSCRATCH_ADDR   : prv_pipe_if.rdata = mscratch;
+      MEPC_ADDR       : prv_pipe_if.rdata = mepc;
+      MCAUSE_ADDR     : prv_pipe_if.rdata = mcause;
+      MBADADDR_ADDR   : prv_pipe_if.rdata = mbadaddr;
+      MIP_ADDR        : prv_pipe_if.rdata = mip; 
      
       //machine protection and translation not present 
-      12'h380 : prv_pipe_if.rdata = '0;
-      12'h381 : prv_pipe_if.rdata = '0;
-      12'h382 : prv_pipe_if.rdata = '0;
-      12'h383 : prv_pipe_if.rdata = '0;
-      12'h384 : prv_pipe_if.rdata = '0;
-      12'h385 : prv_pipe_if.rdata = '0;
+      MBASE_ADDR      : prv_pipe_if.rdata = '0;
+      MBOUND_ADDR     : prv_pipe_if.rdata = '0;
+      MIBASE_ADDR     : prv_pipe_if.rdata = '0;
+      MIBOUND_ADDR    : prv_pipe_if.rdata = '0;
+      MDBASE_ADDR     : prv_pipe_if.rdata = '0;
+      MDBOUND_ADDR    : prv_pipe_if.rdata = '0;
 
       //only machine mode
-      12'hb01 : prv_pipe_if.rdata = '0;
-      12'hb81 : prv_pipe_if.rdata = '0;
+      HTIMEW_ADDR     : prv_pipe_if.rdata = '0;
+      HTIMEHW_ADDR    : prv_pipe_if.rdata = '0;
             
       //Timers unimplemented
-      12'h321 : prv_pipe_if.rdata = '0;
-      12'h701 : prv_pipe_if.rdata = '0;
-      12'h741 : prv_pipe_if.rdata = '0;
+      MTIMECMP_ADDR   : prv_pipe_if.rdata = '0;//mtimecmp;
+      MTIME_ADDR      : prv_pipe_if.rdata = '0;//mtime;
+      MTIMEH_ADDR     : prv_pipe_if.rdata = '0;//mtimeh;
       
       // Non-Standard mtohost/mfromhost
-      12'h780 : prv_pipe_if.rdata = mtohost;
-      12'h781 : prv_pipe_if.rdata = mfromhost;
-  
+      MTOHOST_ADDR    : prv_pipe_if.rdata = mtohost;
+      MFROMHOST_ADDR  : prv_pipe_if.rdata = mfromhost;
+ 
       default : begin
         valid_csr_addr = 1'b0;
         prv_pipe_if.rdata = '0;
