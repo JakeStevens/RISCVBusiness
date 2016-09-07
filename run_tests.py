@@ -38,7 +38,8 @@ START_RED = "\033[31m"
 FILE_NAME = None
 ARCH = "RV32I"
 SUPPORTED_ARCHS = []
-TEST_TYPE = "asm"
+SUPPORTED_TEST_TYPES = ['asm', 'c', 'selfasm', ""]
+TEST_TYPE = ""
 # Change this variable to the filename (minus extension)
 # of the top level file for your project. This should
 # match the file name given in the top level wscript
@@ -50,7 +51,7 @@ def parse_arguments():
       parser.add_argument('--arch', '-a', dest='arch', type=str,
                           default="RV32I",
                           help="Specify the architecture targeted. Default: RV32I")
-      parser.add_argument('--test', '-t', dest='test_type', type=str, default="asm",
+      parser.add_argument('--test', '-t', dest='test_type', type=str, default="",
                           help="Specify what type of tests to run. Default: asm")
       parser.add_argument('file_name', metavar='file_name', type=str,
                           nargs='?',
@@ -60,20 +61,32 @@ def parse_arguments():
       FILE_NAME = args.file_name
       TEST_TYPE = args.test_type
       
-      if TEST_TYPE not in ['asm', 'c', 'selfasm']:
+      if TEST_TYPE not in SUPPORTED_TEST_TYPES:
           print "ERROR: " + TEST_TYPE + " is not a supported test type"
           sys.exit(1)
       
-      if TEST_TYPE == 'selfasm':
-          test_file_dir = 'self-tests/'
-      else:
-          test_file_dir = TEST_TYPE + '-tests/'
-      SUPPORTED_ARCHS = glob.glob('./verification/' + test_file_dir + '*')
-      SUPPORTED_ARCHS = [a.split('/'+test_file_dir)[1] for a in SUPPORTED_ARCHS]
-      if ARCH not in SUPPORTED_ARCHS:
-          print "ERROR: No " + TEST_TYPE + " tests exist for " + ARCH
-          sys.exit(1)
 
+      if TEST_TYPE == "":
+        for test_type in SUPPORTED_TEST_TYPES[:-1]:
+           if test_type == 'selfasm':
+              test_file_dir = 'self-tests/'
+           else:
+              test_file_dir = test_type + '-tests/'
+        SUPPORTED_ARCHS = glob.glob('./verification/' + test_file_dir + '*')
+        SUPPORTED_ARCHS = [a.split('/'+test_file_dir)[1] for a in SUPPORTED_ARCHS]
+        if ARCH not in SUPPORTED_ARCHS:
+           print "ERROR: No " + test_type + " tests exist for " + ARCH
+           sys.exit(1)
+      else:
+         if TEST_TYPE == 'selfasm':
+            test_file_dir = 'self-tests/'
+         else:
+            test_file_dir = TEST_TYPE + '-tests/'
+         SUPPORTED_ARCHS = glob.glob('./verification/' + test_file_dir + '*')
+         SUPPORTED_ARCHS = [a.split('/'+test_file_dir)[1] for a in SUPPORTED_ARCHS]
+         if ARCH not in SUPPORTED_ARCHS:
+           print "ERROR: No " + TEST_TYPE + " tests exist for " + ARCH
+           sys.exit(1)
 
 # compile_asm takes a file_name as input and assembles the file pointed
 # to by that file name. It also takes the elf file that is the result
@@ -424,71 +437,91 @@ def check_results(f):
             print fail_msg
             return 1
 
+def run_asm():
+   failures = 0
+   if FILE_NAME is None:
+       files = glob.glob("./verification/"+"asm"+"-tests/"+ARCH+"/*.S")
+   else:
+       files = glob.glob("./verification/"+"asm"+"-tests/"+ARCH+"/"+FILE_NAME+"*.S")
+   print "Starting asm tests..."
+   for f in files:
+       ret = compile_asm(f)
+       if ret != 0:
+           if ret == -1:
+               print "An error has occured during GCC compilation"
+           elif ret == -2:
+               print "An error has occured converting elf to hex"
+           sys.exit(1)
+       clean_init_hex(f)
+       ret = run_spike_asm(f)
+       if ret != 0:
+           print "An error has occurred during running Spike"
+           sys.exit(ret)
+       clean_spike_output(f)
+       ret = run_sim(f)
+       if ret != 0:
+           if ret == -1:
+             print "An error has occurred while setting waf's top level"
+           elif ret == -2:
+               print "An error has occurred while running " + f
+           sys.exit(ret)
+       clean_sim_trace(f)
+       failures += compare_results(f)
+   return failures
+
+def run_c():
+   failures = 0
+   if FILE_NAME is None:
+       files = glob.glob("./verification/"+"c"+"-tests/"+ARCH+"/*.c")
+   else:
+       files = glob.glob("./verification/"+"c"+"-tests/"+ARCH+"/"+FILE_NAME+"*.c")
+   print "To be implemented"
+   return failures
+
+def run_selfasm():
+   failures = 0
+   if FILE_NAME is None:
+       files = glob.glob("./verification/self-tests/" + ARCH + "/*.S")
+   else:
+       loc = "./verification/self-tests/" + ARCH + "/" + FILE_NAME + "*.S"
+       files = glob.glob(loc)
+   print "Starting self tests..."
+   for f in files:
+     ret = compile_asm_for_self(f)
+     if ret != 0:
+         if ret == -1:
+             print "An error has occured during GCC compilation"
+         elif ret == -2:
+             print "An error has occured converting elf to hex"
+         sys.exit(ret)
+     clean_init_hex_for_self(f)
+     ret = run_self_sim(f)
+     if ret != 0:
+         if ret == -1:
+             print "An error has occured while seting waf's top level"
+         elif ret == -2:
+             print "An error has occured while running " + f
+         sys.exit(ret)
+     failures += check_results(f)
+   return failures
+
 if __name__ == '__main__':
     parse_arguments()  
     failures = 0 
     # asm comparison testing
     if TEST_TYPE == "asm":
-        if FILE_NAME is None:
-            files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/*.S")
-        else:
-            files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/"+FILE_NAME+"*.S")
-        print "Starting tests..."
-        for f in files:
-            ret = compile_asm(f)
-            if ret != 0:
-                if ret == -1:
-                    print "An error has occured during GCC compilation"
-                elif ret == -2:
-                    print "An error has occured converting elf to hex"
-                sys.exit(1)
-            clean_init_hex(f)
-            ret = run_spike_asm(f)
-            if ret != 0:
-                print "An error has occurred during running Spike"
-                sys.exit(ret)
-            clean_spike_output(f)
-            ret = run_sim(f)
-            if ret != 0:
-                if ret == -1:
-                  print "An error has occurred while setting waf's top level"
-                elif ret == -2:
-                    print "An error has occurred while running " + f
-                sys.exit(ret)
-            clean_sim_trace(f)
-            failures += compare_results(f)
+      failures = run_asm()
     # C comparison testing
     elif TEST_TYPE == "c":
-        if FILE_NAME is None:
-            files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/*.c")
-        else:
-            files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/"+FILE_NAME+"*.c")
-        print "To be implemented"
+      failures = run_c()
     # self tests
     elif TEST_TYPE == "selfasm":
-        if FILE_NAME is None:
-            files = glob.glob("./verification/self-tests/" + ARCH + "/*.S")
-        else:
-            loc = "./verification/self-tests/" + ARCH + "/" + FILE_NAME + "*.S"
-            files = glob.glob(loc)
-        print "Starting self tests"
-        for f in files:
-          ret = compile_asm_for_self(f)
-          if ret != 0:
-              if ret == -1:
-                  print "An error has occured during GCC compilation"
-              elif ret == -2:
-                  print "An error has occured converting elf to hex"
-              sys.exit(ret)
-          clean_init_hex_for_self(f)
-          ret = run_self_sim(f)
-          if ret != 0:
-              if ret == -1:
-                  print "An error has occured while seting waf's top level"
-              elif ret == -2:
-                  print "An error has occured while running " + f
-              sys.exit(ret)
-          failures += check_results(f)
+      failures = run_selfasm()
+    elif TEST_TYPE == "":
+      failures += run_asm()
+      # C not implemented yet
+      #failures += run_c()
+      failures += run_selfasm()
     else:
         print "To be implemented"
     sys.exit(failures)
