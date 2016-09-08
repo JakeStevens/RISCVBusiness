@@ -36,9 +36,9 @@ module csr_rfile (
  
   /* Machine Information Registers */
   
-  mcpuid_t    mcpuid;
-  mimpid_t    mimpid;
-  mhartid_t   mhartid;
+  mcpuid_t      mcpuid;
+  mimpid_t      mimpid;
+  mhartid_t     mhartid;
 
   assign mcpuid.base          = BASE_RV32;
   assign mcpuid.zero          = '0;
@@ -112,8 +112,14 @@ module csr_rfile (
  
  
   /* Machine Timers and Counters */
-  // TODO: Implement Timers.  Non-Critical feature
-
+  mtimecmp_t    mtimecmp, mtimecmp_next;
+  mtime_t       mtime, mtime_next;
+  mtimeh_t      mtimeh, mtimeh_next;
+  logic [63:0]  mtimefull, mtimefull_next;
+  assign mtime          = mtimefull[31:0];
+  assign mtimeh         = mtimefull[63:32];
+  assign mtimefull_next = mtimefull + 1;
+  assign csr_pr_if.timer_int      = (mtime == mtimecmp);
 
   /* Machine Counter Setup */
   // TODO: Implement Timers.  Non-Critical feature
@@ -139,8 +145,10 @@ module csr_rfile (
       mscratch    <= '0;
       mtohost     <= '0;
       mfromhost   <= '0;
-    end else begin      
-      mstatus. ie <= mstatus_next.ie;
+      mtimecmp    <= '0;
+      mtimefull   <= '0;
+    end else if (prv_pipe_if.addr == MTIMEH_ADDR)begin
+      mstatus.ie  <= mstatus_next.ie;
       mip.msip    <= mip_next.msip; // interrupt
       mip.mtip    <= mip_next.mtip; // interrupt
       mcause      <= mcause_next;
@@ -149,6 +157,32 @@ module csr_rfile (
       mscratch    <= mscratch_next;
       mtohost     <= mtohost_next;
       mfromhost   <= mfromhost_next;
+      mtimecmp    <= mtimecmp_next;
+      mtimefull   <= {mtimeh_next, mtimefull_next[31:0]};
+    end else if (prv_pipe_if.addr == MTIME_ADDR) begin
+      mstatus.ie  <= mstatus_next.ie;
+      mip.msip    <= mip_next.msip; // interrupt
+      mip.mtip    <= mip_next.mtip; // interrupt
+      mcause      <= mcause_next;
+      mepc        <= mepc_next;
+      mbadaddr    <= mbadaddr_next;
+      mscratch    <= mscratch_next;
+      mtohost     <= mtohost_next;
+      mfromhost   <= mfromhost_next;
+      mtimecmp    <= mtimecmp_next;
+      mtimefull   <= {mtimefull_next[63:32], mtime_next};
+    end else begin      
+      mstatus.ie  <= mstatus_next.ie;
+      mip.msip    <= mip_next.msip; // interrupt
+      mip.mtip    <= mip_next.mtip; // interrupt
+      mcause      <= mcause_next;
+      mepc        <= mepc_next;
+      mbadaddr    <= mbadaddr_next;
+      mscratch    <= mscratch_next;
+      mtohost     <= mtohost_next;
+      mfromhost   <= mfromhost_next;
+      mtimecmp    <= mtimecmp_next;
+      mtimefull   <= mtimefull_next;
     end
   end
 
@@ -186,6 +220,9 @@ module csr_rfile (
   assign mie_next       = (prv_pipe_if.addr == MIE_ADDR) ? mie_t'(rup_data) : mie;
   assign mscratch_next  = (prv_pipe_if.addr == MSCRATCH_ADDR) ? mscratch_t'(rup_data) : mscratch;
   assign mtohost_next   = (prv_pipe_if.addr == MTOHOST_ADDR) ? mtohost_t'(rup_data) : mtohost;
+  assign mtime_next     = (prv_pipe_if.addr == MTIME_ADDR) ? mtime_t'(rup_data) : mtime;
+  assign mtimeh_next    = (prv_pipe_if.addr == MTIMEH_ADDR) ? mtimeh_t'(rup_data) : mtimeh;
+  assign mtimecmp_next  = (prv_pipe_if.addr == MTIMECMP_ADDR) ? mtimecmp_t'(rup_data) : mtimecmp;
 
   always_comb begin
     valid_csr_addr = 1'b1;
@@ -218,9 +255,9 @@ module csr_rfile (
       HTIMEHW_ADDR    : prv_pipe_if.rdata = '0;
             
       //Timers unimplemented
-      MTIMECMP_ADDR   : prv_pipe_if.rdata = '0;//mtimecmp;
-      MTIME_ADDR      : prv_pipe_if.rdata = '0;//mtime;
-      MTIMEH_ADDR     : prv_pipe_if.rdata = '0;//mtimeh;
+      MTIMECMP_ADDR   : prv_pipe_if.rdata = mtimecmp;
+      MTIME_ADDR      : prv_pipe_if.rdata = mtime;
+      MTIMEH_ADDR     : prv_pipe_if.rdata = mtimeh;
       
       // Non-Standard mtohost/mfromhost
       MTOHOST_ADDR    : prv_pipe_if.rdata = mtohost;
@@ -236,7 +273,6 @@ module csr_rfile (
   assign csr_pr_if.mtvec     = mtvec;
   assign csr_pr_if.mepc      = mepc;
   assign csr_pr_if.mie       = mie;
-  assign csr_pr_if.timer_int = 0;
   assign csr_pr_if.mstatus   = mstatus;
   assign csr_pr_if.mcause    = mcause;
   assign csr_pr_if.mip       = mip;
