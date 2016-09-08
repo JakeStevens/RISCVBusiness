@@ -29,7 +29,6 @@ RVTEST_RV32U
 RVTEST_CODE_BEGIN
 
 #test asm code goes here
-main:
   csrrw x0, mscratch, x0
   ori x1, x0, 0xF0
   ori x2, x0, 0x0F
