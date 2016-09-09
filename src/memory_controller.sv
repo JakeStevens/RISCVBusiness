@@ -53,16 +53,18 @@ module memory_controller (
 
  
   /* State Declaration */ 
-  parameter [2:0]   IDLE = 3'b000, 
-                    INSTR_REQ = 3'b001, 
-                    INSTR_WAIT = 3'b010, 
-                    DATA_REQ = 3'b011, 
-                    DATA_INSTR_REQ = 3'b100, 
-                    DATA_WAIT = 3'b101;
+  typedef enum [2:0] {
+    IDLE = 3'b000, 
+    INSTR_REQ = 3'b001, 
+    INSTR_WAIT = 3'b010, 
+    DATA_REQ = 3'b011, 
+    DATA_INSTR_REQ = 3'b100, 
+    DATA_WAIT = 3'b101
+  } state_t;
 
-  reg [2:0] current_state, next_state; 
+  state_t current_state, next_state; 
 
-  always_ff @ (posedge CLK, nRST) 
+  always_ff @ (posedge CLK, negedge nRST) 
   begin 
     if (nRST == 0) 
       current_state <= IDLE; 
