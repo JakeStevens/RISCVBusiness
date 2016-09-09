@@ -120,6 +120,8 @@ module csr_rfile (
   assign mtimeh         = mtimefull[63:32];
   assign mtimefull_next = mtimefull + 1;
   assign csr_pr_if.timer_int      = (mtime == mtimecmp);
+  assign csr_pr_if.clear_timer_int = (prv_pipe_if.addr == MTIMECMP_ADDR) &
+                                      prv_pipe_if.valid_write;
 
   /* Machine Counter Setup */
   // TODO: Implement Timers.  Non-Critical feature
