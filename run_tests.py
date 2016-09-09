@@ -148,6 +148,31 @@ def compile_asm_for_self(file_name):
     else:
         return 0
 
+def compile_c(file_name):
+    # compile all of the files
+    short_name = file_name.split(ARCH+'/')[1][:-2]
+    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_name = output_dir + short_name + '.elf'
+
+    if not os.path.exists(os.path.dirname(output_name)):
+        os.makedirs(os.path.dirname(output_name))
+
+    cmd_arr = ['riscv64-unknown-elf-gcc', '-Os', '-m32', '-ffreestanding', '-nostdlib', '-o', output_name, 
+              '-Wl,-Bstatic,-T,verification/asm-env/c_firmware/link.lds,--strip-debug', '-lgcc', file_name]
+    failure = subprocess.call(cmd_arr)
+    if failure:
+        return -1
+    
+    # create an meminit.hex file from the elf file produced above
+    cmd_arr = ['elf2hex', '8', '65536', output_name]
+    hex_file_loc = output_dir + 'meminit.hex'
+    with open(hex_file_loc, 'w') as hex_file:
+        failure = subprocess.call(cmd_arr, stdout=hex_file)
+    if failure:
+        return -2
+    else:
+        return 0
+
 def invert_bin_string(bin_string):
     inverted = ''
     while len(bin_string) < 8:
@@ -504,6 +529,34 @@ def run_selfasm():
          sys.exit(ret)
      failures += check_results(f)
    return failures
+
+def run_c():
+   failures = 0
+   if FILE_NAME is None:
+       files = glob.glob("./verification/c-tests/" + ARCH + "/*.c")
+   else:
+       loc = "./verification/c-tests/" + ARCH + "/" + FILE_NAME + "*.c"
+       files = glob.glob(loc)
+   print "Starting c tests..."
+   for f in files:
+     ret = compile_c(f)
+     if ret != 0:
+         if ret == -1:
+             print "An error has occured during GCC compilation"
+         elif ret == -2:
+             print "An error has occured converting elf to hex"
+         sys.exit(ret)
+     clean_init_hex_for_self(f)
+     #ret = run_self_sim(f)
+     if ret != 0:
+         if ret == -1:
+             print "An error has occured while seting waf's top level"
+         elif ret == -2:
+             print "An error has occured while running " + f
+         sys.exit(ret)
+     failures += check_results(f)
+   return failures
+
 
 if __name__ == '__main__':
     parse_arguments()  
