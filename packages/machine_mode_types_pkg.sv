@@ -215,10 +215,8 @@ package machine_mode_types_pkg;
 
   /* Simple registers */
 
-  typedef logic [63:0] mtime_t;
   typedef logic [63:0] mcycle_t;
   typedef logic [63:0] minstret_t;
-  typedef logic [31:0] mtimecmp_t;
   typedef logic [31:0] mscratch_t;
   typedef logic [31:0] mbadaddr_t;
   typedef logic [31:0] mimpid_t;
@@ -226,6 +224,9 @@ package machine_mode_types_pkg;
   typedef logic [31:0] mtdeleg_t;
   typedef logic [31:0] mtvec_t;
   typedef logic [31:0] mepc_t;
+  typedef logic [31:0] mtime_t;
+  typedef logic [31:0] mtimeh_t;
+  typedef logic [31:0] mtimecmp_t;
 
   `define MTVEC_ADDR 32'h1C0
 

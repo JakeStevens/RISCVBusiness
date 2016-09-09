@@ -45,7 +45,7 @@ interface control_unit_if;
 
   // Privilege control signals
   logic fault_insn, illegal_insn, ret_insn, breakpoint, ecall_insn;
-  logic csr_swap, csr_set, csr_clr, csr_imm, csr_rw_valid;
+  logic csr_swap, csr_set, csr_clr, csr_imm, csr_rw_valid, not_zero;
   csr_addr_t csr_addr;
   logic [4:0] zimm;
 
@@ -56,7 +56,7 @@ interface control_unit_if;
     imm_I, imm_S, imm_SB, imm_UJ, imm_U, imm_shamt_sel, alu_op, 
     opcode, halt, wen, fault_insn, illegal_insn, ret_insn, breakpoint, 
     ecall_insn, csr_swap, csr_set, csr_clr, csr_imm, csr_rw_valid,
-    csr_addr, zimm
+    csr_addr, zimm, not_zero
   );
 
 endinterface

@@ -218,23 +218,29 @@ module control_unit
     cu_if.csr_clr   = 1'b0;
     cu_if.csr_set   = 1'b0;
     cu_if.csr_imm   = 1'b0;
+    cu_if.not_zero       = 1'b0;
  
     if (cu_if.opcode == SYSTEM) begin
       if (rv32i_system_t'(instr_r.funct3) == CSRRW) begin
         cu_if.csr_swap  = 1'b1;
       end else if (rv32i_system_t'(instr_r.funct3) == CSRRS) begin
         cu_if.csr_set   = 1'b1;
+        cu_if.not_zero       = !rf_if.rs1;
       end else if (rv32i_system_t'(instr_r.funct3) == CSRRC) begin 
         cu_if.csr_clr = 1'b1; 
+        cu_if.not_zero     = !rf_if.rs1;
       end else if (rv32i_system_t'(instr_r.funct3) == CSRRWI) begin
         cu_if.csr_swap  = 1'b1;
-        cu_if.csr_imm   = 1'b1; 
+        cu_if.csr_imm   = 1'b1;
+        cu_if.not_zero       = !cu_if.zimm;  
       end else if (rv32i_system_t'(instr_r.funct3) == CSRRSI) begin
         cu_if.csr_set   = 1'b1;
-        cu_if.csr_imm   = 1'b1; 
+        cu_if.csr_imm   = 1'b1;
+        cu_if.not_zero       = !cu_if.zimm;  
       end else if (rv32i_system_t'(instr_r.funct3) == CSRRCI) begin
         cu_if.csr_clr = 1'b1; 
         cu_if.csr_imm   = 1'b1; 
+        cu_if.not_zero       = !cu_if.zimm;  
       end
     end   
   end

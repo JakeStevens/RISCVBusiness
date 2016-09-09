@@ -240,6 +240,8 @@ module execute_stage(
   assign prv_pipe_if.set   = cu_if.csr_set   & cu_if.csr_rw_valid & ~hazard_if.if_ex_stall;
   assign prv_pipe_if.wdata = cu_if.csr_imm ? {27'h0, cu_if.zimm} : rf_if.rs1_data;
   assign prv_pipe_if.addr  = cu_if.csr_addr;
+  assign prv_pipe_if.valid_write = (prv_pipe_if.swap | prv_pipe_if.clr |
+                                    prv_pipe_if.set) & cu_if.not_zero;
   
   always_comb begin
     if(byte_en == 4'hf) 

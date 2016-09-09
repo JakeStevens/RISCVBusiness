@@ -59,6 +59,7 @@ module prv_control (
   always_comb begin
     csr_pr_if.mip_next = csr_pr_if.mip;
     if (prv_pipe_if.timer_int) csr_pr_if.mip_next.mtip = 1'b1;
+    if (csr_pr_if.clear_timer_int) csr_pr_if.mip_next.mtip = 1'b0;
     if (prv_pipe_if.soft_int) csr_pr_if.mip_next.msip = 1'b1;
     if (prv_pipe_if.ext_int) csr_pr_if.mip_next.msip = 1'b1; //external interrupts not specified in 1.7
   end
