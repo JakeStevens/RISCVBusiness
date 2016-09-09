@@ -29,6 +29,18 @@ def configure(ctx):
       tb = 'tb_alu',
       tb_includes = ['include']
     )
+    ctx.setup_hdl_module('ahb_master', 
+      includes = ['include'],
+      src_dir = ['packages','src'],
+      tb = 'tb_ahb_master',
+      tb_includes = ['include']
+    )
+    ctx.setup_hdl_module('memory_controller', 
+      includes = ['include'],
+      src_dir = ['packages','src'],
+      tb = 'tb_memory_controller',
+      tb_includes = ['include']
+    )
 
 def build(ctx):
     pass
