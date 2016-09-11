@@ -157,8 +157,8 @@ def compile_c(file_name):
     if not os.path.exists(os.path.dirname(output_name)):
         os.makedirs(os.path.dirname(output_name))
 
-    cmd_arr = ['riscv64-unknown-elf-gcc', '-Os', '-m32', '-ffreestanding', '-nostdlib', '-o', output_name, 
-              '-Wl,-Bstatic,-T,verification/asm-env/c_firmware/link.lds,--strip-debug', '-lgcc', file_name]
+    cmd_arr = ['riscv64-unknown-elf-gcc', '-O0', '-m32', '-march=RV32IM', '-ffreestanding', '-nostdlib', '-o', output_name, 
+              '-Wl,-Bstatic,-T,verification/c-firmware/link.ld,--strip-debug', '-lgcc', 'verification/c-firmware/interrupt.S',file_name]
     failure = subprocess.call(cmd_arr)
     if failure:
         return -1
