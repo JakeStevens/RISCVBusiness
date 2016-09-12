@@ -23,8 +23,9 @@
 */
 
 `include "ram_if.vh" 
+`include "ahb_if.vh" 
 
-module tb_memory_controller ();
+module memory_controller_tb ();
 
   parameter NUM_TESTS = 1;
   parameter PERIOD = 20; 
@@ -35,8 +36,11 @@ module tb_memory_controller ();
   ram_if i_ram_if(); 
   ram_if out_ram_if(); 
 
-  memory_controller DUT ( CLK, nRST, d_ram_if, i_ram_if, out_ram_if );
+  ahb_if ahb_m();
 
+  memory_controller DUT ( CLK, nRST, d_ram_if, i_ram_if, out_ram_if );
+  ahb_master DUT2 ( CLK, nRST, ahb_m, out_ram_if); 
+  
   //-- CLOCK INITIALIZATION --// 
   initial begin : INIT 
     CLK = 0; 
@@ -63,36 +67,113 @@ module tb_memory_controller ();
     d_ram_if.wdata = 32'h00000000; 
     d_ram_if.byte_en = 4'h1;
 
-    out_ram_if.rdata = 32'hDEADBEEF; 
-    out_ram_if.busy = 0;
+    ahb_m.HRDATA = 32'hbad1bad1; 
+    ahb_m.HREADY = 0;
+    ahb_m.HRESP = 0;
+
+    //-- Base Address Initilization --// 
+    i_ram_if.addr = 32'h00000010; 
+    d_ram_if.addr = 32'h00000080; 
 
     @(posedge CLK); 
-    @(posedge CLK); 
+    #(PERIOD); 
 
-    nRST = 1; 
+    //-- Program starts here --// 
+    nRST = 1;
+
+    instruction_read();
+    data_read();
+    data_write(); 
+     
+    #(3 * PERIOD); 
+
+    $finish;
+  end : MAIN
+
+  task instruction_read; 
+  begin 
+    d_ram_if.ren = 0; 
+    d_ram_if.wen = 0;
+    i_ram_if.ren = 1; 
+    i_ram_if.wen = 0;
+    i_ram_if.addr = i_ram_if.addr + 4; 
+    #(5 * PERIOD) 
+    ahb_m.HRDATA = 32'hDEADBEEF; 
+    ahb_m.HWDATA = 0; 
+    ahb_m.HREADY = 1; 
+    #(PERIOD) 
+    ahb_m.HRDATA = 32'hbad1bad1; 
+    ahb_m.HREADY = 0; 
+    d_ram_if.ren = 0; 
+    d_ram_if.wen = 0;
+    i_ram_if.ren = 1; 
+    i_ram_if.wen = 0;
+  end
+  endtask
+
+  task data_read; 
+  begin 
+    d_ram_if.addr = d_ram_if.addr + 4; 
     d_ram_if.ren = 1; 
     d_ram_if.wen = 0;
     i_ram_if.ren = 1; 
     i_ram_if.wen = 0;
+    #(5 * PERIOD) 
+    ahb_m.HRDATA = 32'hDEADBEEF; 
+    ahb_m.HWDATA = 0; 
+    ahb_m.HREADY = 1; 
+    #(PERIOD) 
+    ahb_m.HRDATA = 32'hDEADBEEF; 
+    ahb_m.HREADY = 0; 
+    d_ram_if.ren = 1; 
+    d_ram_if.wen = 0;
+    i_ram_if.ren = 1; 
+    i_ram_if.wen = 0;
+    #(5 * PERIOD) 
+    ahb_m.HRDATA = 32'hbad1bad1; 
+    ahb_m.HWDATA = 0; 
+    ahb_m.HREADY = 1; 
+    #(PERIOD) 
+    ahb_m.HRDATA = 32'hbad1bad1; 
+    ahb_m.HREADY = 0; 
+    d_ram_if.ren = 0; 
+    d_ram_if.wen = 0;
+    i_ram_if.ren = 1; 
+    i_ram_if.wen = 0;
+  end
+  endtask
 
-    i_ram_if.addr = 32'h00000010; 
-    d_ram_if.addr = 32'h00000080; 
+  task data_write; 
+  begin 
+    d_ram_if.addr = d_ram_if.addr + 4; 
+    d_ram_if.ren = 0; 
+    d_ram_if.wen = 1;
+    i_ram_if.ren = 1; 
+    i_ram_if.wen = 0;
+    #(5 * PERIOD) 
+    ahb_m.HRDATA = 32'hDEADBEEF; 
+    ahb_m.HWDATA = 0; 
+    ahb_m.HREADY = 1; 
+    #(PERIOD) 
+    ahb_m.HRDATA = 32'hDEADBEEF; 
+    ahb_m.HREADY = 0; 
+    d_ram_if.ren = 0; 
+    d_ram_if.wen = 1;
+    i_ram_if.ren = 1; 
+    i_ram_if.wen = 0;
+    #(5 * PERIOD) 
+    ahb_m.HRDATA = 32'hbad1bad1; 
+    ahb_m.HWDATA = 0; 
+    ahb_m.HREADY = 1; 
+    #(PERIOD) 
+    ahb_m.HRDATA = 32'hbad1bad1; 
+    ahb_m.HREADY = 0; 
+    d_ram_if.ren = 0; 
+    d_ram_if.wen = 0;
+    i_ram_if.ren = 1; 
+    i_ram_if.wen = 0;
+  end 
+  endtask
 
-    out_ram_if.rdata = 32'hDEADBEEF; 
-    out_ram_if.busy = 1; 
-
-    #(2 * PERIOD) 
-    #(2 * PERIOD) 
-    //#(PERIOD/2) 
-    out_ram_if.busy = 0; 
-    #(2 * PERIOD) 
-    #(2 * PERIOD) 
-    out_ram_if.busy = 1; 
-    #(2 * PERIOD) 
-    #(2 * PERIOD) 
-    out_ram_if.busy = 0; 
-    #(2 * PERIOD) 
-
-    $finish;
-  end : MAIN
 endmodule
+

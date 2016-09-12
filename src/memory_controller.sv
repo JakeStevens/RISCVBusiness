@@ -17,8 +17,9 @@
 *   Filename:     memory_controller.sv
 *   
 *   Created by:   John Skubic
-*   Email:        jskubic@purdue.edu
-*   Date Created: 06/01/2016
+*   Modified by:  Chuan Yean Tan
+*   Email:        jskubic@purdue.edu , tan56@purdue.edu
+*   Date Created: 09/12/2016
 *   Description:  Memory controller and arbitration between instruction
 *                 and data accesses
 */
@@ -26,7 +27,7 @@
 `include "ram_if.vh"
 
 module memory_controller (
-  input CLK, nRST,
+  input logic CLK, nRST,
   ram_if.ram d_ram_if,
   ram_if.ram i_ram_if,
   ram_if.cpu out_ram_if
@@ -53,14 +54,14 @@ module memory_controller (
 
  
   /* State Declaration */ 
-  typedef enum [2:0] {
-    IDLE = 3'b000, 
-    INSTR_REQ = 3'b001, 
-    INSTR_WAIT = 3'b010, 
-    DATA_REQ = 3'b011, 
-    DATA_INSTR_REQ = 3'b100, 
-    DATA_WAIT = 3'b101
-  } state_t;
+  typedef enum { 
+                    IDLE, 
+                    INSTR_REQ ,
+                    INSTR_WAIT, 
+                    DATA_REQ ,
+                    DATA_INSTR_REQ ,
+                    DATA_WAIT
+                    } state_t; 
 
   state_t current_state, next_state; 
 
