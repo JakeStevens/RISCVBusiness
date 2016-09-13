@@ -28,6 +28,8 @@
 #ifndef _ENV_SIMPLE_PHYSICAL_SINGLE_CORE_H
 #define _ENV_SIMPLE_PHYSICAL_SINGLE_CORE_H
 
+#include "../encoding.h"
+
 //-----------------------------------------------------------------------
 // Data Dump Section Macro
 //-----------------------------------------------------------------------
@@ -40,9 +42,27 @@
 // Text Section Macro
 //-----------------------------------------------------------------------
 
-#define RVTEST_CODE_BEGIN .align 6; .global _start; _start:
+#define RVTEST_INTVEC_USER_BEGIN \
+  .text;                    \
+  .align 6;                 
+ 
+#define RVTEST_INTVEC_SUPER_BEGIN \
+  .align 6;            
 
-#define RVTEST_CODE_END csrw mtohost, 1; \
+#define RVTEST_INTVEC_HYPER_BEGIN \
+  .align 6;           
+
+#define RVTEST_INTVEC_MACH_BEGIN \
+  .align 6;           
+
+#define RVTEST_CODE_BEGIN   \
+  .align  6; \
+  .globl _start;          \
+_start:
+  
+
+#define RVTEST_CODE_END \
+  csrw mtohost, 1; \
   1:  \
   j 1b
 

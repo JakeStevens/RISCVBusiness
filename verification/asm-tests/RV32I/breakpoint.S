@@ -14,36 +14,54 @@
 *   limitations under the License.
 *
 *
-*   Filename:     csr_pipe_if.vh
+*   Filename:     breakpoint.S
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
-*   Date Created: 07/27/2016
-*   Description:  Interface between the csr register file and pipeline 
+*   Date Created: 07/01/2016
+*   Description:  Creates a breakpoint
 */
 
-`ifndef CSR_PIPE_IF_VH
-`define CSR_PIPE_IF_VH
+#include "riscv_test.h"
 
-interface csr_pipe_if;
-  import machine_mode_types_pkg::*;
-  import rv32i_types_pkg::*;
+RVTEST_DATA_DUMP_BEGIN
+
+RVTEST_INTVEC_USER_BEGIN
+  nop
+RVTEST_INTVEC_SUPER_BEGIN
+  nop
+RVTEST_INTVEC_HYPER_BEGIN
+  nop
+RVTEST_INTVEC_MACH_BEGIN
+  ori x9, x0, 1
+  la  x8, tdat2
+  sw  x9, 0(x8)
+  csrr x10, mepc
+  addi x10,x10, 4
+  csrw mepc, x10
+  eret
+RVTEST_CODE_BEGIN
+
+main:
+  ori x2, x0, 0x678
+  ori x4, x0, 1
+  la  x3, tdat4
+  la  x5, tdat3
+  ebreak 
+  sw  x4, 0(x5)
   
-  logic       swap, clr, set;
-  logic       invalid_csr;
-  csr_addr_t  addr;
-  word_t      rdata, wdata;
 
-  modport csr (
-    input  swap, clr, set, wdata, addr,
-    output rdata, invalid_csr
-  );
+RVTEST_CODE_END
 
-  modport csr (
-    output swap, clr, set, wdata, addr,
-    input  rdata, invalid_csr
-  );
+.data
+#test data goes here
+tdat0:  .word 0xdeadcafe
+tdat1:  .word 0xbadc0de1
+tdat2:  .word 0x00000000
+tdat3:  .word 0x00000000
+tdat4:  .word 0x00000000
 
-endinterface
+RVTEST_DATA_DUMP_END
 
-`endif //CSR_PIPE_IF_VH
+
+

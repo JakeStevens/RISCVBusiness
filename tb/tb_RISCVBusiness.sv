@@ -27,6 +27,7 @@
 `include "ram_if.vh"
 
 `define OUTPUT_FILE_NAME "cpu.hex"
+`define CLK_TIMEOUT 10000
 
 module tb_RISCVBusiness ();
    
@@ -39,6 +40,7 @@ module tb_RISCVBusiness ();
   logic [63:0] hexdump_temp;
   logic [7:0] checksum;
   integer fptr;
+  integer clk_count;
 
   //Interface Instantiations
   ram_if ram_if();
@@ -114,17 +116,22 @@ module tb_RISCVBusiness ();
   initial begin : CORE_RUN
     nRST = 0;
     ram_control = 1;
+    clk_count = 0;
  
     @(posedge CLK);
     @(posedge CLK);
 
     nRST = 1;
     
-    while (halt == 0) begin
+    while (halt == 0 && clk_count != `CLK_TIMEOUT) begin
       @(posedge CLK);
+      clk_count++;
     end
 
     dump_ram();
+
+    if (clk_count == `CLK_TIMEOUT) 
+      $display("ERROR: Test timed out");
 
     $finish;
 
@@ -140,7 +147,7 @@ module tb_RISCVBusiness ();
 
     fptr = $fopen(`OUTPUT_FILE_NAME, "w");
 
-    for(addr = 32'h200; addr < 32'h1000; addr+=4) begin
+    for(addr = 32'h100; addr < 32'h2000; addr+=4) begin
       read_ram(addr, data);
       hexdump_temp = {8'h04, addr[15:0]>>2, 8'h00, data};
       checksum = calculate_crc(hexdump_temp);

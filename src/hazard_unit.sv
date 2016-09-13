@@ -24,9 +24,12 @@
 */
 
 `include "hazard_unit_if.vh"
+`include "prv_pipeline_if.vh"
+
 module hazard_unit
 (
-  hazard_unit_if.hazard_unit hazard_if
+  hazard_unit_if.hazard_unit hazard_if,
+  prv_pipeline_if.hazard  prv_pipe_if
 );
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;
@@ -39,9 +42,9 @@ module hazard_unit
 
   // IRQ/Exception hazard signals
   logic ex_flush_hazard; 
-  logic[1:0] pc;
-  assign pc = hazard_unit.pc[3:2];
-  
+  logic e_ex_stage;
+  logic e_f_stage;
+  logic intr;
 
   assign dmem_access = (hazard_if.dren || hazard_if.dwen);
   assign branch_jump = hazard_if.jump || 
@@ -51,8 +54,8 @@ module hazard_unit
   
   assign hazard_if.npc_sel = branch_jump;
   
-  assign hazard_if.pc_en = (~wait_for_dmem&~wait_for_imem&~hazard_if.halt) |
-                            branch_jump; 
+  assign hazard_if.pc_en = (~wait_for_dmem&~wait_for_imem&~hazard_if.halt&~ex_flush_hazard) |
+                            branch_jump | prv_pipe_if.insert_pc | prv_pipe_if.ret; 
 
   assign hazard_if.if_ex_flush = ex_flush_hazard | branch_jump |
                                  (wait_for_imem & dmem_access &
@@ -60,13 +63,34 @@ module hazard_unit
 
   assign hazard_if.if_ex_stall = (wait_for_dmem ||
                                  (wait_for_imem & ~dmem_access) ||
-                                 hazard_if.halt) & ~ex_flush_hazard;
+                                 hazard_if.halt) & (~ex_flush_hazard | e_ex_stage);
 
-
-  assign hazard_if.mal_instr = !(pc == 2'b00 || pc == 2'b01 ||
-                                  pc == 2'b10 || pc == 2'b11);
   /* Hazards due to Interrupts/Exceptions */
-  assign hazard_if.priv_sel = hazard_if.insert_pc;
-  assign hazard_if.pipeline_finish = hazard_if.interrupt;
-  assign ex_flush_hazard = hazard_if.ex_excptn;
+  assign prv_pipe_if.ret = hazard_if.ret;
+  assign e_ex_stage = hazard_if.illegal_insn | hazard_if.fault_l | hazard_if.mal_l |
+                      hazard_if.fault_s | hazard_if.mal_s | hazard_if.breakpoint |
+                      hazard_if.env_m;
+  assign e_f_stage = hazard_if.fault_insn | hazard_if.mal_insn;
+  assign intr = ~e_ex_stage & ~e_f_stage & prv_pipe_if.intr;
+
+  assign prv_pipe_if.pipe_clear = e_ex_stage | ~hazard_if.token_ex;
+  assign ex_flush_hazard =  ((intr | e_f_stage) & ~wait_for_dmem) | e_ex_stage | prv_pipe_if.ret;
+
+  assign hazard_if.insert_priv_pc = prv_pipe_if.insert_pc;
+  assign hazard_if.priv_pc        = prv_pipe_if.priv_pc;
+
+  /* Send Exception notifications to Prv Block */
+  assign prv_pipe_if.fault_insn   = hazard_if.fault_insn;
+  assign prv_pipe_if.mal_insn     = hazard_if.mal_insn;
+  assign prv_pipe_if.illegal_insn = hazard_if.illegal_insn;
+  assign prv_pipe_if.fault_l      = hazard_if.fault_l;
+  assign prv_pipe_if.mal_l        = hazard_if.mal_l;
+  assign prv_pipe_if.fault_s      = hazard_if.fault_s;
+  assign prv_pipe_if.mal_s        = hazard_if.mal_s;
+  assign prv_pipe_if.breakpoint   = hazard_if.breakpoint;
+  assign prv_pipe_if.env_m        = hazard_if.env_m;
+
+  assign prv_pipe_if.epc = (hazard_if.mal_insn | hazard_if.fault_insn) ? hazard_if.epc_f : hazard_if.epc_e;
+  assign prv_pipe_if.badaddr = (hazard_if.mal_insn | hazard_if.fault_insn) ? hazard_if.badaddr_f : hazard_if.badaddr_e; 
+
 endmodule

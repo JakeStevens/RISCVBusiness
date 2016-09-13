@@ -26,10 +26,18 @@
 #include "riscv_test.h"
 
 RVTEST_DATA_DUMP_BEGIN
+
+RVTEST_INTVEC_USER_BEGIN
+  nop
+RVTEST_INTVEC_SUPER_BEGIN
+  nop
+RVTEST_INTVEC_HYPER_BEGIN
+  nop
+RVTEST_INTVEC_MACH_BEGIN
+  nop
+
 RVTEST_CODE_BEGIN
 
-.text
-#test asm code goes here
 main:
     lui x4, 0x70000
     lui x5, 0xf0000

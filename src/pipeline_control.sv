@@ -23,38 +23,35 @@
 *                 block 
 */
 
+`include "prv_pipeline_if.vh"
+
 module pipeline_control
 (
-  input logic intr, ret, pipe_clear,
-  logic [1:0] prv_intr, prv_ret,
-  word_t [1:0] xtvec, xepc_r,
-  output logic insert_pc,
-  word_t priv_pc,
-  logic intr_out
+  input logic CLK, nRST,
+  input logic [1:0] prv_intr, prv_ret,
+  prv_pipeline_if.pipe_ctrl prv_pipe_if
 );
   import rv32i_types_pkg::*;
   
-  assign intr_out = intr;
-  assign insert_pc = ret || pipe_clear;
-  
-  
+  assign prv_pipe_if.insert_pc = prv_pipe_if.ret | (prv_pipe_if.pipe_clear & prv_pipe_if.intr);
+ 
   always_comb begin
-    if(intr)
+    if(prv_pipe_if.intr)
       case(prv_intr)
-        2'b00:  priv_pc = xtvec[2'b00];
-        2'b01:  priv_pc = xtvec[2'b01];
-        2'b10:  priv_pc = xtvec[2'b10];
-        2'b11:  priv_pc = xtvec[2'b11]; 
+        2'b00:  prv_pipe_if.priv_pc = prv_pipe_if.xtvec[2'b00];
+        2'b01:  prv_pipe_if.priv_pc = prv_pipe_if.xtvec[2'b01];
+        2'b10:  prv_pipe_if.priv_pc = prv_pipe_if.xtvec[2'b10];
+        2'b11:  prv_pipe_if.priv_pc = prv_pipe_if.xtvec[2'b11]; 
       endcase
-    else if (ret)
+    else if (prv_pipe_if.ret)
       case(prv_ret)
-        2'b00:  priv_pc = xepc_r[2'b00];
-        2'b01:  priv_pc = xepc_r[2'b01];
-        2'b10:  priv_pc = xepc_r[2'b10];
-        2'b11:  priv_pc = xepc_r[2'b11];
+        2'b00:  prv_pipe_if.priv_pc = prv_pipe_if.xepc_r[2'b00];
+        2'b01:  prv_pipe_if.priv_pc = prv_pipe_if.xepc_r[2'b01];
+        2'b10:  prv_pipe_if.priv_pc = prv_pipe_if.xepc_r[2'b10];
+        2'b11:  prv_pipe_if.priv_pc = prv_pipe_if.xepc_r[2'b11];
       endcase
     else
-      priv_pc = 32'b0;
+      prv_pipe_if.priv_pc = 32'b0;
   end
 
 endmodule

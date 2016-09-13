@@ -28,6 +28,7 @@ import sys
 import glob
 import subprocess
 import os
+import re
 
 FNULL = open(os.devnull, 'w')
 END_COLOR = "\033[0m"
@@ -37,7 +38,8 @@ START_RED = "\033[31m"
 FILE_NAME = None
 ARCH = "RV32I"
 SUPPORTED_ARCHS = []
-TEST_TYPE = "asm"
+SUPPORTED_TEST_TYPES = ['asm', 'c', 'selfasm', ""]
+TEST_TYPE = ""
 # Change this variable to the filename (minus extension)
 # of the top level file for your project. This should
 # match the file name given in the top level wscript
@@ -49,7 +51,7 @@ def parse_arguments():
       parser.add_argument('--arch', '-a', dest='arch', type=str,
                           default="RV32I",
                           help="Specify the architecture targeted. Default: RV32I")
-      parser.add_argument('--test', '-t', dest='test_type', type=str, default="asm",
+      parser.add_argument('--test', '-t', dest='test_type', type=str, default="",
                           help="Specify what type of tests to run. Default: asm")
       parser.add_argument('file_name', metavar='file_name', type=str,
                           nargs='?',
@@ -59,17 +61,32 @@ def parse_arguments():
       FILE_NAME = args.file_name
       TEST_TYPE = args.test_type
       
-      if TEST_TYPE not in ['asm', 'c', 'self']:
+      if TEST_TYPE not in SUPPORTED_TEST_TYPES:
           print "ERROR: " + TEST_TYPE + " is not a supported test type"
           sys.exit(1)
       
-      test_file_dir = TEST_TYPE + '-tests/'
-      SUPPORTED_ARCHS = glob.glob('./verification/' + test_file_dir + '*')
-      SUPPORTED_ARCHS = [a.split('/'+test_file_dir)[1] for a in SUPPORTED_ARCHS]
-      if ARCH not in SUPPORTED_ARCHS:
-          print "ERROR: No " + TEST_TYPE + " tests exist for " + ARCH
-          sys.exit(1)
 
+      if TEST_TYPE == "":
+        for test_type in SUPPORTED_TEST_TYPES[:-1]:
+           if test_type == 'selfasm':
+              test_file_dir = 'self-tests/'
+           else:
+              test_file_dir = test_type + '-tests/'
+        SUPPORTED_ARCHS = glob.glob('./verification/' + test_file_dir + '*')
+        SUPPORTED_ARCHS = [a.split('/'+test_file_dir)[1] for a in SUPPORTED_ARCHS]
+        if ARCH not in SUPPORTED_ARCHS:
+           print "ERROR: No " + test_type + " tests exist for " + ARCH
+           sys.exit(1)
+      else:
+         if TEST_TYPE == 'selfasm':
+            test_file_dir = 'self-tests/'
+         else:
+            test_file_dir = TEST_TYPE + '-tests/'
+         SUPPORTED_ARCHS = glob.glob('./verification/' + test_file_dir + '*')
+         SUPPORTED_ARCHS = [a.split('/'+test_file_dir)[1] for a in SUPPORTED_ARCHS]
+         if ARCH not in SUPPORTED_ARCHS:
+           print "ERROR: No " + TEST_TYPE + " tests exist for " + ARCH
+           sys.exit(1)
 
 # compile_asm takes a file_name as input and assembles the file pointed
 # to by that file name. It also takes the elf file that is the result
@@ -87,6 +104,61 @@ def compile_asm(file_name):
                 '-mcmodel=medany', '-fvisibility=hidden', '-nostdlib',
                 '-nostartfiles', '-T./verification/asm-env/link.ld',
                 '-I./verification/asm-env/asm', file_name, '-o', output_name]
+    failure = subprocess.call(cmd_arr)
+    if failure:
+        return -1
+    
+    # create an meminit.hex file from the elf file produced above
+    cmd_arr = ['elf2hex', '8', '65536', output_name]
+    hex_file_loc = output_dir + 'meminit.hex'
+    with open(hex_file_loc, 'w') as hex_file:
+        failure = subprocess.call(cmd_arr, stdout=hex_file)
+    if failure:
+        return -2
+    else:
+        return 0
+
+# compile_asm_for_self is identical to compile_asm but has different
+# settings specifically for compiling self tests
+def compile_asm_for_self(file_name):
+    # compile all of the files
+    short_name = file_name.split(ARCH+'/')[1][:-2]
+    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_name = output_dir + short_name + '.elf'
+
+    if not os.path.exists(os.path.dirname(output_name)):
+        os.makedirs(os.path.dirname(output_name))
+
+    cmd_arr = ['riscv64-unknown-elf-gcc', '-m32', '-static',
+                '-mcmodel=medany', '-fvisibility=hidden', '-nostdlib',
+                '-nostartfiles', '-T./verification/asm-env/link.ld',
+                '-I./verification/asm-env/selfasm', file_name, '-o',
+                output_name]
+    failure = subprocess.call(cmd_arr)
+    if failure:
+        return -1
+    
+    # create an meminit.hex file from the elf file produced above
+    cmd_arr = ['elf2hex', '8', '65536', output_name]
+    hex_file_loc = output_dir + 'meminit.hex'
+    with open(hex_file_loc, 'w') as hex_file:
+        failure = subprocess.call(cmd_arr, stdout=hex_file)
+    if failure:
+        return -2
+    else:
+        return 0
+
+def compile_c(file_name):
+    # compile all of the files
+    short_name = file_name.split(ARCH+'/')[1][:-2]
+    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_name = output_dir + short_name + '.elf'
+
+    if not os.path.exists(os.path.dirname(output_name)):
+        os.makedirs(os.path.dirname(output_name))
+
+    cmd_arr = ['riscv64-unknown-elf-gcc', '-O0', '-m32', '-march=RV32IM', '-ffreestanding', '-nostdlib', '-o', output_name, 
+              '-Wl,-Bstatic,-T,verification/c-firmware/link.ld,--strip-debug', '-lgcc', 'verification/c-firmware/interrupt.S',file_name]
     failure = subprocess.call(cmd_arr)
     if failure:
         return -1
@@ -163,7 +235,50 @@ def clean_init_hex(file_name):
                 if new_data_word != "00000000":
                     out = ":04" + addr_str + "00" + new_data_word + checksum + '\n'
                     # ignore the ELF header
-                    if addr >= 0x200:
+                    if addr >= 0x100:
+                        cleaned_file.write(out)
+                addr += 0x4
+        # add the EOL record to the file
+        cleaned_file.write(":00000001FF")
+        cleaned_file.close()
+    subprocess.call(['rm', init_output])
+    subprocess.call(['mv', cleaned_location, init_output])
+    if not os.path.exists(os.path.dirname(build_dir)):
+        os.makedirs(os.path.dirname(build_dir))
+    subprocess.call(['cp', init_output, build_dir])
+    return
+
+# Create a temp file that consists of the Intel HEX format
+# version of the meminit.hex file, delete the original log file
+# and rename the temp file to the original's name
+def clean_init_hex_for_self(file_name):
+    short_name = file_name.split(ARCH+'/')[1][:-2]
+    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    init_output = output_dir + 'meminit.hex'
+    build_dir = './build/meminit.hex'
+
+    cleaned_location = init_output[:len(file_name)-4] + "_clean.hex"
+    addr = 0x00
+    with open(init_output, 'r') as init_file:
+        cleaned_file = open(cleaned_location, 'w')
+
+        for line in init_file:
+            stripped_line = line[:len(line)-1]
+            for i in range(len(stripped_line), 0, -8):
+                data_word = stripped_line[i-8:i]
+                new_data_word = data_word[6:8] + data_word[4:6]
+                new_data_word += data_word[2:4] + data_word[0:2]
+                checksum = calculate_checksum_str(int(new_data_word, 16), addr)
+                if len(checksum) < 2:
+                    checksum = '0' + checksum
+                addr_str = hex(addr/4)[2:]
+                #left pad the string with 0s until 4 hex digits
+                while len(addr_str) < 4:
+                    addr_str = '0' + addr_str
+                if new_data_word != "00000000":
+                    out = ":04" + addr_str + "00" + new_data_word + checksum + '\n'
+                    # ignore the ELF header
+                    if addr >= 0x100:
                         cleaned_file.write(out)
                 addr += 0x4
         # add the EOL record to the file
@@ -186,7 +301,7 @@ def clean_spike_output(file_name):
     # clean the hex memory dump
     spike_output = output_dir + short_name + '_spike.hex'
     cleaned_location = output_dir + short_name + '_spike_clean.hex'
-    addr = 0x200
+    addr = 0x100
     with open(spike_output, 'r') as spike_file:
         cleaned_file = open(cleaned_location, 'w')
         for line in spike_file:
@@ -220,7 +335,7 @@ def clean_spike_output(file_name):
             broken_line_arr = line.split()
             if 'csrwi' == broken_line_arr[4]:
                 break
-            if '0x' == broken_line_arr[6][0:2]:
+            if len(broken_line_arr) > 6 and '0x' == broken_line_arr[6][0:2]:
               imm = int(broken_line_arr[6], 16)
               broken_line_arr[6] = str(imm)
             if len(broken_line_arr) > 8 and '0x' == broken_line_arr[8][0:2]:
@@ -262,7 +377,7 @@ def run_sim(file_name):
     if failure:
         return -1
     cmd_arr = ['waf', 'verify_source']
-    log = open(output_dir + 'waf_output.log', 'a')
+    log = open(output_dir + 'waf_output.log', 'w')
     log.write('Now running ' + file_name)
     failure = subprocess.call(cmd_arr, stdout=log)
     if failure:
@@ -272,6 +387,26 @@ def run_sim(file_name):
         print line
       return -2
     subprocess.call(['mv', 'build/cpu.hex', output_dir + 'cpu.hex'])
+    return 0
+
+def run_self_sim(file_name):
+    short_name = file_name.split(ARCH+'/')[1][:-2]
+    output_dir = './run/' + ARCH + '/' + short_name + '/'
+
+    cmd_arr = ['waf', 'configure', '--top_level=' + TOP_LEVEL + "_self_test"]
+    failure = subprocess.call(cmd_arr, stdout=FNULL)
+    if failure:
+        return -1
+    cmd_arr = ['waf', 'verify_source']
+    log = open(output_dir + 'waf_output.log', 'w')
+    log.write('Now running ' + file_name)
+    failure = subprocess.call(cmd_arr, stdout=log)
+    if failure:
+      log.close()
+      log = open(output_dir + 'waf_output.log', 'r')
+      for line in log:
+        print line
+      return -2
     return 0
 
 def run_spike_asm(file_name):
@@ -309,51 +444,137 @@ def compare_results(f):
         print pass_msg
         return 0
 
+def check_results(f):
+    short_name = f.split(ARCH+'/')[1][:-2]
+    output_dir = './run/' + ARCH + '/' + short_name + '/'
+
+    pass_msg = '{0:<40}{1:>20}'.format(short_name,START_GREEN + '[PASSED]' + END_COLOR)
+    fail_msg = '{0:<40}{1:>20}'.format(short_name,START_RED + '[FAILED]' + END_COLOR)
+
+    pattern = r'SUCCESS'
+    with open(output_dir + '/waf_output.log', 'r') as waf_output:
+        waf_output_text = waf_output.read()
+        match = re.search(pattern, waf_output_text)
+        if match:
+            print pass_msg
+            return 0
+        else:
+            print fail_msg
+            return 1
+
+def run_asm():
+   failures = 0
+   if FILE_NAME is None:
+       files = glob.glob("./verification/"+"asm"+"-tests/"+ARCH+"/*.S")
+   else:
+       files = glob.glob("./verification/"+"asm"+"-tests/"+ARCH+"/"+FILE_NAME+"*.S")
+   print "Starting asm tests..."
+   for f in files:
+       ret = compile_asm(f)
+       if ret != 0:
+           if ret == -1:
+               print "An error has occured during GCC compilation"
+           elif ret == -2:
+               print "An error has occured converting elf to hex"
+           sys.exit(1)
+       clean_init_hex(f)
+       ret = run_spike_asm(f)
+       if ret != 0:
+           print "An error has occurred during running Spike"
+           sys.exit(ret)
+       clean_spike_output(f)
+       ret = run_sim(f)
+       if ret != 0:
+           if ret == -1:
+             print "An error has occurred while setting waf's top level"
+           elif ret == -2:
+               print "An error has occurred while running " + f
+           sys.exit(ret)
+       clean_sim_trace(f)
+       failures += compare_results(f)
+   return failures
+
+def run_c():
+   failures = 0
+   if FILE_NAME is None:
+       files = glob.glob("./verification/"+"c"+"-tests/"+ARCH+"/*.c")
+   else:
+       files = glob.glob("./verification/"+"c"+"-tests/"+ARCH+"/"+FILE_NAME+"*.c")
+   print "To be implemented"
+   return failures
+
+def run_selfasm():
+   failures = 0
+   if FILE_NAME is None:
+       files = glob.glob("./verification/self-tests/" + ARCH + "/*.S")
+   else:
+       loc = "./verification/self-tests/" + ARCH + "/" + FILE_NAME + "*.S"
+       files = glob.glob(loc)
+   print "Starting self tests..."
+   for f in files:
+     ret = compile_asm_for_self(f)
+     if ret != 0:
+         if ret == -1:
+             print "An error has occured during GCC compilation"
+         elif ret == -2:
+             print "An error has occured converting elf to hex"
+         sys.exit(ret)
+     clean_init_hex_for_self(f)
+     ret = run_self_sim(f)
+     if ret != 0:
+         if ret == -1:
+             print "An error has occured while seting waf's top level"
+         elif ret == -2:
+             print "An error has occured while running " + f
+         sys.exit(ret)
+     failures += check_results(f)
+   return failures
+
+def run_c():
+   failures = 0
+   if FILE_NAME is None:
+       files = glob.glob("./verification/c-tests/" + ARCH + "/*.c")
+   else:
+       loc = "./verification/c-tests/" + ARCH + "/" + FILE_NAME + "*.c"
+       files = glob.glob(loc)
+   print "Starting c tests..."
+   for f in files:
+     ret = compile_c(f)
+     if ret != 0:
+         if ret == -1:
+             print "An error has occured during GCC compilation"
+         elif ret == -2:
+             print "An error has occured converting elf to hex"
+         sys.exit(ret)
+     clean_init_hex_for_self(f)
+     #ret = run_self_sim(f)
+     if ret != 0:
+         if ret == -1:
+             print "An error has occured while seting waf's top level"
+         elif ret == -2:
+             print "An error has occured while running " + f
+         sys.exit(ret)
+     failures += check_results(f)
+   return failures
+
+
 if __name__ == '__main__':
     parse_arguments()  
     failures = 0 
     # asm comparison testing
     if TEST_TYPE == "asm":
-        if FILE_NAME is None:
-            files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/*.S")
-        else:
-            files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/"+FILE_NAME+"*.S")
-        print "Running sim..."
-        for f in files:
-            ret = compile_asm(f)
-            if ret != 0:
-                if ret == -1:
-                    print "An error has occured during GCC compilation"
-                elif ret == -2:
-                    print "An error has occured converting elf to hex"
-                sys.exit(1)
-            clean_init_hex(f)
-            ret = run_spike_asm(f)
-            if ret != 0:
-                print "An error has occurred during running Spike"
-                sys.exit(1)
-            clean_spike_output(f)
-            ret = run_sim(f)
-            if ret != 0:
-                if ret == -1:
-                  print "An error has occurred while setting waf's top level"
-                elif ret == -2:
-                    print "An error has occurred while running " + f
-                sys.exit(1)
-            clean_sim_trace(f)
-            failures += compare_results(f)
+      failures = run_asm()
     # C comparison testing
     elif TEST_TYPE == "c":
-        if FILE_NAME is None:
-            files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/*.c")
-        else:
-            files = glob.glob("./verification/"+TEST_TYPE+"-tests/"+ARCH+"/"+FILE_NAME+"*.c")
-        print "To be implemented"
+      failures = run_c()
     # self tests
-    elif TEST_TYPE == "self":
-        for f in files:
-            if ".S" in f:
-                print "To be implemented."
-            elif ".c" in f:
-                print "To be implemented"
+    elif TEST_TYPE == "selfasm":
+      failures = run_selfasm()
+    elif TEST_TYPE == "":
+      failures += run_asm()
+      # C not implemented yet
+      #failures += run_c()
+      failures += run_selfasm()
+    else:
+        print "To be implemented"
     sys.exit(failures)

@@ -29,6 +29,7 @@
 `include "rv32i_reg_file_if.vh"
 `include "ram_if.vh"
 `include "alu_if.vh"
+`include "prv_pipeline_if.vh"
 
 module execute_stage(
   input logic CLK, nRST,
@@ -36,6 +37,7 @@ module execute_stage(
   hazard_unit_if.execute hazard_if,
   predictor_pipeline_if.update predict_if,
   ram_if.cpu dram_if,
+  prv_pipeline_if.pipe  prv_pipe_if,
   output halt 
 );
 
@@ -103,6 +105,7 @@ module execute_stage(
   word_t imm_or_shamt;
   assign imm_or_shamt = (cu_if.imm_shamt_sel == 1'b1) ? cu_if.shamt : imm_I_ext;
   assign alu_if.aluop = cu_if.alu_op;
+  logic mal_addr;
  
   always_comb begin
     case (cu_if.alu_a_sel)
@@ -124,14 +127,16 @@ module execute_stage(
 
   always_comb begin
     case(cu_if.w_sel)
-      2'd0: rf_if.w_data = dload_ext;
-      2'd1: rf_if.w_data = fetch_ex_if.fetch_ex_reg.pc4;
-      2'd2: rf_if.w_data = cu_if.imm_U;
-      2'd3: rf_if.w_data = alu_if.port_out;
+      3'd0    : rf_if.w_data = dload_ext;
+      3'd1    : rf_if.w_data = fetch_ex_if.fetch_ex_reg.pc4;
+      3'd2    : rf_if.w_data = cu_if.imm_U;
+      3'd3    : rf_if.w_data = alu_if.port_out;
+      3'd4    : rf_if.w_data = prv_pipe_if.rdata;
+      default : rf_if.w_data = '0; 
     endcase
   end
 
-  assign rf_if.wen = cu_if.wen & (~hazard_if.if_ex_stall | hazard_if.npc_sel); 
+  assign rf_if.wen = cu_if.wen & (~hazard_if.if_ex_stall | hazard_if.npc_sel) & ~(cu_if.dren & mal_addr); 
   /*******************************************************
   *** Branch Target Resolution and Associated Logic 
   *******************************************************/
@@ -156,8 +161,8 @@ module execute_stage(
   *******************************************************/
   logic [1:0] byte_offset;
 
-  assign dram_if.ren           = cu_if.dren;
-  assign dram_if.wen           = cu_if.dwen;
+  assign dram_if.ren           = cu_if.dren & ~mal_addr;
+  assign dram_if.wen           = cu_if.dwen & ~mal_addr;
   assign dram_if.byte_en       = cu_if.dren ? byte_en:
                                 {byte_en[0], byte_en[1], byte_en[2], byte_en[3]};
   assign dram_if.addr          = alu_if.port_out;
@@ -227,5 +232,39 @@ module execute_stage(
   
   assign halt = cu_if.halt;
 
+  /*******************************************************
+  *** CSR / Priv Interface Logic 
+  *******************************************************/ 
+  assign prv_pipe_if.swap  = cu_if.csr_swap  & cu_if.csr_rw_valid & ~hazard_if.if_ex_stall;
+  assign prv_pipe_if.clr   = cu_if.csr_clr   & cu_if.csr_rw_valid & ~hazard_if.if_ex_stall;
+  assign prv_pipe_if.set   = cu_if.csr_set   & cu_if.csr_rw_valid & ~hazard_if.if_ex_stall;
+  assign prv_pipe_if.wdata = cu_if.csr_imm ? {27'h0, cu_if.zimm} : rf_if.rs1_data;
+  assign prv_pipe_if.addr  = cu_if.csr_addr;
+  assign prv_pipe_if.valid_write = (prv_pipe_if.swap | prv_pipe_if.clr |
+                                    prv_pipe_if.set) & cu_if.not_zero;
+  
+  always_comb begin
+    if(byte_en == 4'hf) 
+      mal_addr = (dram_if.addr[1:0] != 2'b00);
+    else if (byte_en == 4'h3 || byte_en == 4'hc) begin
+      mal_addr = (dram_if.addr[1:0] == 2'b01 || dram_if.addr[1:0] == 2'b11);
+    end
+    else 
+      mal_addr = 1'b0;
+  end
+
+  //Send exceptions to Hazard Unit
+  assign hazard_if.illegal_insn = cu_if.illegal_insn | prv_pipe_if.invalid_csr;
+  assign hazard_if.fault_l      = 1'b0; 
+  assign hazard_if.mal_l        = cu_if.dren & mal_addr;
+  assign hazard_if.fault_s      = 1'b0;
+  assign hazard_if.mal_s        = cu_if.dwen & mal_addr;
+  assign hazard_if.breakpoint   = cu_if.breakpoint;
+  assign hazard_if.env_m        = cu_if.ecall_insn;
+  assign hazard_if.ret          = cu_if.ret_insn;
+  assign hazard_if.badaddr_e    = dram_if.addr;
+
+  assign hazard_if.epc_e = fetch_ex_if.fetch_ex_reg.pc;
+  assign hazard_if.token_ex = fetch_ex_if.fetch_ex_reg.token;
 endmodule
 

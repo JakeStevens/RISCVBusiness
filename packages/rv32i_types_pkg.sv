@@ -52,7 +52,8 @@ package rv32i_types_pkg;
     // All register-register instructions share an opcode
     REGREG  = 7'b0110011,
     // All system instructions share an opcode
-    SYSTEM  = 7'b1110011
+    SYSTEM  = 7'b1110011,
+    FENCE   = 7'b0001111
   } opcode_t;
 
   typedef enum logic [BR_W-1:0] {
@@ -120,6 +121,12 @@ package rv32i_types_pkg;
     CSRRCI      = 3'b111
   } rv32i_system_t;
 
+  typedef enum logic [11:0] {
+    ECALL   = 12'h0,
+    EBREAK  = 12'h1,
+    ERET    = 12'h100
+  } priv_insn_t;
+
   typedef struct packed {
     logic [6:0] funct7;
     logic [4:0] rs2;
@@ -181,6 +188,7 @@ package rv32i_types_pkg;
   } systype_t;
 
   typedef struct packed {
+    logic         token;
     word_t        pc;
     word_t        pc4;
     word_t        instr;

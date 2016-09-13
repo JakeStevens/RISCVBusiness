@@ -22,12 +22,12 @@
 *   Description:  Main control for the priv isa block 
 */
 
-`include "prv_ex_int_if.vh"
 `include "csr_prv_if.vh"
+`include "prv_pipeline_if.vh"
 
 module prv_control (
-  prv_ext_int_if.prv  ext_int_if,
-  csr_prv_if.prv      csr_if
+  prv_pipeline_if.prv  prv_pipe_if,
+  csr_prv_if.prv      csr_pr_if
 );
   import rv32i_types_pkg::*;
   import machine_mode_types_pkg::*;
@@ -40,103 +40,83 @@ module prv_control (
 
   always_comb begin
     interrupt = 1'b1;
-    intr_src = USER_SOFT_INT;
+    intr_src = SOFT_INT;
 
-    if (ext_int_if.timer_int) begin
-      casez (ext_int_if.timer_prv) 
-        U_MODE : intr_src = USER_TIMER_INT;
-        S_MODE : intr_src = SUPER_TIMER_INT;
-        H_MODE : intr_src = HYPER_TIMER_INT;
-        M_MODE : intr_src = MACH_TIMER_INT;
-      endcase
+    if (prv_pipe_if.timer_int) begin
+      intr_src = TIMER_INT;
     end
-    else if (ext_int_if.soft_int) begin
-      casez (ext_int_if.soft_prv) 
-        U_MODE : intr_src = USER_SOFT_INT;
-        S_MODE : intr_src = SUPER_SOFT_INT;
-        H_MODE : intr_src = HYPER_SOFT_INT;
-        M_MODE : intr_src = MACH_SOFT_INT;
-      endcase
+    else if (prv_pipe_if.soft_int) begin
+      intr_src = SOFT_INT;
     end
-    else if (ext_int_if.ext_int) begin
-      casez (ext_int_if.ext_prv) 
-        U_MODE : intr_src = USER_EXT_INT;
-        S_MODE : intr_src = SUPER_EXT_INT;
-        H_MODE : intr_src = HYPER_EXT_INT;
-        M_MODE : intr_src = MACH_EXT_INT;
-      endcase
+    else if (prv_pipe_if.ext_int) begin
+      intr_src = EXT_INT;
     end
     else
       interrupt = 1'b0;
   end
 
-  assign csr_if.mip_rup = interrupt;
+  assign csr_pr_if.mip_rup = interrupt;
   always_comb begin
-    csr_if.mip_next = csr_if.mip;
-    if (ext_int_if.timer_int) csr_if.mip_next.mtip = 1'b1;
-    if (ext_int_if.soft_int) csr_if.mip_next.msip = 1'b1;
-    if (ext_int_if.ext_int) csr_if.mip_next.meip = 1'b1;
+    csr_pr_if.mip_next = csr_pr_if.mip;
+    if (prv_pipe_if.timer_int) csr_pr_if.mip_next.mtip = 1'b1;
+    if (csr_pr_if.clear_timer_int) csr_pr_if.mip_next.mtip = 1'b0;
+    if (prv_pipe_if.soft_int) csr_pr_if.mip_next.msip = 1'b1;
+    if (prv_pipe_if.ext_int) csr_pr_if.mip_next.msip = 1'b1; //external interrupts not specified in 1.7
   end
 
   always_comb begin
     exception = 1'b1;
     ex_src = INSN_MAL;
 
-    if (ext_int_if.fault_l)
+    if (prv_pipe_if.fault_l)
       ex_src = L_FAULT;
-    else if (ext_int_if.mal_l)
+    else if (prv_pipe_if.mal_l)
       ex_src = L_ADDR_MAL;
-    else if (ext_int_if.fault_s) 
+    else if (prv_pipe_if.fault_s) 
       ex_src = S_FAULT;
-    else if (ext_int_if.mal_s) 
+    else if (prv_pipe_if.mal_s) 
       ex_src = S_ADDR_MAL;
-    else if (ext_int_if.breakpoint)
+    else if (prv_pipe_if.breakpoint)
       ex_src = BREAKPOINT;
-    else if (ext_int_if.env_m) 
+    else if (prv_pipe_if.env_m) 
       ex_src = ENV_CALL_M;
-    else if (ext_int_if.illegal_insn) 
+    else if (prv_pipe_if.illegal_insn) 
       ex_src = ILLEGAL_INSN;
-    else if (ext_int_if.fault_insn)
+    else if (prv_pipe_if.fault_insn)
       ex_src = INSN_FAULT;
-    else if (ext_int_if.mal_insn)
+    else if (prv_pipe_if.mal_insn)
       ex_src = INSN_MAL;
     else 
       exception = 1'b0;
   end
 
   //output to pipeline control
-  assign ex_int_if.intr = exception | (csr_if.mstatus.mie &  ((csr_if.mie.mtie & csr_if.mip.mtip) | 
-                                                              (csr_if.mie.msie & csr_if.mip.msip) |
-                                                              (csr_if.mie.meie & csr_if.mip.meip)));
-  assign ex_int_if.intr_prv = M_MODE;
+  assign prv_pipe_if.intr = exception | (csr_pr_if.mstatus.ie & ((csr_pr_if.mie.mtie & csr_pr_if.mip.mtip) | 
+                                                              (csr_pr_if.mie.msie & csr_pr_if.mip.msip)));
  
   // Register Updates on Interrupt/Exception
-  assign csr_prv_if.mcause_rup = ex_int_if.intr;
-  assign csr_prv_if.mcause_next.interrupt = ~exception;
-  assign csr_prv_if.mcause_next.cause = exception ? ex_src : intr_src;
+  assign csr_pr_if.mcause_rup = prv_pipe_if.intr & prv_pipe_if.pipe_clear;
+  assign csr_pr_if.mcause_next.interrupt = ~exception;
+  assign csr_pr_if.mcause_next.cause = exception ? ex_src : intr_src;
 
-  assign csr_prv_if.mstatus_rup = ex_int_if.intr;
+  assign csr_pr_if.mstatus_rup = prv_pipe_if.intr;
 
   always_comb begin
-    if (ex_int_if.intr) begin
-      csr_prv_if.mstatus_next.mpie = 1'b1;
-      csr_prv_if.mstatus_next.mie = 1'b0; 
-      csr_prv_if.mstatus_next.mpp = M_MODE;  
-    end else if (ex_int_if.ret) begin
-      csr_prv_if.mstatus_next.mie = csr_prv_if.mstatus.mpie;
-      csr_prv_if.mstatus_next.mpie = 1'b0;
-      csr_prv_if.mstatus_next.mpp = M_MODE;
+    if (prv_pipe_if.intr) begin
+      csr_pr_if.mstatus_next.ie = 1'b0; 
+    end else if (prv_pipe_if.ret) begin
+      csr_pr_if.mstatus_next.ie = 1'b1;
     end
     else begin
-      csr_prv_if.mstatus_next.mie = csr_prv_if.mstatus.mie;
-      csr_prv_if.mstatus_next.mpie = csr_prv_if.mstatus.mpie;
-      csr_prv_if.mstatus_next.mpp = csr_prv_if.mstatus.mpp;
+      csr_pr_if.mstatus_next.ie = csr_pr_if.mstatus.ie;
     end
   end
 
-  assign csr_prv_if.mepc_rup = ex_int_if.intr;
-  assign csr_prv_if.mepc_next = (exception & (ex_int_if.breakpoint | ex_int_if.env_m)) ? ext_int_if.curr_epc_p4 : ext_int_if.curr_epc;
+  assign csr_pr_if.mepc_rup = prv_pipe_if.intr & prv_pipe_if.pipe_clear;
+  assign csr_pr_if.mepc_next = prv_pipe_if.epc;
 
-  assign csr_prv_if.mbadaddr_rup = (ext_int_if.mal_l | ext_int_if.fault_l | ext_int_if.mal_s | ext_int_if.fault_s | 
-                                    ext_int_if.illegal_insn | ext_int_if.fault_imsn | ext_int_if.mal_insn);
+  assign csr_pr_if.mbadaddr_rup = (prv_pipe_if.mal_l | prv_pipe_if.fault_l | prv_pipe_if.mal_s | prv_pipe_if.fault_s | 
+                                  prv_pipe_if.illegal_insn | prv_pipe_if.fault_insn | prv_pipe_if.mal_insn) 
+                                  & prv_pipe_if.pipe_clear;
+  assign csr_pr_if.mbadaddr_next = prv_pipe_if.badaddr;
 endmodule

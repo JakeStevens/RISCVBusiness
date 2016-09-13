@@ -27,27 +27,42 @@
 interface hazard_unit_if();
 
   import rv32i_types_pkg::word_t;
-  logic pc_en, npc_sel, i_ram_busy, d_ram_busy, dren, dwen, iren, interrupt;
-  logic ex_excptn, insert_pc, mal_instr, priv_sel, pipeline_finish;
+  logic pc_en, npc_sel, i_ram_busy, d_ram_busy, dren, dwen, iren,ret;
   logic branch_taken, prediction, jump, branch, if_ex_stall;
   logic if_ex_flush, mispredict, halt;
   word_t pc; 
 
+  //Pipeline Exceptions
+  logic fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s,
+        breakpoint, env_m;
+  word_t epc_f, epc_e, badaddr_f, badaddr_e;
+
+  // TVEC Insertion
+  word_t priv_pc;
+  logic insert_priv_pc;
+
+  // Pipeline Tokens 
+  logic token_ex;
+
   modport hazard_unit (
     input i_ram_busy, d_ram_busy, dren, dwen, iren, jump,
-          branch, mispredict, halt, interrupt, pc, ex_excptn, insert_pc,
-          pipeline_finish,
-    output pc_en, npc_sel, if_ex_stall, if_ex_flush, mal_instr, priv_sel
+          branch, mispredict, halt, pc,fault_insn, mal_insn, 
+          illegal_insn, fault_l, 
+          mal_l, fault_s, mal_s, breakpoint, env_m, ret,
+          epc_f, epc_e, badaddr_f, badaddr_e, token_ex,
+    output pc_en, npc_sel, if_ex_stall, if_ex_flush, priv_pc, insert_priv_pc
   );
 
   modport fetch (
-    input pc_en, npc_sel, if_ex_stall, if_ex_flush,
-    output i_ram_busy, iren
+    input pc_en, npc_sel, if_ex_stall, if_ex_flush, priv_pc, insert_priv_pc,
+    output i_ram_busy, iren, fault_insn, mal_insn, epc_f, badaddr_f
   );
 
   modport execute (
     input if_ex_stall, npc_sel,
-    output d_ram_busy, dren, dwen, jump, branch, mispredict, halt
+    output d_ram_busy, dren, dwen, jump, branch, mispredict, halt,
+    illegal_insn, fault_l, mal_l, fault_s, mal_s, breakpoint, env_m, ret, epc_e,
+    badaddr_e, token_ex
   );
  
 endinterface

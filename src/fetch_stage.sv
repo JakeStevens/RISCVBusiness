@@ -52,8 +52,8 @@ module fetch_stage (
 
   assign pc4 = pc + 4;
   assign predict_if.current_pc = pc;
-  assign npc = hazard_if.npc_sel ? fetch_ex_if.brj_addr : 
-                (predict_if.predict_taken ? predict_if.target_addr : pc4);
+  assign npc = hazard_if.insert_priv_pc ? hazard_if.priv_pc : (hazard_if.npc_sel ? fetch_ex_if.brj_addr : 
+                (predict_if.predict_taken ? predict_if.target_addr : pc4));
 
   //Instruction Access logic
   assign hazard_if.iren        = 1'b1;
@@ -73,15 +73,23 @@ module fetch_stage (
   always_ff @ (posedge CLK, negedge nRST) begin
     if (!nRST || hazard_if.if_ex_flush)
       fetch_ex_if.fetch_ex_reg <= '0;
-    else if (hazard_if.if_ex_flush)
-      fetch_ex_if.fetch_ex_reg <= fetch_ex_if.fetch_ex_reg;
     else if (!hazard_if.if_ex_stall) begin
+      fetch_ex_if.fetch_ex_reg.token       <= 1'b1;
       fetch_ex_if.fetch_ex_reg.pc          <= pc;
       fetch_ex_if.fetch_ex_reg.pc4         <= pc4;
       fetch_ex_if.fetch_ex_reg.instr       <= instr;
       fetch_ex_if.fetch_ex_reg.prediction  <= predict_if.predict_taken;
     end
   end
+
+  //Send exceptions to Hazard Unit
+  logic mal_addr;
+  assign mal_addr = (iram_if.addr[1:0] != 2'b00);
+  assign hazard_if.fault_insn = 1'b0;
+  assign hazard_if.mal_insn = iram_if.ren & mal_addr;
+
+  assign hazard_if.badaddr_f = iram_if.addr;
+  assign hazard_if.epc_f = pc; 
 
 endmodule
 
