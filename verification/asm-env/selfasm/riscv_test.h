@@ -180,4 +180,17 @@ ecall:  ecall;                                                          \
 #define RVTEST_DATA_BEGIN EXTRA_DATA .align 4; .global begin_signature; begin_signature:
 #define RVTEST_DATA_END .align 4; .global end_signature; end_signature:
 
+#define RVTEST_INTVEC_USER_BEGIN \
+  .text;                    \
+  .align 6;                 
+ 
+#define RVTEST_INTVEC_SUPER_BEGIN \
+  .align 6;            
+
+#define RVTEST_INTVEC_HYPER_BEGIN \
+  .align 6;           
+
+#define RVTEST_INTVEC_MACH_BEGIN \
+  .align 6; 
+
 #endif
