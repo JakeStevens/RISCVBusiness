@@ -69,6 +69,7 @@ module tb_RISCVBusiness ();
     .pc(fetch_ex_if.fetch_ex_reg.pc),
     .opcode(cu_if.opcode),
     .funct3(cu_if.instr[14:12]),
+    .funct12(cu_if.instr[31:20]),
     .rs1(rf_if.rs1),
     .rs2(rf_if.rs2),
     .rd(rf_if.rd),

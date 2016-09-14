@@ -31,6 +31,7 @@ module cpu_tracker(
   input word_t instr, pc,
   input opcode_t opcode,
   input logic [2:0] funct3,
+  input logic [11:0] funct12,
   input logic [4:0] rs1, rs2, rd,
   input logic [12:0] imm_SB,
   input logic [11:0] imm_S, imm_I,
@@ -63,6 +64,7 @@ module cpu_tracker(
       LOAD:       $sformat(operands, "%s, %d(%s)", dest, signed'(imm_I), src1);
       IMMED:      $sformat(operands, "%s, %s, %d", dest, src1, signed'(imm_I));
       REGREG:     $sformat(operands, "%s, %s, %s", dest, src1, src2);
+      default:    operands = "";
     endcase
   end
 
@@ -150,6 +152,13 @@ module cpu_tracker(
           CSRRWI:   instr_mnemonic = "csrrwi";
           CSRRSI:   instr_mnemonic = "csrrsi";
           CSRRCI:   instr_mnemonic = "csrrci";
+          PRIV: begin
+            case(priv_insn_t'(funct12))
+              ECALL:  instr_mnemonic = "ecall";
+              EBREAK: instr_mnemonic = "ebreak";
+              ERET:   instr_mnemonic = "eret";
+            endcase
+          end
           default:  instr_mnemonic = "xxx";
         endcase
       end
