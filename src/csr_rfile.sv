@@ -84,7 +84,6 @@ module csr_rfile (
   assign mie.zero_0 = '0;
   assign mie.zero_1 = '0;
   assign mie.zero_2 = '0;
-  assign mie.mtie = 1'b0;
   assign mie.htie = 1'b0;
   assign mie.stie = 1'b0;
   assign mie.hsie = 1'b0;
@@ -138,7 +137,9 @@ module csr_rfile (
  
   always_ff @ (posedge CLK, negedge nRST) begin
     if (~nRST) begin
-      mstatus.ie <= 1'b1;
+      mstatus.ie  <= 1'b1;
+      mie.mtie    <= 1'b0;
+      mie.msie    <= 1'b0;
       mip.msip    <= 1'b0;
       mip.mtip    <= 1'b0;
       mcause      <= '0;
@@ -151,6 +152,8 @@ module csr_rfile (
       mtimefull   <= '0;
     end else if (prv_pipe_if.addr == MTIMEH_ADDR)begin
       mstatus.ie  <= mstatus_next.ie;
+      mie.mtie    <= mie_next.mtie; 
+      mie.msie    <= mie_next.msie;
       mip.msip    <= mip_next.msip; // interrupt
       mip.mtip    <= mip_next.mtip; // interrupt
       mcause      <= mcause_next;
@@ -163,6 +166,8 @@ module csr_rfile (
       mtimefull   <= {mtimeh_next, mtimefull_next[31:0]};
     end else if (prv_pipe_if.addr == MTIME_ADDR) begin
       mstatus.ie  <= mstatus_next.ie;
+      mie.mtie    <= mie_next.mtie; 
+      mie.msie    <= mie_next.msie;
       mip.msip    <= mip_next.msip; // interrupt
       mip.mtip    <= mip_next.mtip; // interrupt
       mcause      <= mcause_next;
@@ -175,6 +180,8 @@ module csr_rfile (
       mtimefull   <= {mtimefull_next[63:32], mtime_next};
     end else begin      
       mstatus.ie  <= mstatus_next.ie;
+      mie.mtie    <= mie_next.mtie; 
+      mie.msie    <= mie_next.msie;
       mip.msip    <= mip_next.msip; // interrupt
       mip.mtip    <= mip_next.mtip; // interrupt
       mcause      <= mcause_next;

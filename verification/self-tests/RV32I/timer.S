@@ -33,6 +33,8 @@ RVTEST_CODE_BEGIN
 
 
 main:
+  addi x6, x0, 0xFF
+  addi x7, x0, 0xFF
   # Read the timer CSR
   csrr x1, mtime
   nop
@@ -48,7 +50,10 @@ main:
   RVTEST_FAIL
 
 more_tests:
-  addi x2, x2, 100 
+  addi x3, x0, 0x1
+  csrw mstatus, x3
+  csrr x2, mtime
+  addi x2, x2, 20 
   csrw mtimecmp, x2
   ori x3, x0, 0x80
   csrw mie, x3
@@ -57,16 +62,26 @@ more_tests:
   nop
   nop
   nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  bne x6, x7, pass
   RVTEST_FAIL 
+pass:
+  RVTEST_PASS
 
 .align 2
 mtvec_handler:
-  RVTEST_PASS
   # Write to mtimecmp using the zero register
   # Check that nothing happened to interrupt
   # Actually write to mtimecmp
   # Check that the interrupt cleared
+  # Change sigil to show interrupt was entered
+  ori x6, x0, 0x0F
   # Return
+  eret
 
 RVTEST_CODE_END
 

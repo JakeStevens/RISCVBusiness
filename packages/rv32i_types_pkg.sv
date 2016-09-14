@@ -112,7 +112,7 @@ package rv32i_types_pkg;
     // ECALL/EBREAK based on bit 20 of instruction
     //   0  /   1 
     //   xRET based on bits 28 and 29 of instruction
-    NONCSR      = 3'b000,
+    PRIV        = 3'b000,
     CSRRW       = 3'b001,
     CSRRS       = 3'b010,
     CSRRC       = 3'b011,

@@ -32,7 +32,8 @@ module pipeline_control
   prv_pipeline_if.pipe_ctrl prv_pipe_if
 );
   import rv32i_types_pkg::*;
-  
+  logic interrupt_pending;
+ 
   assign prv_pipe_if.insert_pc = prv_pipe_if.ret | (prv_pipe_if.pipe_clear & prv_pipe_if.intr);
  
   always_comb begin

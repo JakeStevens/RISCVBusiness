@@ -26,6 +26,7 @@
 `include "prv_pipeline_if.vh"
 
 module prv_control (
+  input CLK, nRST,
   prv_pipeline_if.prv  prv_pipe_if,
   csr_prv_if.prv      csr_pr_if
 );
@@ -37,6 +38,7 @@ module prv_control (
   
   int_code_t intr_src;
   logic interrupt;
+  logic interrupt_reg, interrupt_fired;
 
   always_comb begin
     interrupt = 1'b1;
@@ -55,7 +57,7 @@ module prv_control (
       interrupt = 1'b0;
   end
 
-  assign csr_pr_if.mip_rup = interrupt;
+  assign csr_pr_if.mip_rup = interrupt || csr_pr_if.clear_timer_int;
   always_comb begin
     csr_pr_if.mip_next = csr_pr_if.mip;
     if (prv_pipe_if.timer_int) csr_pr_if.mip_next.mtip = 1'b1;
@@ -91,15 +93,16 @@ module prv_control (
   end
 
   //output to pipeline control
-  assign prv_pipe_if.intr = exception | (csr_pr_if.mstatus.ie & ((csr_pr_if.mie.mtie & csr_pr_if.mip.mtip) | 
-                                                              (csr_pr_if.mie.msie & csr_pr_if.mip.msip)));
+  assign prv_pipe_if.intr = exception | interrupt_reg;
+  assign interrupt_fired = (csr_pr_if.mstatus.ie & ((csr_pr_if.mie.mtie & csr_pr_if.mip.mtip) | 
+                     (csr_pr_if.mie.msie & csr_pr_if.mip.msip)));
  
   // Register Updates on Interrupt/Exception
-  assign csr_pr_if.mcause_rup = prv_pipe_if.intr & prv_pipe_if.pipe_clear;
+  assign csr_pr_if.mcause_rup = exception | interrupt_fired;
   assign csr_pr_if.mcause_next.interrupt = ~exception;
   assign csr_pr_if.mcause_next.cause = exception ? ex_src : intr_src;
 
-  assign csr_pr_if.mstatus_rup = prv_pipe_if.intr;
+  assign csr_pr_if.mstatus_rup = exception | interrupt_fired;
 
   always_comb begin
     if (prv_pipe_if.intr) begin
@@ -112,11 +115,25 @@ module prv_control (
     end
   end
 
-  assign csr_pr_if.mepc_rup = prv_pipe_if.intr & prv_pipe_if.pipe_clear;
+  // Update EPC as soon as interrupt or exception is found 
+  assign csr_pr_if.mepc_rup = exception | interrupt_fired;
   assign csr_pr_if.mepc_next = prv_pipe_if.epc;
 
   assign csr_pr_if.mbadaddr_rup = (prv_pipe_if.mal_l | prv_pipe_if.fault_l | prv_pipe_if.mal_s | prv_pipe_if.fault_s | 
                                   prv_pipe_if.illegal_insn | prv_pipe_if.fault_insn | prv_pipe_if.mal_insn) 
                                   & prv_pipe_if.pipe_clear;
   assign csr_pr_if.mbadaddr_next = prv_pipe_if.badaddr;
+
+  /* Interrupt needs to be latched until pipeline cleared   */
+  /* because mstatus.ie causes the irq to disappear after   */
+  /* one cycle. Cannot wait to clear mstatus.ie because     */
+  /* then another interrupt can fire during pipeline clear  */
+  always_ff @ (posedge CLK, negedge nRST) begin
+    if (!nRST)
+      interrupt_reg <= '0;
+    else if (interrupt_fired)
+      interrupt_reg <= 1'b1;
+    else if (prv_pipe_if.pipe_clear)
+      interrupt_reg <= '0;
+  end 
 endmodule

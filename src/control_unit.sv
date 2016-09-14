@@ -201,7 +201,7 @@ module control_unit
     cu_if.ecall_insn = 1'b0;
 
     if (cu_if.opcode == SYSTEM) begin
-      if (rv32i_system_t'(instr_i.funct3) == NONCSR) begin
+      if (rv32i_system_t'(instr_i.funct3) == PRIV) begin
         if (priv_insn_t'(instr_i.imm11_00) == ERET)
           cu_if.ret_insn = 1'b1;
         if (priv_insn_t'(instr_i.imm11_00) == EBREAK)
@@ -218,7 +218,7 @@ module control_unit
     cu_if.csr_clr   = 1'b0;
     cu_if.csr_set   = 1'b0;
     cu_if.csr_imm   = 1'b0;
-    cu_if.not_zero       = 1'b0;
+    cu_if.not_zero  = 1'b1;
  
     if (cu_if.opcode == SYSTEM) begin
       if (rv32i_system_t'(instr_r.funct3) == CSRRW) begin
