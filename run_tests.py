@@ -158,7 +158,7 @@ def compile_c(file_name):
         os.makedirs(os.path.dirname(output_name))
 
     cmd_arr = ['riscv64-unknown-elf-gcc', '-O0', '-m32', '-march=RV32IM', '-ffreestanding', '-nostdlib', '-o', output_name, 
-              '-Wl,-Bstatic,-T,verification/c-firmware/link.ld,--strip-debug', '-lgcc', 'verification/c-firmware/interrupt.S',file_name]
+              '-Wl,-Bstatic,-T,verification/c-firmware/link.ld,--strip-debug', '-lgcc', 'verification/c-firmware/trap.S', 'verification/c-firmware/trap.c', file_name]
     failure = subprocess.call(cmd_arr)
     if failure:
         return -1
