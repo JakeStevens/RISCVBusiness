@@ -1,3 +1,27 @@
+# 
+#   Copyright 2016 Purdue University
+#   
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#   
+#       http://www.apache.org/licenses/LICENSE-2.0
+#   
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+#
+#   Filename:     trap.S
+#
+#   Created by:   John Skubic
+#   Email:        jskubic@purdue.edu
+#   Date Created: 09/16/2016
+#   Description:  Asm source for interrupt and exception handling code
+#
+
   .section .text
   .global irq_handler
   .global exception_handler
@@ -56,13 +80,17 @@ trap:
   sw x2,  -30*4(sp)
   sw x1,  -31*4(sp)
   sw x0,  -32*4(sp)
-  #push pointer to reg values
+  #set pointer to reg values
   addi sp, sp, -32*4
-  addi a0, sp, 0
-  #push value of mcause
-  csrrs x0, mcause, a1
+  addi a1, sp, 0
+  #set pointer to mepc
+  csrr a2, mepc
+  #set pointer to mbadaddr
+  csrr a3, mbadaddr 
+  #set value of mcause
+  csrr a0, mcause
   #go to int handler if top bit is set, else exception
-  addi t0, a1, 0
+  addi t0, a0, 0
   srli t0, t0, 31
   beq t0, zero, j_ex
 j_int:
@@ -72,33 +100,33 @@ j_ex:
   jal exception_handler
 trap_ret:
   #pop modified values of registers (ignore 0-4)
-  lw x31, 1*4(sp)
-  lw x30, 2*4(sp)
-  lw x29, 3*4(sp)
-  lw x28, 4*4(sp)
-  lw x27, 5*4(sp)
-  lw x26, 6*4(sp)
-  lw x25, 7*4(sp)
-  lw x24, 8*4(sp)
-  lw x23, 9*4(sp)
-  lw x22, 10*4(sp)
-  lw x21, 11*4(sp)
-  lw x20, 12*4(sp)
-  lw x19, 13*4(sp)
-  lw x18, 14*4(sp)
-  lw x17, 15*4(sp)
+  lw x31, 31*4(sp)
+  lw x30, 30*4(sp)
+  lw x29, 29*4(sp)
+  lw x28, 28*4(sp)
+  lw x27, 27*4(sp)
+  lw x26, 26*4(sp)
+  lw x25, 25*4(sp)
+  lw x24, 24*4(sp)
+  lw x23, 23*4(sp)
+  lw x22, 22*4(sp)
+  lw x21, 21*4(sp)
+  lw x20, 20*4(sp)
+  lw x19, 19*4(sp)
+  lw x18, 18*4(sp)
+  lw x17, 17*4(sp)
   lw x16, 16*4(sp)
-  lw x15, 17*4(sp)
-  lw x14, 18*4(sp)
-  lw x13, 19*4(sp)
-  lw x12, 20*4(sp)
-  lw x11, 21*4(sp)
-  lw x10, 22*4(sp)
-  lw x9,  23*4(sp)
-  lw x8,  24*4(sp)
-  lw x7,  25*4(sp)
-  lw x6,  26*4(sp)
-  lw x5,  27*4(sp)
+  lw x15, 15*4(sp)
+  lw x14, 14*4(sp)
+  lw x13, 13*4(sp)
+  lw x12, 12*4(sp)
+  lw x11, 11*4(sp)
+  lw x10, 10*4(sp)
+  lw x9,  9*4(sp)
+  lw x8,  8*4(sp)
+  lw x7,  7*4(sp)
+  lw x6,  6*4(sp)
+  lw x5,  5*4(sp)
   addi sp, sp, 32*4
   #restore return address, update epc and return
   lw ra, 0(sp)
