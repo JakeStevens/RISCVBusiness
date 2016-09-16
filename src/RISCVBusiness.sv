@@ -29,13 +29,14 @@ module RISCVBusiness (
   output logic halt,
   ram_if.cpu ram_if
 );
-  
+
   // Interface instantiations
 
   ram_if tspp_icache_ram_if();
   ram_if tspp_dcache_ram_if();
   ram_if icache_mc_if();
   ram_if dcache_mc_if();
+  ram_if pipeline_trans_if(); 
 
   // Module Instantiations
 
@@ -66,8 +67,15 @@ module RISCVBusiness (
     .nRST(nRST),
     .d_ram_if(dcache_mc_if),
     .i_ram_if(icache_mc_if),
-    .out_ram_if(ram_if)
+    .out_ram_if(pipeline_trans_if)
+    //.out_ram_if(ram_if)
   );
 
+  bus_trans bt(
+    .CLK(CLK), 
+    .nRST(nRST), 
+    .pipeline_trans_if(pipeline_trans_if), 
+    .out_ram_if(ram_if)
+  );
 
 endmodule

@@ -88,7 +88,11 @@ module memory_controller (
 
       INSTR_REQ: begin 
         if( (d_ram_if.ren || d_ram_if.wen) && !out_ram_if.busy) 
-          next_state = DATA_WAIT; 
+          next_state = DATA_WAIT;
+        else if ( !out_ram_if.busy ) 
+        begin 
+          next_state = IDLE; 
+        end 
         else 
           next_state = INSTR_WAIT; 
       end
