@@ -186,9 +186,10 @@ module control_unit
  
   always_comb begin
     case(cu_if.opcode)
+      REGREG: cu_if.illegal_insn = instr_r.funct7[0];
       LUI, AUIPC, JAL, JALR,
       BRANCH, LOAD, STORE,
-      IMMED, REGREG, SYSTEM,
+      IMMED, SYSTEM,
       MISCMEM, opcode_t'('0)           : cu_if.illegal_insn = 1'b0;
       default                 : cu_if.illegal_insn = 1'b1;
     endcase
