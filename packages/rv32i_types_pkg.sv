@@ -37,23 +37,23 @@ package rv32i_types_pkg;
   typedef logic [WORD_SIZE-1:0] word_t;
 
   typedef enum logic [OP_W-1:0] {
-    LUI     = 7'b0110111,
-    AUIPC   = 7'b0010111,
-    JAL     = 7'b1101111,
-    JALR    = 7'b1100111,
+    LUI       = 7'b0110111,
+    AUIPC     = 7'b0010111,
+    JAL       = 7'b1101111,
+    JALR      = 7'b1100111,
     // All branching instructions share an opcode
-    BRANCH  = 7'b1100011,
+    BRANCH    = 7'b1100011,
     // All load instructions share an opcode
-    LOAD    = 7'b0000011,
+    LOAD      = 7'b0000011,
     // All store instructions share an opcode
-    STORE   = 7'b0100011,
+    STORE     = 7'b0100011,
     // All immediate ALU instructions share an opcode
-    IMMED   = 7'b0010011,
+    IMMED     = 7'b0010011,
     // All register-register instructions share an opcode
-    REGREG  = 7'b0110011,
+    REGREG    = 7'b0110011,
     // All system instructions share an opcode
-    SYSTEM  = 7'b1110011,
-    FENCE   = 7'b0001111
+    SYSTEM    = 7'b1110011,
+    MISCMEM  = 7'b0001111
   } opcode_t;
 
   typedef enum logic [BR_W-1:0] {
@@ -126,6 +126,11 @@ package rv32i_types_pkg;
     EBREAK  = 12'h1,
     ERET    = 12'h100
   } priv_insn_t;
+
+  typedef enum logic [2:0] {
+    FENCE   = 3'b000,
+    FENCEI  = 3'b001
+  } rv32i_miscmem_t;
 
   typedef struct packed {
     logic [6:0] funct7;

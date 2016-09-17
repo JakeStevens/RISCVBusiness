@@ -189,7 +189,7 @@ module control_unit
       LUI, AUIPC, JAL, JALR,
       BRANCH, LOAD, STORE,
       IMMED, REGREG, SYSTEM,
-      FENCE, opcode_t'('0)           : cu_if.illegal_insn = 1'b0;
+      MISCMEM, opcode_t'('0)           : cu_if.illegal_insn = 1'b0;
       default                 : cu_if.illegal_insn = 1'b1;
     endcase
   end

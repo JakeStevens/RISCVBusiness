@@ -82,7 +82,7 @@ module cpu_tracker(
           BGE:      instr_mnemonic = "bge";
           BLTU:     instr_mnemonic = "bltu";
           BGEU:     instr_mnemonic = "bgeu";
-          default:  instr_mnemonic = "xxx";
+          default:  instr_mnemonic = "unknown branch op";
         endcase
       end
       LOAD: begin
@@ -92,7 +92,7 @@ module cpu_tracker(
           LW:       instr_mnemonic = "lw";
           LBU:      instr_mnemonic = "lbu";
           LHU:      instr_mnemonic = "lhu";
-          default:  instr_mnemonic = "xxx";
+          default:  instr_mnemonic = "unknown load op";
         endcase
       end
       STORE: begin
@@ -100,7 +100,7 @@ module cpu_tracker(
           SB:       instr_mnemonic = "sb";
           SH:       instr_mnemonic = "sh";
           SW:       instr_mnemonic = "sw";
-          default:  instr_mnemonic = "xxx";
+          default:  instr_mnemonic = "unknown store op";
         endcase
       end
       IMMED: begin
@@ -118,7 +118,7 @@ module cpu_tracker(
             else
                     instr_mnemonic = "srli";
           end
-          default:  instr_mnemonic = "xxx";
+          default:  instr_mnemonic = "unknown immed op";
         endcase
       end
       REGREG: begin
@@ -141,7 +141,7 @@ module cpu_tracker(
           end
           OR:       instr_mnemonic = "or";
           AND:      instr_mnemonic = "and";
-          default:  instr_mnemonic = "xxx";
+          default:  instr_mnemonic = "unknown regreg op";
         endcase
       end
       SYSTEM: begin
@@ -159,7 +159,14 @@ module cpu_tracker(
               ERET:   instr_mnemonic = "eret";
             endcase
           end
-          default:  instr_mnemonic = "xxx";
+          default:  instr_mnemonic = "unknown system op";
+        endcase
+      end
+      MISCMEM: begin
+        case(rv32i_miscmem_t'(funct3))
+          FENCE:    instr_mnemonic = "fence";
+          FENCEI:   instr_mnemonic = "fence.i";
+          default:  instr_mnemonic = "unknown misc-mem op";
         endcase
       end
       default:  instr_mnemonic = "xxx";
