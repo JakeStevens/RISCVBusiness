@@ -494,15 +494,6 @@ def run_asm():
        failures += compare_results(f)
    return failures
 
-def run_c():
-   failures = 0
-   if FILE_NAME is None:
-       files = glob.glob("./verification/"+"c"+"-tests/"+ARCH+"/*.c")
-   else:
-       files = glob.glob("./verification/"+"c"+"-tests/"+ARCH+"/"+FILE_NAME+"*.c")
-   print "To be implemented"
-   return failures
-
 def run_selfasm():
    failures = 0
    if FILE_NAME is None:
@@ -547,7 +538,7 @@ def run_c():
              print "An error has occured converting elf to hex"
          sys.exit(ret)
      clean_init_hex_for_self(f)
-     #ret = run_self_sim(f)
+     ret = run_self_sim(f)
      if ret != 0:
          if ret == -1:
              print "An error has occured while seting waf's top level"
@@ -556,7 +547,6 @@ def run_c():
          sys.exit(ret)
      failures += check_results(f)
    return failures
-
 
 if __name__ == '__main__':
     parse_arguments()  
@@ -572,9 +562,8 @@ if __name__ == '__main__':
       failures = run_selfasm()
     elif TEST_TYPE == "":
       failures += run_asm()
-      # C not implemented yet
-      #failures += run_c()
       failures += run_selfasm()
+      failures += run_c()
     else:
         print "To be implemented"
     sys.exit(failures)

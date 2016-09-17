@@ -137,7 +137,7 @@ module tb_RISCVBusiness_self_test ();
       $display("ERROR: Test timed out");
     else if(DUT.pipeline.execute_stage_i.rf.registers[28] != 32'h1)
       $display("ERROR: Test %0d did not pass",
-                DUT.pipeline.execute_stage_i.rf.registers[28]);
+                (DUT.pipeline.execute_stage_i.rf.registers[28] - 1)/2);
     else 
       $display("SUCCESS");
     $finish;
