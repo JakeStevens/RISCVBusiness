@@ -28,13 +28,14 @@
 int main(void) { 
   int a=6;
   int b=3; 
-  int c;
+  int c, d;
 
   //perform test operation
   c = a*b;
+  d = 2*c;
 
   //check if memory is as expected
-  if(c == 18) {
+  if(d == 36) {
     TEST_FINISH_SUCCESS
   }
   TEST_FINISH_FAIL(1)
