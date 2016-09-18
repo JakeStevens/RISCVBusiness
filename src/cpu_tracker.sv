@@ -26,6 +26,7 @@
 `define TRACE_FILE_NAME "trace.log"
 
 import rv32i_types_pkg::*;
+import machine_mode_types_pkg::*;
 module cpu_tracker(
   input logic CLK, wb_stall, instr_30,
   input word_t instr, pc,
@@ -41,7 +42,8 @@ module cpu_tracker(
   parameter CPUID = 0;
 
   integer fptr;
-  string instr_mnemonic, output_str, src1, src2, dest, operands, temp_str;
+  string instr_mnemonic, output_str, src1, src2, dest, operands;
+  string csr, temp_str;
   logic [63:0] pc64;
   assign pc64 = {{32{1'b0}}, pc};
   initial begin: INIT_FILE
@@ -49,21 +51,31 @@ module cpu_tracker(
   end
 
   always_comb begin
-    src1 = registerAssign(rs1);
-    src2 = registerAssign(rs2);
-    dest = registerAssign(rd);
+    src1  = registerAssign(rs1);
+    src2  = registerAssign(rs2);
+    dest  = registerAssign(rd);
+    csr   = csrRegisterAssign(funct12);
   end
 
   always_comb begin
     case (opcode)
-      LUI, AUIPC: $sformat(operands, "%s, %d", dest, imm_U[31:12]);
-      JAL:        $sformat(operands, "%s, pc + %d", dest, signed'(imm_UJ));
-      JALR:       $sformat(operands, "%s, %s, %d", dest, src1, signed'(imm_I));
-      BRANCH:     $sformat(operands, "%s, %s, pc + %d", src1, src2, signed'(imm_SB));
-      STORE:      $sformat(operands, "%s, %d(%s)", src2, signed'(imm_S), src1);
-      LOAD:       $sformat(operands, "%s, %d(%s)", dest, signed'(imm_I), src1);
-      IMMED:      $sformat(operands, "%s, %s, %d", dest, src1, signed'(imm_I));
-      REGREG:     $sformat(operands, "%s, %s, %s", dest, src1, src2);
+      LUI, AUIPC:   $sformat(operands, "%s, %d", dest, imm_U[31:12]);
+      JAL:          $sformat(operands, "%s, pc + %d", dest, signed'(imm_UJ));
+      JALR:         $sformat(operands, "%s, %s, %d", dest, src1, signed'(imm_I));
+      BRANCH:       $sformat(operands, "%s, %s, pc + %d", src1, src2, signed'(imm_SB));
+      STORE:        $sformat(operands, "%s, %d(%s)", src2, signed'(imm_S), src1);
+      LOAD:         $sformat(operands, "%s, %d(%s)", dest, signed'(imm_I), src1);
+      IMMED:        $sformat(operands, "%s, %s, %d", dest, src1, signed'(imm_I));
+      REGREG:       $sformat(operands, "%s, %s, %s", dest, src1, src2);
+      SYSTEM: begin
+        case(rv32i_system_t'(funct3))
+          CSRRS, CSRRW,
+          CSRRC:    $sformat(operands, "%s, %s, %s", dest, csr, src1);
+          CSRRSI, CSRRWI,
+          CSRRCI:   $sformat(operands, "%s, %s, %d", dest, csr, rs1);
+          PRIV:     operands = "";
+        endcase
+      end
       default:    operands = "";
     endcase
   end
@@ -207,6 +219,37 @@ module cpu_tracker(
       5'd29:  registerAssign = "t4";
       5'd30:  registerAssign = "t5";
       5'd31:  registerAssign = "t6";
+    endcase
+  endfunction
+
+  function string csrRegisterAssign(input logic [11:0] csr_register);
+    case (csr_addr_t'(csr_register))
+      MCPUID_ADDR     : csrRegisterAssign = "mcpuid"; 
+      MIMPID_ADDR     : csrRegisterAssign = "mimpid"; 
+      MHARTID_ADDR    : csrRegisterAssign = "mhartid"; 
+      MSTATUS_ADDR    : csrRegisterAssign = "mstatus"; 
+      MTVEC_ADDR      : csrRegisterAssign = "mtvec"; 
+      MTDELEG_ADDR    : csrRegisterAssign = "mtdeleg"; 
+      MIE_ADDR        : csrRegisterAssign = "mie"; 
+      MSCRATCH_ADDR   : csrRegisterAssign = "mscratch"; 
+      MEPC_ADDR       : csrRegisterAssign = "mepc"; 
+      MCAUSE_ADDR     : csrRegisterAssign = "mcause"; 
+      MBADADDR_ADDR   : csrRegisterAssign = "mbadaddr"; 
+      MIP_ADDR        : csrRegisterAssign = "mip"; 
+      MBASE_ADDR      : csrRegisterAssign = "mbase"; 
+      MBOUND_ADDR     : csrRegisterAssign = "mbound"; 
+      MIBASE_ADDR     : csrRegisterAssign = "mibase"; 
+      MIBOUND_ADDR    : csrRegisterAssign = "mibound"; 
+      MDBASE_ADDR     : csrRegisterAssign = "mdbase"; 
+      MDBOUND_ADDR    : csrRegisterAssign = "mdbound"; 
+      HTIMEW_ADDR     : csrRegisterAssign = "htimew"; 
+      HTIMEHW_ADDR    : csrRegisterAssign = "htimehw"; 
+      MTIMECMP_ADDR   : csrRegisterAssign = "mtimecmp"; 
+      MTIME_ADDR      : csrRegisterAssign = "mtime"; 
+      MTIMEH_ADDR     : csrRegisterAssign = "mtimeh"; 
+      MTOHOST_ADDR    : csrRegisterAssign = "mtohost"; 
+      MFROMHOST_ADDR  : csrRegisterAssign = "mfromhost"; 
+      default         : csrRegisterAssign = "csr register not tracked";
     endcase
   endfunction
 
