@@ -35,41 +35,15 @@ RVTEST_CODE_BEGIN
 main:
   addi x6, x0, 0xFF
   addi x7, x0, 0xFF
-  # Read the timer CSR
-  csrr x1, mtime
-  nop
-  nop
-  nop
-  nop
-  nop
-  csrr x2, mtime
-  sub x2, x2, x1
-  # 5 nops * 2 cycles/nop = 10
-  ori x1, x0, 10
-  beq x2, x1, more_tests
-  RVTEST_FAIL
-
-more_tests:
   addi x3, x0, 0x1
   csrw mstatus, x3
   csrr x2, mtime
-  addi x2, x2, 20 
+  addi x2, x2, 50 
   csrw mtimecmp, x2
   ori x3, x0, 0x80
   csrw mie, x3
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  bne x6, x7, pass
-  RVTEST_FAIL 
-pass:
+idle_loop:
+  beq x6, x7, idle_loop
   RVTEST_PASS
 
 .align 2
