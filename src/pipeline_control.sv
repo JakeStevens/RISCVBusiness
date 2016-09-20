@@ -27,32 +27,31 @@
 
 module pipeline_control
 (
-  input logic CLK, nRST,
   input logic [1:0] prv_intr, prv_ret,
-  prv_pipeline_if.pipe_ctrl prv_pipe_if
+  prv_internal_if.pipe_ctrl prv_intern_if
 );
   import rv32i_types_pkg::*;
   logic interrupt_pending;
  
-  assign prv_pipe_if.insert_pc = prv_pipe_if.ret | (prv_pipe_if.pipe_clear & prv_pipe_if.intr);
+  assign prv_intern_if.insert_pc = prv_intern_if.ret | (prv_intern_if.pipe_clear & prv_intern_if.intr);
  
   always_comb begin
-    if(prv_pipe_if.intr)
+    if(prv_intern_if.intr)
       case(prv_intr)
-        2'b00:  prv_pipe_if.priv_pc = prv_pipe_if.xtvec[2'b00];
-        2'b01:  prv_pipe_if.priv_pc = prv_pipe_if.xtvec[2'b01];
-        2'b10:  prv_pipe_if.priv_pc = prv_pipe_if.xtvec[2'b10];
-        2'b11:  prv_pipe_if.priv_pc = prv_pipe_if.xtvec[2'b11]; 
+        2'b00:  prv_intern_if.priv_pc = prv_intern_if.xtvec[2'b00];
+        2'b01:  prv_intern_if.priv_pc = prv_intern_if.xtvec[2'b01];
+        2'b10:  prv_intern_if.priv_pc = prv_intern_if.xtvec[2'b10];
+        2'b11:  prv_intern_if.priv_pc = prv_intern_if.xtvec[2'b11]; 
       endcase
-    else if (prv_pipe_if.ret)
+    else if (prv_intern_if.ret)
       case(prv_ret)
-        2'b00:  prv_pipe_if.priv_pc = prv_pipe_if.xepc_r[2'b00];
-        2'b01:  prv_pipe_if.priv_pc = prv_pipe_if.xepc_r[2'b01];
-        2'b10:  prv_pipe_if.priv_pc = prv_pipe_if.xepc_r[2'b10];
-        2'b11:  prv_pipe_if.priv_pc = prv_pipe_if.xepc_r[2'b11];
+        2'b00:  prv_intern_if.priv_pc = prv_intern_if.xepc_r[2'b00];
+        2'b01:  prv_intern_if.priv_pc = prv_intern_if.xepc_r[2'b01];
+        2'b10:  prv_intern_if.priv_pc = prv_intern_if.xepc_r[2'b10];
+        2'b11:  prv_intern_if.priv_pc = prv_intern_if.xepc_r[2'b11];
       endcase
     else
-      prv_pipe_if.priv_pc = 32'b0;
+      prv_intern_if.priv_pc = 32'b0;
   end
 
 endmodule

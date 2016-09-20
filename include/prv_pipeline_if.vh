@@ -62,22 +62,13 @@ interface prv_pipeline_if();
     input  rdata, invalid_csr
   );
 
-  modport prv (
-    input   pipe_clear, ret, epc, fault_insn, mal_insn, 
-            illegal_insn, fault_l, mal_l, fault_s, mal_s,
-            breakpoint, env_m, timer_int, soft_int, ext_int,
-            badaddr,
-    output  intr
-  );
 
-  modport pipe_ctrl (
-    input intr, ret, pipe_clear, xtvec, xepc_r,
-    output insert_pc, priv_pc 
-  );
-  
-  modport csr (
-    input  swap, clr, set, wdata, addr, valid_write,
-    output rdata, invalid_csr, xtvec, xepc_r
+  modport priv_block (
+    input pipe_clear, ret, epc, fault_insn, mal_insn,
+          illegal_insn, fault_l, mal_l, fault_s, mal_s,
+          breakpoint, env_m, badaddr, swap, clr, set,
+          wdata, addr, valid_write,
+    output priv_pc, insert_pc, intr, rdata, invalid_csr
   );
 
 endinterface
