@@ -94,7 +94,7 @@ def parse_arguments():
 def compile_asm(file_name):
     # compile all of the files
     short_name = file_name.split(ARCH+'/')[1][:-2]
-    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_dir = './sim_out/' + ARCH + '/' + short_name + '/'
     output_name = output_dir + short_name + '.elf'
 
     if not os.path.exists(os.path.dirname(output_name)):
@@ -123,7 +123,7 @@ def compile_asm(file_name):
 def compile_asm_for_self(file_name):
     # compile all of the files
     short_name = file_name.split(ARCH+'/')[1][:-2]
-    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_dir = './sim_out/' + ARCH + '/' + short_name + '/'
     output_name = output_dir + short_name + '.elf'
 
     if not os.path.exists(os.path.dirname(output_name)):
@@ -151,7 +151,7 @@ def compile_asm_for_self(file_name):
 def compile_c(file_name):
     # compile all of the files
     short_name = file_name.split(ARCH+'/')[1][:-2]
-    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_dir = './sim_out/' + ARCH + '/' + short_name + '/'
     output_name = output_dir + short_name + '.elf'
 
     if not os.path.exists(os.path.dirname(output_name)):
@@ -210,7 +210,7 @@ def calculate_checksum_str(data, addr):
 # and rename the temp file to the original's name
 def clean_init_hex(file_name):
     short_name = file_name.split(ARCH+'/')[1][:-2]
-    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_dir = './sim_out/' + ARCH + '/' + short_name + '/'
     init_output = output_dir + 'meminit.hex'
     build_dir = './build/meminit.hex'
 
@@ -253,7 +253,7 @@ def clean_init_hex(file_name):
 # and rename the temp file to the original's name
 def clean_init_hex_for_self(file_name):
     short_name = file_name.split(ARCH+'/')[1][:-2]
-    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_dir = './sim_out/' + ARCH + '/' + short_name + '/'
     init_output = output_dir + 'meminit.hex'
     build_dir = './build/meminit.hex'
 
@@ -296,7 +296,7 @@ def clean_init_hex_for_self(file_name):
 # and rename the temp file to the original's name
 def clean_spike_output(file_name):
     short_name = file_name.split(ARCH+'/')[1][:-2]
-    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_dir = './sim_out/' + ARCH + '/' + short_name + '/'
 
     # clean the hex memory dump
     spike_output = output_dir + short_name + '_spike.hex'
@@ -350,7 +350,7 @@ def clean_spike_output(file_name):
 
 def clean_sim_trace(file_name):
     short_name = file_name.split(ARCH+'/')[1][:-2]
-    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_dir = './sim_out/' + ARCH + '/' + short_name + '/'
  
     # clean the trace 
     trace_output = output_dir + short_name + '_sim.trace'
@@ -370,7 +370,7 @@ def clean_sim_trace(file_name):
 
 def run_sim(file_name):
     short_name = file_name.split(ARCH+'/')[1][:-2]
-    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_dir = './sim_out/' + ARCH + '/' + short_name + '/'
 
     cmd_arr = ['waf', 'configure', '--top_level=' + TOP_LEVEL]
     failure = subprocess.call(cmd_arr, stdout=FNULL)
@@ -391,7 +391,7 @@ def run_sim(file_name):
 
 def run_self_sim(file_name):
     short_name = file_name.split(ARCH+'/')[1][:-2]
-    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_dir = './sim_out/' + ARCH + '/' + short_name + '/'
 
     cmd_arr = ['waf', 'configure', '--top_level=' + TOP_LEVEL + "_self_test"]
     failure = subprocess.call(cmd_arr, stdout=FNULL)
@@ -412,7 +412,7 @@ def run_self_sim(file_name):
 def run_spike_asm(file_name):
     # the object file should already exist from calling compile_asm
     short_name = file_name.split(ARCH+'/')[1][:-2]
-    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_dir = './sim_out/' + ARCH + '/' + short_name + '/'
     
     elf_name = output_dir + short_name + '.elf'
     log_name = output_dir + short_name + '_spike.hex'
@@ -426,7 +426,7 @@ def run_spike_asm(file_name):
 
 def compare_results(f):
     short_name = f.split(ARCH+'/')[1][:-2]
-    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_dir = './sim_out/' + ARCH + '/' + short_name + '/'
 
     sim_name =  output_dir + 'cpu.hex'
     spike_name = output_dir + short_name + '_spike.hex'
@@ -446,7 +446,7 @@ def compare_results(f):
 
 def check_results(f):
     short_name = f.split(ARCH+'/')[1][:-2]
-    output_dir = './run/' + ARCH + '/' + short_name + '/'
+    output_dir = './sim_out/' + ARCH + '/' + short_name + '/'
 
     pass_msg = '{0:<40}{1:>20}'.format(short_name,START_GREEN + '[PASSED]' + END_COLOR)
     fail_msg = '{0:<40}{1:>20}'.format(short_name,START_RED + '[FAILED]' + END_COLOR)

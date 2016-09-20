@@ -52,7 +52,7 @@ interface csr_prv_if;
     output mtvec, mepc, mie, timer_int, mip, mcause, mstatus, clear_timer_int
   );
 
-  modport prv (
+  modport prv_control (
     output mip_rup, mbadaddr_rup, mcause_rup, mepc_rup, mstatus_rup,
       mip_next, mcause_next, mepc_next, mstatus_next, mbadaddr_next, 
     input mepc, mie, mip, mcause, mstatus, clear_timer_int

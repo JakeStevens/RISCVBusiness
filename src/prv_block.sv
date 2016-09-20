@@ -22,28 +22,53 @@
 *   Description:  Top level block for the priv logic. 
 */
 
-`include "csr_prv_if.vh"
 `include "prv_pipeline_if.vh"
+`include "prv_internal_if.vh"
 
 module prv_block (
   input logic CLK, nRST,
-  prv_pipeline_if prv_pipe_if
+  prv_pipeline_if.priv_block prv_pipe_if
 );
-  csr_prv_if    csr_pr_if();
+  prv_internal_if prv_intern_if();
 
   logic [1:0] prv_intr, prv_ret;
   
-  csr_rfile csr_rfile_i(.*);
-  prv_control prv_control_i(.*);
-  pipeline_control pipeline_control_i(.*);
+  csr_rfile csr_rfile_i(.*, .prv_intern_if(prv_intern_if));
+  prv_control prv_control_i(.*, .prv_intern_if(prv_intern_if));
+  pipeline_control pipeline_control_i(.*, .prv_intern_if(prv_intern_if));
 
   //Machine Mode Only
   assign prv_intr = 2'b11;
   assign prv_ret  = 2'b11;
 
-  assign prv_pipe_if.soft_int = 1'b0;
-  assign prv_pipe_if.timer_int = csr_pr_if.timer_int;
+  assign prv_intern_if.soft_int = 1'b0;
   //TODO: PIC (Programmable Interrupt Controller) 
-  assign prv_pipe_if.ext_int =  1'b0;
+  assign prv_intern_if.ext_int =  1'b0;
+
+  // Assign inputs to the prv_block to the corresponding internal signals
+  assign prv_intern_if.pipe_clear   = prv_pipe_if.pipe_clear;
+  assign prv_intern_if.ret          = prv_pipe_if.ret;
+  assign prv_intern_if.epc          = prv_pipe_if.epc;
+  assign prv_intern_if.fault_insn   = prv_pipe_if.fault_insn;
+  assign prv_intern_if.illegal_insn = prv_pipe_if.illegal_insn;
+  assign prv_intern_if.fault_l      = prv_pipe_if.fault_l;
+  assign prv_intern_if.mal_l        = prv_pipe_if.mal_l;
+  assign prv_intern_if.fault_s      = prv_pipe_if.fault_s;
+  assign prv_intern_if.mal_s        = prv_pipe_if.mal_s;
+  assign prv_intern_if.breakpoint   = prv_pipe_if.breakpoint;
+  assign prv_intern_if.env_m        = prv_pipe_if.env_m;
+  assign prv_intern_if.badaddr      = prv_pipe_if.badaddr;
+  assign prv_intern_if.swap         = prv_pipe_if.swap;
+  assign prv_intern_if.clr          = prv_pipe_if.clr;
+  assign prv_intern_if.set          = prv_pipe_if.set;
+  assign prv_intern_if.wdata        = prv_pipe_if.wdata;
+  assign prv_intern_if.addr         = prv_pipe_if.addr;
+  assign prv_intern_if.valid_write  = prv_pipe_if.valid_write;
+  // Assign outputs from internal signals to the outputs of the priv block
+  assign prv_pipe_if.priv_pc     = prv_intern_if.priv_pc;
+  assign prv_pipe_if.insert_pc   = prv_intern_if.insert_pc;
+  assign prv_pipe_if.intr        = prv_intern_if.intr;
+  assign prv_pipe_if.rdata       = prv_intern_if.rdata;
+  assign prv_pipe_if.invalid_csr = prv_intern_if.invalid_csr;
   
 endmodule

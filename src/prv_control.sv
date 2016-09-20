@@ -22,13 +22,11 @@
 *   Description:  Main control for the priv isa block 
 */
 
-`include "csr_prv_if.vh"
-`include "prv_pipeline_if.vh"
+`include "prv_internal_if.vh"
 
 module prv_control (
   input CLK, nRST,
-  prv_pipeline_if.prv  prv_pipe_if,
-  csr_prv_if.prv      csr_pr_if
+  prv_internal_if.prv_control prv_intern_if
 );
   import rv32i_types_pkg::*;
   import machine_mode_types_pkg::*;
@@ -44,85 +42,85 @@ module prv_control (
     interrupt = 1'b1;
     intr_src = SOFT_INT;
 
-    if (prv_pipe_if.timer_int) begin
+    if (prv_intern_if.timer_int) begin
       intr_src = TIMER_INT;
     end
-    else if (prv_pipe_if.soft_int) begin
+    else if (prv_intern_if.soft_int) begin
       intr_src = SOFT_INT;
     end
-    else if (prv_pipe_if.ext_int) begin
+    else if (prv_intern_if.ext_int) begin
       intr_src = EXT_INT;
     end
     else
       interrupt = 1'b0;
   end
 
-  assign csr_pr_if.mip_rup = interrupt || csr_pr_if.clear_timer_int;
+  assign prv_intern_if.mip_rup = interrupt || prv_intern_if.clear_timer_int;
   always_comb begin
-    csr_pr_if.mip_next = csr_pr_if.mip;
-    if (prv_pipe_if.timer_int) csr_pr_if.mip_next.mtip = 1'b1;
-    if (csr_pr_if.clear_timer_int) csr_pr_if.mip_next.mtip = 1'b0;
-    if (prv_pipe_if.soft_int) csr_pr_if.mip_next.msip = 1'b1;
-    if (prv_pipe_if.ext_int) csr_pr_if.mip_next.msip = 1'b1; //external interrupts not specified in 1.7
+    prv_intern_if.mip_next = prv_intern_if.mip;
+    if (prv_intern_if.timer_int) prv_intern_if.mip_next.mtip = 1'b1;
+    if (prv_intern_if.clear_timer_int) prv_intern_if.mip_next.mtip = 1'b0;
+    if (prv_intern_if.soft_int) prv_intern_if.mip_next.msip = 1'b1;
+    if (prv_intern_if.ext_int) prv_intern_if.mip_next.msip = 1'b1; //external interrupts not specified in 1.7
   end
 
   always_comb begin
     exception = 1'b1;
     ex_src = INSN_MAL;
 
-    if (prv_pipe_if.fault_l)
+    if (prv_intern_if.fault_l)
       ex_src = L_FAULT;
-    else if (prv_pipe_if.mal_l)
+    else if (prv_intern_if.mal_l)
       ex_src = L_ADDR_MAL;
-    else if (prv_pipe_if.fault_s) 
+    else if (prv_intern_if.fault_s) 
       ex_src = S_FAULT;
-    else if (prv_pipe_if.mal_s) 
+    else if (prv_intern_if.mal_s) 
       ex_src = S_ADDR_MAL;
-    else if (prv_pipe_if.breakpoint)
+    else if (prv_intern_if.breakpoint)
       ex_src = BREAKPOINT;
-    else if (prv_pipe_if.env_m) 
+    else if (prv_intern_if.env_m) 
       ex_src = ENV_CALL_M;
-    else if (prv_pipe_if.illegal_insn) 
+    else if (prv_intern_if.illegal_insn) 
       ex_src = ILLEGAL_INSN;
-    else if (prv_pipe_if.fault_insn)
+    else if (prv_intern_if.fault_insn)
       ex_src = INSN_FAULT;
-    else if (prv_pipe_if.mal_insn)
+    else if (prv_intern_if.mal_insn)
       ex_src = INSN_MAL;
     else 
       exception = 1'b0;
   end
 
   //output to pipeline control
-  assign prv_pipe_if.intr = exception | interrupt_reg;
-  assign interrupt_fired = (csr_pr_if.mstatus.ie & ((csr_pr_if.mie.mtie & csr_pr_if.mip.mtip) | 
-                     (csr_pr_if.mie.msie & csr_pr_if.mip.msip)));
+  assign prv_intern_if.intr = exception | interrupt_reg;
+  assign interrupt_fired = (prv_intern_if.mstatus.ie & ((prv_intern_if.mie.mtie & prv_intern_if.mip.mtip) | 
+                     (prv_intern_if.mie.msie & prv_intern_if.mip.msip)));
  
   // Register Updates on Interrupt/Exception
-  assign csr_pr_if.mcause_rup = exception | interrupt_fired;
-  assign csr_pr_if.mcause_next.interrupt = ~exception;
-  assign csr_pr_if.mcause_next.cause = exception ? ex_src : intr_src;
+  assign prv_intern_if.mcause_rup = exception | interrupt_fired;
+  assign prv_intern_if.mcause_next.interrupt = ~exception;
+  assign prv_intern_if.mcause_next.cause = exception ? ex_src : intr_src;
 
-  assign csr_pr_if.mstatus_rup = exception | interrupt_fired;
+  assign prv_intern_if.mstatus_rup = exception | interrupt_fired;
 
   always_comb begin
-    if (prv_pipe_if.intr) begin
-      csr_pr_if.mstatus_next.ie = 1'b0; 
-    end else if (prv_pipe_if.ret) begin
-      csr_pr_if.mstatus_next.ie = 1'b1;
+    if (prv_intern_if.intr) begin
+      prv_intern_if.mstatus_next.ie = 1'b0; 
+    end else if (prv_intern_if.ret) begin
+      prv_intern_if.mstatus_next.ie = 1'b1;
     end
     else begin
-      csr_pr_if.mstatus_next.ie = csr_pr_if.mstatus.ie;
+      prv_intern_if.mstatus_next.ie = prv_intern_if.mstatus.ie;
     end
   end
 
   // Update EPC as soon as interrupt or exception is found 
-  assign csr_pr_if.mepc_rup = exception | interrupt_fired;
-  assign csr_pr_if.mepc_next = prv_pipe_if.epc;
+  assign prv_intern_if.mepc_rup = exception | interrupt_fired;
+  assign prv_intern_if.mepc_next = prv_intern_if.epc;
 
-  assign csr_pr_if.mbadaddr_rup = (prv_pipe_if.mal_l | prv_pipe_if.fault_l | prv_pipe_if.mal_s | prv_pipe_if.fault_s | 
-                                  prv_pipe_if.illegal_insn | prv_pipe_if.fault_insn | prv_pipe_if.mal_insn) 
-                                  & prv_pipe_if.pipe_clear;
-  assign csr_pr_if.mbadaddr_next = prv_pipe_if.badaddr;
+  assign prv_intern_if.mbadaddr_rup = (prv_intern_if.mal_l | prv_intern_if.fault_l | prv_intern_if.mal_s | prv_intern_if.fault_s | 
+                                  prv_intern_if.illegal_insn | prv_intern_if.fault_insn | prv_intern_if.mal_insn) 
+                                  & prv_intern_if.pipe_clear;
+  assign prv_intern_if.mbadaddr_next = prv_intern_if.badaddr;
 
   /* Interrupt needs to be latched until pipeline cleared   */
   /* because mstatus.ie causes the irq to disappear after   */
@@ -133,7 +131,7 @@ module prv_control (
       interrupt_reg <= '0;
     else if (interrupt_fired)
       interrupt_reg <= 1'b1;
-    else if (prv_pipe_if.pipe_clear)
+    else if (prv_intern_if.pipe_clear)
       interrupt_reg <= '0;
   end 
 endmodule

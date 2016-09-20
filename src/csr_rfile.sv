@@ -23,13 +23,11 @@
 */
 
 
-`include "csr_prv_if.vh"
-`include "prv_pipeline_if.vh"
+`include "prv_internal_if.vh"
 
 module csr_rfile (
   input CLK, nRST,
-  prv_pipeline_if.csr prv_pipe_if,
-  csr_prv_if.csr  csr_pr_if
+  prv_internal_if.csr prv_intern_if
 );
   import machine_mode_types_pkg::*;
   import rv32i_types_pkg::*;
@@ -118,9 +116,9 @@ module csr_rfile (
   assign mtime          = mtimefull[31:0];
   assign mtimeh         = mtimefull[63:32];
   assign mtimefull_next = mtimefull + 1;
-  assign csr_pr_if.timer_int      = (mtime == mtimecmp);
-  assign csr_pr_if.clear_timer_int = (prv_pipe_if.addr == MTIMECMP_ADDR) &
-                                      prv_pipe_if.valid_write;
+  assign prv_intern_if.timer_int      = (mtime == mtimecmp);
+  assign prv_intern_if.clear_timer_int = (prv_intern_if.addr == MTIMECMP_ADDR) &
+                                      prv_intern_if.valid_write;
 
   /* Machine Counter Setup */
   // TODO: Implement Timers.  Non-Critical feature
@@ -150,7 +148,7 @@ module csr_rfile (
       mfromhost   <= '0;
       mtimecmp    <= '0;
       mtimefull   <= '0;
-    end else if (prv_pipe_if.addr == MTIMEH_ADDR)begin
+    end else if (prv_intern_if.addr == MTIMEH_ADDR)begin
       mstatus.ie  <= mstatus_next.ie;
       mie.mtie    <= mie_next.mtie; 
       mie.msie    <= mie_next.msie;
@@ -164,7 +162,7 @@ module csr_rfile (
       mfromhost   <= mfromhost_next;
       mtimecmp    <= mtimecmp_next;
       mtimefull   <= {mtimeh_next, mtimefull_next[31:0]};
-    end else if (prv_pipe_if.addr == MTIME_ADDR) begin
+    end else if (prv_intern_if.addr == MTIME_ADDR) begin
       mstatus.ie  <= mstatus_next.ie;
       mie.mtie    <= mie_next.mtie; 
       mie.msie    <= mie_next.msie;
@@ -202,92 +200,92 @@ module csr_rfile (
   logic csr_op;
   word_t rup_data;
 
-  assign csr_op = prv_pipe_if.swap | prv_pipe_if.clr | prv_pipe_if.set;
-  assign prv_pipe_if.invalid_csr = csr_op & ~valid_csr_addr;
-  assign rup_data = prv_pipe_if.swap ? prv_pipe_if.wdata : (
-                      prv_pipe_if.clr ? prv_pipe_if.rdata & ~prv_pipe_if.wdata : 
-                      prv_pipe_if.set ? prv_pipe_if.rdata | prv_pipe_if.wdata :
-                      prv_pipe_if.rdata
+  assign csr_op = prv_intern_if.swap | prv_intern_if.clr | prv_intern_if.set;
+  assign prv_intern_if.invalid_csr = csr_op & ~valid_csr_addr;
+  assign rup_data = prv_intern_if.swap ? prv_intern_if.wdata : (
+                      prv_intern_if.clr ? prv_intern_if.rdata & ~prv_intern_if.wdata : 
+                      prv_intern_if.set ? prv_intern_if.rdata | prv_intern_if.wdata :
+                      prv_intern_if.rdata
                       );
 
   // Readonly by pipeline, rw by prv
-  assign mip_next       = csr_pr_if.mip_rup ? csr_pr_if.mip_next : mip;
-  assign mbadaddr_next  = csr_pr_if.mbadaddr_rup ? csr_pr_if.mbadaddr_next : mbadaddr;
-  assign mcause_next    = csr_pr_if.mcause_rup ? csr_pr_if.mcause_next : mcause;
+  assign mip_next       = prv_intern_if.mip_rup ? prv_intern_if.mip_next : mip;
+  assign mbadaddr_next  = prv_intern_if.mbadaddr_rup ? prv_intern_if.mbadaddr_next : mbadaddr;
+  assign mcause_next    = prv_intern_if.mcause_rup ? prv_intern_if.mcause_next : mcause;
 
   // Read and write by pipeline and prv
-  assign mstatus_next   = (prv_pipe_if.addr == MSTATUS_ADDR) ? mstatus_t'(rup_data) : (
-                            csr_pr_if.mstatus_rup ? csr_pr_if.mstatus_next :
+  assign mstatus_next   = (prv_intern_if.addr == MSTATUS_ADDR) ? mstatus_t'(rup_data) : (
+                            prv_intern_if.mstatus_rup ? prv_intern_if.mstatus_next :
                             mstatus
                           );
 
-  assign mepc_next      = (prv_pipe_if.addr == MEPC_ADDR)  ? mepc_t'(rup_data) : (
-                            csr_pr_if.mepc_rup ? csr_pr_if.mepc_next : 
+  assign mepc_next      = (prv_intern_if.addr == MEPC_ADDR)  ? mepc_t'(rup_data) : (
+                            prv_intern_if.mepc_rup ? prv_intern_if.mepc_next : 
                             mepc
                           );
 
   // Read and write by pipeline
-  assign mie_next       = (prv_pipe_if.addr == MIE_ADDR) ? mie_t'(rup_data) : mie;
-  assign mscratch_next  = (prv_pipe_if.addr == MSCRATCH_ADDR) ? mscratch_t'(rup_data) : mscratch;
-  assign mtohost_next   = (prv_pipe_if.addr == MTOHOST_ADDR) ? mtohost_t'(rup_data) : mtohost;
-  assign mtime_next     = (prv_pipe_if.addr == MTIME_ADDR) ? mtime_t'(rup_data) : mtime;
-  assign mtimeh_next    = (prv_pipe_if.addr == MTIMEH_ADDR) ? mtimeh_t'(rup_data) : mtimeh;
-  assign mtimecmp_next  = (prv_pipe_if.addr == MTIMECMP_ADDR) ? mtimecmp_t'(rup_data) : mtimecmp;
+  assign mie_next       = (prv_intern_if.addr == MIE_ADDR) ? mie_t'(rup_data) : mie;
+  assign mscratch_next  = (prv_intern_if.addr == MSCRATCH_ADDR) ? mscratch_t'(rup_data) : mscratch;
+  assign mtohost_next   = (prv_intern_if.addr == MTOHOST_ADDR) ? mtohost_t'(rup_data) : mtohost;
+  assign mtime_next     = (prv_intern_if.addr == MTIME_ADDR) ? mtime_t'(rup_data) : mtime;
+  assign mtimeh_next    = (prv_intern_if.addr == MTIMEH_ADDR) ? mtimeh_t'(rup_data) : mtimeh;
+  assign mtimecmp_next  = (prv_intern_if.addr == MTIMECMP_ADDR) ? mtimecmp_t'(rup_data) : mtimecmp;
 
   always_comb begin
     valid_csr_addr = 1'b1;
-    casez (prv_pipe_if.addr)
-      MCPUID_ADDR     : prv_pipe_if.rdata = mcpuid; 
-      MIMPID_ADDR     : prv_pipe_if.rdata = mimpid;
-      MHARTID_ADDR    : prv_pipe_if.rdata = mhartid;
+    casez (prv_intern_if.addr)
+      MCPUID_ADDR     : prv_intern_if.rdata = mcpuid; 
+      MIMPID_ADDR     : prv_intern_if.rdata = mimpid;
+      MHARTID_ADDR    : prv_intern_if.rdata = mhartid;
       
-      MSTATUS_ADDR    : prv_pipe_if.rdata = mstatus;
-      MTVEC_ADDR      : prv_pipe_if.rdata = mtvec;
-      MTDELEG_ADDR    : prv_pipe_if.rdata = mtdeleg; 
-      MIE_ADDR        : prv_pipe_if.rdata = mie;
+      MSTATUS_ADDR    : prv_intern_if.rdata = mstatus;
+      MTVEC_ADDR      : prv_intern_if.rdata = mtvec;
+      MTDELEG_ADDR    : prv_intern_if.rdata = mtdeleg; 
+      MIE_ADDR        : prv_intern_if.rdata = mie;
       
-      MSCRATCH_ADDR   : prv_pipe_if.rdata = mscratch;
-      MEPC_ADDR       : prv_pipe_if.rdata = mepc;
-      MCAUSE_ADDR     : prv_pipe_if.rdata = mcause;
-      MBADADDR_ADDR   : prv_pipe_if.rdata = mbadaddr;
-      MIP_ADDR        : prv_pipe_if.rdata = mip; 
+      MSCRATCH_ADDR   : prv_intern_if.rdata = mscratch;
+      MEPC_ADDR       : prv_intern_if.rdata = mepc;
+      MCAUSE_ADDR     : prv_intern_if.rdata = mcause;
+      MBADADDR_ADDR   : prv_intern_if.rdata = mbadaddr;
+      MIP_ADDR        : prv_intern_if.rdata = mip; 
      
       //machine protection and translation not present 
-      MBASE_ADDR      : prv_pipe_if.rdata = '0;
-      MBOUND_ADDR     : prv_pipe_if.rdata = '0;
-      MIBASE_ADDR     : prv_pipe_if.rdata = '0;
-      MIBOUND_ADDR    : prv_pipe_if.rdata = '0;
-      MDBASE_ADDR     : prv_pipe_if.rdata = '0;
-      MDBOUND_ADDR    : prv_pipe_if.rdata = '0;
+      MBASE_ADDR      : prv_intern_if.rdata = '0;
+      MBOUND_ADDR     : prv_intern_if.rdata = '0;
+      MIBASE_ADDR     : prv_intern_if.rdata = '0;
+      MIBOUND_ADDR    : prv_intern_if.rdata = '0;
+      MDBASE_ADDR     : prv_intern_if.rdata = '0;
+      MDBOUND_ADDR    : prv_intern_if.rdata = '0;
 
       //only machine mode
-      HTIMEW_ADDR     : prv_pipe_if.rdata = '0;
-      HTIMEHW_ADDR    : prv_pipe_if.rdata = '0;
+      HTIMEW_ADDR     : prv_intern_if.rdata = '0;
+      HTIMEHW_ADDR    : prv_intern_if.rdata = '0;
             
       //Timers unimplemented
-      MTIMECMP_ADDR   : prv_pipe_if.rdata = mtimecmp;
-      MTIME_ADDR      : prv_pipe_if.rdata = mtime;
-      MTIMEH_ADDR     : prv_pipe_if.rdata = mtimeh;
+      MTIMECMP_ADDR   : prv_intern_if.rdata = mtimecmp;
+      MTIME_ADDR      : prv_intern_if.rdata = mtime;
+      MTIMEH_ADDR     : prv_intern_if.rdata = mtimeh;
       
       // Non-Standard mtohost/mfromhost
-      MTOHOST_ADDR    : prv_pipe_if.rdata = mtohost;
-      MFROMHOST_ADDR  : prv_pipe_if.rdata = mfromhost;
+      MTOHOST_ADDR    : prv_intern_if.rdata = mtohost;
+      MFROMHOST_ADDR  : prv_intern_if.rdata = mfromhost;
  
       default : begin
         valid_csr_addr = 1'b0;
-        prv_pipe_if.rdata = '0;
+        prv_intern_if.rdata = '0;
       end
     endcase
   end
 
-  assign csr_pr_if.mtvec     = mtvec;
-  assign csr_pr_if.mepc      = mepc;
-  assign csr_pr_if.mie       = mie;
-  assign csr_pr_if.mstatus   = mstatus;
-  assign csr_pr_if.mcause    = mcause;
-  assign csr_pr_if.mip       = mip;
+  assign prv_intern_if.mtvec     = mtvec;
+  assign prv_intern_if.mepc      = mepc;
+  assign prv_intern_if.mie       = mie;
+  assign prv_intern_if.mstatus   = mstatus;
+  assign prv_intern_if.mcause    = mcause;
+  assign prv_intern_if.mip       = mip;
 
-  assign prv_pipe_if.xtvec[2'b11]   = mtvec;
-  assign prv_pipe_if.xepc_r[2'b11]  = mepc;
+  assign prv_intern_if.xtvec[2'b11]   = mtvec;
+  assign prv_intern_if.xepc_r[2'b11]  = mepc;
 
 endmodule
