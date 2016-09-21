@@ -21,7 +21,8 @@
 *   Date Created: 09/16/2016
 *   Description:  C source for interrupt and exception handling code
 */
-#include "c_self_test.h"
+
+#include "trap.h"
 
 void irq_handler(int cause) {
   /* TODO: Interrupt Handling Code */
@@ -29,8 +30,7 @@ void irq_handler(int cause) {
 
 void exception_handler(int cause, int *regs, int *epc, int *badaddr) {
   // TODO: More exceptions
-  // TODO: header for constants like cause
-  if (2 == cause) {
+  if (ILLEGAL_INSN == cause) { 
     int instr, opcode, rd, rs1, rs2, funct3, funct7;
     int multiplier, multiplicand, product;
     instr = *epc;
@@ -40,28 +40,59 @@ void exception_handler(int cause, int *regs, int *epc, int *badaddr) {
     rs2 = (instr & 0x01F00000) >> 20;
     funct3 = (instr & 0x00007000) >> 12;
     funct7 = (instr & 0xFE000000) >> 25;
-    if (0x33 == opcode) //REGREG
-      if(0x1 == funct7) //M/D instruction
-        if (0 == funct3) { //MUL
+
+    if (OPCODE_REGREG == opcode) //REGREG
+      if(FUNCT7_MULDIV == funct7) //M/D instruction
+        if (FUNCT3_MUL == funct3) { //MUL
           // rs2 = multiplier
           // rs1 = multiplicand
-          multiplier = *(regs + rs2);
+          /*multiplier = *(regs + rs2);
           multiplicand = *(regs + rs1);
           product = 0;
           while(multiplier > 0) {
             product += multiplicand;
             multiplier--;
           }
-          *(regs + rd) = product;
+          *(regs + rd) = product;*/
+
+          asm_mul(*(regs + rs2), *(regs + rs1), (regs +rd));
         }
-        else if (0x1 == funct3) { //MULH
+        else if (FUNCT3_MULH == funct3) { //MULH
           ; //TODO implement MULH
         }
-        else if (0x2 == funct3) { //MULHSU
+        else if (FUNCT3_MULHSU == funct3) { //MULHSU
           ; //TODO implement MULHSU
         }
-        else if (0x3 == funct3) { //MULHU
+        else if (FUNCT3_MULHU == funct3) { //MULHU
           ; //TODO implement MULHU
         }
+        else if (FUNCT3_DIV == funct3) {
+          ; //TODO implement DIV
+        }
+        else if (FUNCT3_DIVU == funct3) {
+          ; //TODO implement DIVU
+        }
+        else if (FUNCT3_REM == funct3) {
+          ; //TODO implement REM
+        }
+        else if (FUNCT3_REMU == funct3) {
+          ; //TODO implement REMU
+        }
   }
+}
+
+void asm_mul(int multiplier, int multiplicand, int *product) {
+  asm volatile (
+    "addi t0, a0, 0     \t\n\
+    addi a0, zero, 0    \t\n\
+    2:                  \t\n\
+    andi t1, a1, 0x1    \t\n\
+    beq t1, zero, 1f    \t\n\
+    add a0, t0, a0      \t\n\
+    1:                  \t\n\
+    slli t0, t0, 1      \t\n\
+    srli a1, a1, 1      \t\n\
+    bne  a1, zero, 2b   \t\n\
+    sw   a0, 0(a2)      \t\n\
+  ");
 }
