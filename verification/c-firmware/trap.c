@@ -41,29 +41,18 @@ void exception_handler(int cause, int *regs, int *epc, int *badaddr) {
     funct3 = (instr & 0x00007000) >> 12;
     funct7 = (instr & 0xFE000000) >> 25;
 
-    if (OPCODE_REGREG == opcode) //REGREG
-      if(FUNCT7_MULDIV == funct7) //M/D instruction
-        if (FUNCT3_MUL == funct3) { //MUL
-          // rs2 = multiplier
-          // rs1 = multiplicand
-          /*multiplier = *(regs + rs2);
-          multiplicand = *(regs + rs1);
-          product = 0;
-          while(multiplier > 0) {
-            product += multiplicand;
-            multiplier--;
-          }
-          *(regs + rd) = product;*/
-
+    if (OPCODE_REGREG == opcode) { 
+      if(FUNCT7_MULDIV == funct7) {
+        if (FUNCT3_MUL == funct3) { 
           asm_mul(*(regs + rs2), *(regs + rs1), (regs +rd));
         }
-        else if (FUNCT3_MULH == funct3) { //MULH
+        else if (FUNCT3_MULH == funct3) { 
           ; //TODO implement MULH
         }
-        else if (FUNCT3_MULHSU == funct3) { //MULHSU
+        else if (FUNCT3_MULHSU == funct3) { 
           ; //TODO implement MULHSU
         }
-        else if (FUNCT3_MULHU == funct3) { //MULHU
+        else if (FUNCT3_MULHU == funct3) { 
           ; //TODO implement MULHU
         }
         else if (FUNCT3_DIV == funct3) {
@@ -78,10 +67,13 @@ void exception_handler(int cause, int *regs, int *epc, int *badaddr) {
         else if (FUNCT3_REMU == funct3) {
           ; //TODO implement REMU
         }
+      }
+    }
   }
 }
 
 void asm_mul(int multiplier, int multiplicand, int *product) {
+  //registers a0-a2 hold the arguments
   asm volatile (
     "addi t0, a0, 0     \t\n\
     addi a0, zero, 0    \t\n\
