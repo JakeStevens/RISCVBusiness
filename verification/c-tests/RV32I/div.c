@@ -14,35 +14,34 @@
 *   limitations under the License.
 *
 *
-*   Filename:     array_test.c
+*   Filename:     div.c
 *
-*   Created by:   John Skubic 
+*   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 09/21/2016
-*   Description:  A test that verifies arrays are functional.
+*   Description:  Division c test.  Tests hardware if mul extension is
+*                 implemented, or tests software multiply trap handler
 */
 
 #include "../../c-firmware/c_self_test.h"
-#define ARR_LENGTH 100
-int main(void)
-{
-  int array1[ARR_LENGTH];
-  int array2[ARR_LENGTH];
-  int array3[ARR_LENGTH];
-  int i;
+ 
+int main(void) { 
+  int a=6;
+  int b=3; 
+  int c,d;
 
-  for(i = 0; i < ARR_LENGTH;i++) {
-    array1[i] = i;
-    array2[i] = i*2;
-    array3[i] = array1[i] + array2[i];
+  //perform test operation
+  c = a/b;
+  a = 639;
+  b = 14;
+  d = a/b;
+
+  //check if memory is as expected
+  if(c != 2) {
+    TEST_FINISH_FAIL(1)
   }
-
-  for(i = 0; i < ARR_LENGTH;i++) {
-    if(array1[i] > array2[i])
-      TEST_FINISH_FAIL(1)
-
-    if(array2[i] > array3[i])
-      TEST_FINISH_FAIL(2)
+  if(c != 45) {
+    TEST_FINISH_FAIL(2)
   }
   TEST_FINISH_SUCCESS
 }
