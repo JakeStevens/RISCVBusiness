@@ -75,10 +75,10 @@ int partition(int lb, int ub, int *arr) {
   //choose the median of three pivots
   if(arr[lb] < arr[ub]){
     if(arr[lb] > arr[mid]){
-    	swap(lb, ub, arr);
+      swap(lb, ub, arr);
     }
     else if (arr[ub] > arr[mid]) {
-    	swap(ub, mid, arr);
+      swap(ub, mid, arr);
     }
   }
   else{ 
