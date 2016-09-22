@@ -1,6 +1,6 @@
 # ignore the build and run files
 build/
-run/
+sim_out/
 # ignore memory files from test cases
 *.hex
 meminit.ver
