@@ -70,28 +70,28 @@ int partition(int lb, int ub, int *arr) {
   int pivot;
   int currPtr = lb;
   int smallPtr = lb-1;
-	int mid = (lb + ub) >> 1; // divide by 2
-
+  int mid = (lb + ub) >> 1; // divide by 2
+  
   //choose the median of three pivots
-	if(arr[lb] < arr[ub]){
-		if(arr[lb] > arr[mid]){
-			swap(lb, ub, arr);
-		}
-		else if (arr[ub] > arr[mid]) {
-			swap(ub, mid, arr);
-		}
-	}
-	else{ 
-		if(arr[ub] < arr[mid]){
-			swap(ub, mid, arr);
-		}
-		else if (arr[lb] < arr[mid]){
-			swap(lb, ub, arr);
-		}
-	}
-
-	pivot = arr[ub];
-
+  if(arr[lb] < arr[ub]){
+    if(arr[lb] > arr[mid]){
+    	swap(lb, ub, arr);
+    }
+    else if (arr[ub] > arr[mid]) {
+    	swap(ub, mid, arr);
+    }
+  }
+  else{ 
+    if(arr[ub] < arr[mid]){
+      swap(ub, mid, arr);
+    }
+    else if (arr[lb] < arr[mid]){
+      swap(lb, ub, arr);
+    }
+  }
+  
+  pivot = arr[ub];
+  
   for(currPtr = lb; currPtr < ub; currPtr++){
     if(arr[currPtr] <= pivot){
       smallPtr++;
@@ -100,7 +100,7 @@ int partition(int lb, int ub, int *arr) {
   }
   smallPtr++;
   swap(smallPtr, ub, arr);
-
+  
   return smallPtr; // holds the value of q 
 }
 
