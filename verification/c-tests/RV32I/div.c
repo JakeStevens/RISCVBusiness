@@ -40,7 +40,7 @@ int main(void) {
   if(c != 2) {
     TEST_FINISH_FAIL(1)
   }
-  if(c != 45) {
+  if(d != 45) {
     TEST_FINISH_FAIL(2)
   }
   TEST_FINISH_SUCCESS
