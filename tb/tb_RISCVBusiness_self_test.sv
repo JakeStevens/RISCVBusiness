@@ -28,7 +28,7 @@
 `include "ram_if.vh"
 
 `define OUTPUT_FILE_NAME "cpu.hex"
-`define CLK_TIMEOUT 500000
+`define CLK_TIMEOUT 1000000
 
 module tb_RISCVBusiness_self_test ();
    
