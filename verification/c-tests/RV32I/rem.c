@@ -30,12 +30,35 @@ int main(void) {
   int b=5; 
   int c;
 
-  //perform test operation
   c = a%b;
+  if(c != 3) 
+    TEST_FINISH_FAIL(1) 
 
-  //check if memory is as expected
-  if(c == 3) {
-    TEST_FINISH_SUCCESS
-  }
-  TEST_FINISH_FAIL(1)
+  a = -513;
+  b = 10;
+  c = a%b;
+  if(c != -3) 
+    TEST_FINISH_FAIL(2)  
+
+  a = -31;
+  b = -6;
+  c = a%b;
+  if(c != 1)
+    TEST_FINISH_FAIL(3)
+
+  //divide by zero
+  a = 9;
+  b = 0;
+  c = a%b;
+  if(c != 9)
+    TEST_FINISH_FAIL(4)
+
+  //overflow
+  a = 0x80000000;
+  b = -1;
+  c = a%b;
+  if(c != 0)
+    TEST_FINISH_FAIL(5)
+
+  TEST_FINISH_SUCCESS
 }

@@ -38,5 +38,7 @@
 #define FUNCT3_REMU     0x7
 
 void asm_mul(int multiplier, int multiplicand, int *product);
+void asm_div(int numerator, int denominator, int *quotient, int *remainder);
+int invert(int);
 
 #endif //TRAP_H
