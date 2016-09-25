@@ -41,7 +41,8 @@
   eret
 
   .balign 0x40
-  j main
+  la t0, main
+  jr t0
 
 trap:
   #store return address
