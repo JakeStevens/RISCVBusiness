@@ -28,6 +28,7 @@
 package machine_mode_types_pkg;
 
   typedef enum logic [11:0] {
+    /* Machine Mode Addresses */
     MCPUID_ADDR     = 12'hF00,
     MIMPID_ADDR     = 12'hF01,
     MHARTID_ADDR    = 12'hF10,
@@ -58,7 +59,14 @@ package machine_mode_types_pkg;
     MTIMEH_ADDR     = 12'h741,
 
     MTOHOST_ADDR    = 12'h780,
-    MFROMHOST_ADDR  = 12'h781
+    MFROMHOST_ADDR  = 12'h781,
+    /* User Mode Addresses */
+    CYCLE_ADDR      = 12'hC00,
+    TIME_ADDR       = 12'hC01,
+    INSTRET_ADDR    = 12'hC02,
+    CYCLEH_ADDR     = 12'hC80,
+    TIMEH_ADDR      = 12'hC81,
+    INSTRETH_ADDR   = 12'hC82
   } csr_addr_t;
 
   /* Priv Levels */
@@ -227,6 +235,11 @@ package machine_mode_types_pkg;
   typedef logic [31:0] mtime_t;
   typedef logic [31:0] mtimeh_t;
   typedef logic [31:0] mtimecmp_t;
+
+  /* User simple registers */
+  typedef logic [31:0] cycle_t;
+  typedef logic [31:0] time_t;
+  typedef logic [31:0] instret_t;
 
   `define MTVEC_ADDR 32'h1C0
 

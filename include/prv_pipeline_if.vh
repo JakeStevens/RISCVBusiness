@@ -50,15 +50,18 @@ interface prv_pipeline_if();
   csr_addr_t  addr;
   word_t      rdata, wdata;
 
+  // performance signals
+  logic wb_enable, instr;
+
   modport hazard (
     input priv_pc, insert_pc, intr,
     output pipe_clear, ret, epc, fault_insn, mal_insn, 
             illegal_insn, fault_l, mal_l, fault_s, mal_s,
-            breakpoint, env_m, badaddr
+            breakpoint, env_m, badaddr, wb_enable
   );
 
   modport pipe (
-    output swap, clr, set, wdata, addr, valid_write,
+    output swap, clr, set, wdata, addr, valid_write, instr,
     input  rdata, invalid_csr
   );
 
@@ -67,7 +70,7 @@ interface prv_pipeline_if();
     input pipe_clear, ret, epc, fault_insn, mal_insn,
           illegal_insn, fault_l, mal_l, fault_s, mal_s,
           breakpoint, env_m, badaddr, swap, clr, set,
-          wdata, addr, valid_write,
+          wdata, addr, valid_write, wb_enable, instr,
     output priv_pc, insert_pc, intr, rdata, invalid_csr
   );
 

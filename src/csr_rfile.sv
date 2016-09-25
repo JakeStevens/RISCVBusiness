@@ -120,13 +120,26 @@ module csr_rfile (
   assign prv_intern_if.clear_timer_int = (prv_intern_if.addr == MTIMECMP_ADDR) &
                                       prv_intern_if.valid_write;
 
-  /* Machine Counter Setup */
-  // TODO: Implement Timers.  Non-Critical feature
-
-
   /* Machine Counter Delta Registers */
   // Unimplemented, only Machine Mode Supported
 
+  /* Performance User Level Registers */
+  cycle_t cycle, cycleh, cycle_next, cycleh_next;
+  time_t  _time, timeh, time_next, timeh_next;
+  instret_t instret, instreth, instret_next, isntreth_next;
+  logic [63:0] instretfull, instretfull_next, cyclefull, cyclefull_next;
+  logic [63:0] timefull, timefull_next;
+  //TODO: Difference between time and cycle?
+  assign _time = timefull[31:0];
+  assign timeh = timefull[63:32];
+  assign timefull_next = timefull + 1;
+  assign cycle = cyclefull[31:0];
+  assign cycleh = cyclefull[63:32];
+  assign cyclefull_next = cyclefull + 1;
+  assign instret = instretfull[31:0];
+  assign instreth = instretfull[63:32];
+  assign instretfull_next = (prv_intern_if.instr_retired == 1'b1) ?
+                            instretfull + 1 : instretfull;
 
   //Non Standard Extensions, used for testing 
   mtohost_t   mtohost, mtohost_next;
@@ -148,6 +161,10 @@ module csr_rfile (
       mfromhost   <= '0;
       mtimecmp    <= '0;
       mtimefull   <= '0;
+      /* Performance Counters */
+      timefull    <= '0;
+      cyclefull   <= '0;
+      instretfull <= '0;
     end else if (prv_intern_if.addr == MTIMEH_ADDR)begin
       mstatus.ie  <= mstatus_next.ie;
       mie.mtie    <= mie_next.mtie; 
@@ -162,6 +179,10 @@ module csr_rfile (
       mfromhost   <= mfromhost_next;
       mtimecmp    <= mtimecmp_next;
       mtimefull   <= {mtimeh_next, mtimefull_next[31:0]};
+      /* Performance Counters */
+      timefull    <= timefull_next;
+      cyclefull   <= cyclefull_next;
+      instretfull <= instretfull_next;
     end else if (prv_intern_if.addr == MTIME_ADDR) begin
       mstatus.ie  <= mstatus_next.ie;
       mie.mtie    <= mie_next.mtie; 
@@ -176,6 +197,10 @@ module csr_rfile (
       mfromhost   <= mfromhost_next;
       mtimecmp    <= mtimecmp_next;
       mtimefull   <= {mtimefull_next[63:32], mtime_next};
+      /* Performance Counters */
+      timefull    <= timefull_next;
+      cyclefull   <= cyclefull_next;
+      instretfull <= instretfull_next;
     end else begin      
       mstatus.ie  <= mstatus_next.ie;
       mie.mtie    <= mie_next.mtie; 
@@ -190,6 +215,10 @@ module csr_rfile (
       mfromhost   <= mfromhost_next;
       mtimecmp    <= mtimecmp_next;
       mtimefull   <= mtimefull_next;
+      /* Performance Counters */
+      timefull    <= timefull_next;
+      cyclefull   <= cyclefull_next;
+      instretfull <= instretfull_next;
     end
   end
 
@@ -262,7 +291,7 @@ module csr_rfile (
       HTIMEW_ADDR     : prv_intern_if.rdata = '0;
       HTIMEHW_ADDR    : prv_intern_if.rdata = '0;
             
-      //Timers unimplemented
+      //Timers
       MTIMECMP_ADDR   : prv_intern_if.rdata = mtimecmp;
       MTIME_ADDR      : prv_intern_if.rdata = mtime;
       MTIMEH_ADDR     : prv_intern_if.rdata = mtimeh;
@@ -270,6 +299,14 @@ module csr_rfile (
       // Non-Standard mtohost/mfromhost
       MTOHOST_ADDR    : prv_intern_if.rdata = mtohost;
       MFROMHOST_ADDR  : prv_intern_if.rdata = mfromhost;
+
+      // User level performance counters
+      CYCLE_ADDR      : prv_intern_if.rdata = cycle;
+      TIME_ADDR       : prv_intern_if.rdata = _time;
+      INSTRET_ADDR    : prv_intern_if.rdata = instret;
+      CYCLEH_ADDR     : prv_intern_if.rdata = cycleh;
+      TIMEH_ADDR      : prv_intern_if.rdata = timeh;
+      INSTRETH_ADDR   : prv_intern_if.rdata = instreth;
  
       default : begin
         valid_csr_addr = 1'b0;

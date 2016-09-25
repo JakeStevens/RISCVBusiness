@@ -80,6 +80,9 @@ module hazard_unit
   assign hazard_if.priv_pc        = prv_pipe_if.priv_pc;
 
   /* Send Exception notifications to Prv Block */
+  assign prv_pipe_if.wb_enable    = !hazard_if.if_ex_stall | 
+                                    hazard_if.jump |
+                                    hazard_if.branch; //Because 2 stages
   assign prv_pipe_if.fault_insn   = hazard_if.fault_insn;
   assign prv_pipe_if.mal_insn     = hazard_if.mal_insn;
   assign prv_pipe_if.illegal_insn = hazard_if.illegal_insn;
