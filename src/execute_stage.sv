@@ -242,7 +242,8 @@ module execute_stage(
   assign prv_pipe_if.addr  = cu_if.csr_addr;
   assign prv_pipe_if.valid_write = (prv_pipe_if.swap | prv_pipe_if.clr |
                                     prv_pipe_if.set) & cu_if.not_zero;
-  
+  assign prv_pipe_if.instr = (cu_if.instr != '0);
+
   always_comb begin
     if(byte_en == 4'hf) 
       mal_addr = (dram_if.addr[1:0] != 2'b00);

@@ -42,6 +42,7 @@ interface prv_internal_if;
   logic insert_pc;
   logic swap, clr, set;
   logic valid_write, invalid_csr;
+  logic instr_retired;
 
   word_t epc, badaddr, priv_pc;
   word_t [3:0] xtvec, xepc_r;
@@ -61,7 +62,7 @@ interface prv_internal_if;
   modport csr (
     input mip_rup, mbadaddr_rup, mcause_rup, mepc_rup, mstatus_rup,
       mip_next, mbadaddr_next, mcause_next, mepc_next, mstatus_next,
-      swap, clr, set, wdata, addr, valid_write, 
+      swap, clr, set, wdata, addr, valid_write, instr_retired, 
     output mtvec, mepc, mie, timer_int, mip, mcause, mstatus, clear_timer_int,
       rdata, invalid_csr, xtvec, xepc_r
   );

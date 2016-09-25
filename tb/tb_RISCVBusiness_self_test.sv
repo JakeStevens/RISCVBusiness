@@ -130,6 +130,7 @@ module tb_RISCVBusiness_self_test ();
       clk_count++;
     end
 
+    dump_stats();
     dump_ram();
 
     // Check Register 28 to see if test passed or failed
@@ -143,6 +144,19 @@ module tb_RISCVBusiness_self_test ();
     $finish;
 
   end : CORE_RUN
+
+  task dump_stats();
+    //TODO: Print this to a file?
+    //stats_ptr = $fopen(`STATS_FILE_NAME, "w");
+    integer instret, cycles;
+    instret = DUT.pipeline.prv_block_i.csr_rfile_i.instretfull;
+    cycles  = DUT.pipeline.prv_block_i.csr_rfile_i.cyclefull;
+    assert (cycles == clk_count) else $error("Cycles CSR != clk_count");
+    $display("Instructions retired: %2d", instret);
+    $display("Cycles taken: %2d", cycles);
+    $display("CPI: %5f", real'(cycles)/instret);
+    $display("IPC: %5f", real'(instret)/cycles);
+  endtask
 
   task dump_ram ();
     ram_control = 0;
