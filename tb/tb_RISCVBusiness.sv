@@ -80,6 +80,14 @@ module tb_RISCVBusiness ();
     .imm_SB(cu_if.imm_SB),
     .instr_30(fetch_ex_if.fetch_ex_reg.instr[30])
     );
+
+  bind branch_predictor branch_tracker branch_perf(
+    .CLK(CLK),
+    .nRST(nRST),
+    .update_predictor(predict_if.update_predictor),
+    .prediction(predict_if.prediction),
+    .branch_result(predict_if.branch_result)
+  );
      
 
   //Ramif Mux

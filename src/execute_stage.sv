@@ -267,5 +267,13 @@ module execute_stage(
 
   assign hazard_if.epc_e = fetch_ex_if.fetch_ex_reg.pc;
   assign hazard_if.token_ex = fetch_ex_if.fetch_ex_reg.token;
+
+  /*********************************************************
+  *** Branch Predictor Logic
+  *********************************************************/
+  assign predict_if.update_predictor = cu_if.branch;
+  assign predict_if.prediction = fetch_ex_if.fetch_ex_reg.prediction;
+  assign predict_if.branch_result = branch_if.branch_taken;
+  //predict_if.update_addr = ;
 endmodule
 
