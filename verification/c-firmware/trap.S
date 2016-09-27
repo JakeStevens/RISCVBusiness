@@ -99,6 +99,9 @@ j_int:
   j trap_ret
 j_ex:
   jal exception_handler
+  csrr t0, mepc
+  addi t0, t0, 4
+  csrw mepc, t0
 trap_ret:
   #pop modified values of registers (ignore 0-4)
   lw x31, 31*4(sp)
@@ -131,11 +134,6 @@ trap_ret:
   addi sp, sp, 32*4
   #restore return address, update epc and return
   lw ra, 0(sp)
-  sw t0, 0(sp)
-  csrr t0, mepc
-  addi t0, t0, 4
-  csrw mepc, t0
-  lw t0, 0(sp)
   addi sp, sp, 4
   ret
   
