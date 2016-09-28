@@ -77,7 +77,7 @@ module tb_RISCVBusiness ();
     .imm_S(cu_if.imm_S),
     .imm_I(cu_if.imm_I),
     .imm_U(cu_if.imm_U),
-    .imm_UJ(cu_if.imm_UJ),
+    .imm_UJ({9'b0, cu_if.imm_UJ}),
     .imm_SB(cu_if.imm_SB),
     .instr_30(fetch_ex_if.fetch_ex_reg.instr[30])
     );
@@ -136,7 +136,7 @@ module tb_RISCVBusiness ();
     while (halt == 0 && clk_count != `CLK_TIMEOUT) begin
       @(posedge CLK);
       clk_count++;
-      if (ram_if.addr == 16'h0000 & !ram_if.busy & !ram_if.wen)
+      if (ram_if.addr == 16'h0000 & !ram_if.busy & ram_if.wen)
         $write("%c",ram_if.wdata[31:24]);
     end
 

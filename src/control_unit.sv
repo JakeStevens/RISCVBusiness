@@ -155,7 +155,7 @@ module control_unit
                       (cu_if.opcode == REGREG && instr_r.funct3 == SLTU));
 
   always_comb begin
-    unique if (aluop_sll)
+    if (aluop_sll)
       cu_if.alu_op = ALU_SLL;
     else if (aluop_sra)
       cu_if.alu_op = ALU_SRA;

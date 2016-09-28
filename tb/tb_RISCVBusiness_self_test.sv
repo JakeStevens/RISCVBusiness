@@ -78,7 +78,7 @@ module tb_RISCVBusiness_self_test ();
     .imm_S(cu_if.imm_S),
     .imm_I(cu_if.imm_I),
     .imm_U(cu_if.imm_U),
-    .imm_UJ(cu_if.imm_UJ),
+    .imm_UJ({9'b0, cu_if.imm_UJ}),
     .imm_SB(cu_if.imm_SB),
     .instr_30(fetch_ex_if.fetch_ex_reg.instr[30])
     );
