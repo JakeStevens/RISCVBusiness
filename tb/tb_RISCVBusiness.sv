@@ -27,6 +27,7 @@
 `include "ram_if.vh"
 
 `define OUTPUT_FILE_NAME "cpu.hex"
+`define STATS_FILE_NAME "stats.txt"
 `define CLK_TIMEOUT 10000
 
 module tb_RISCVBusiness ();
@@ -39,7 +40,7 @@ module tb_RISCVBusiness ();
   logic [31:0] addr, data;
   logic [63:0] hexdump_temp;
   logic [7:0] checksum;
-  integer fptr;
+  integer fptr, stats_ptr;
   integer clk_count;
 
   //Interface Instantiations
@@ -135,6 +136,8 @@ module tb_RISCVBusiness ();
     while (halt == 0 && clk_count != `CLK_TIMEOUT) begin
       @(posedge CLK);
       clk_count++;
+      if (ram_if.addr == 16'h0000 & !ram_if.busy & !ram_if.wen)
+        $write("%c",ram_if.wdata[31:24]);
     end
 
     dump_stats();
@@ -148,18 +151,17 @@ module tb_RISCVBusiness ();
   end : CORE_RUN
 
   task dump_stats();
-    //TODO: Print this to a file?
-    //stats_ptr = $fopen(`STATS_FILE_NAME, "w");
     integer instret, cycles;
     instret = DUT.pipeline.prv_block_i.csr_rfile_i.instretfull;
     cycles  = DUT.pipeline.prv_block_i.csr_rfile_i.cyclefull;
     assert (cycles == clk_count) else $error("Cycles CSR != clk_count");
-    $display("Instructions retired: %2d", instret);
-    $display("Cycles taken: %2d", cycles);
-    $display("CPI: %5f", real'(cycles)/instret);
-    $display("IPC: %5f", real'(instret)/cycles);
-  endtask
-    
+    stats_ptr = $fopen(`STATS_FILE_NAME, "w");
+    $fwrite(stats_ptr, "Instructions retired: %2d\n", instret);
+    $fwrite(stats_ptr, "Cycles taken: %2d\n", cycles);
+    $fwrite(stats_ptr, "CPI: %5f\n", real'(cycles)/instret);
+    $fwrite(stats_ptr, "IPC: %5f\n", real'(instret)/cycles);
+    $fclose(stats_ptr);
+  endtask 
 
   task dump_ram ();
     ram_control = 0;

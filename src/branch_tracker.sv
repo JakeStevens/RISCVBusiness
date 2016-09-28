@@ -21,6 +21,7 @@
 *   Date Created: 09/26/2016
 *   Description:  Track performance stats associated with branch prediction 
 */
+`define STATS_FILE_NAME "stats.txt" 
 module branch_tracker(
   input logic CLK, nRST,
   input logic update_predictor,
@@ -67,25 +68,27 @@ module branch_tracker(
   end : tracked_registers
 
   final begin : OUTPUT_STATS
-    $display("Conditional branches predicted: %2d", prediction_count);
-    $display("Conditional branches predicted incorrectly: %2d",
+    integer stats_fptr;
+    stats_fptr = $fopen(`STATS_FILE_NAME, "a");
+    $fwrite(stats_fptr, "Conditional branches predicted: %2d\n", prediction_count);
+    $fwrite(stats_fptr, "Conditional branches predicted incorrectly: %2d\n",
               misprediction_count);
-    $display("Conditional branches predicted correctly: %2d",
+    $fwrite(stats_fptr, "Conditional branches predicted correctly: %2d\n",
               correct_pred_count);
-    $display("Branch prediction accuracy: %5f",
+    $fwrite(stats_fptr, "Branch prediction accuracy: %5f\n",
               real'(correct_pred_count)/prediction_count);
-    $display("Branches predicted as taken: %2d",
+    $fwrite(stats_fptr, "Branches predicted as taken: %2d\n",
               pred_taken_count);
-    $display("Branches predicted as taken, incorrect: %2d",
+    $fwrite(stats_fptr, "Branches predicted as taken, incorrect: %2d\n",
               taken_incorrect_count);
-    $display("Branches predicted as taken, correct: %2d",
+    $fwrite(stats_fptr, "Branches predicted as taken, correct: %2d\n",
               pred_taken_count - taken_incorrect_count);
-    $display("Branches predicted as not taken: %2d",
+    $fwrite(stats_fptr, "Branches predicted as not taken: %2d\n",
               pred_not_taken_count);
-    $display("Branches predicted as not taken, incorrect: %2d",
+    $fwrite(stats_fptr, "Branches predicted as not taken, incorrect: %2d\n",
               not_taken_incorrect_count);
-    $display("Branches predicted as not taken, correct: %2d",
+    $fwrite(stats_fptr, "Branches predicted as not taken, correct: %2d\n",
               pred_not_taken_count - not_taken_incorrect_count);
-
+    $fclose(stats_fptr);
   end : OUTPUT_STATS
 endmodule
