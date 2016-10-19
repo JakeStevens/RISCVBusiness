@@ -26,7 +26,7 @@
 `define RV32I_TYPES_PKG_SV
 package rv32i_types_pkg;
   parameter WORD_SIZE = 32;
-  parameter RAM_ADDR_SIZE = 16;
+  parameter RAM_ADDR_SIZE = 32;
   parameter OP_W = 7;
   parameter BR_W = 3;
   parameter LD_W = 3;
