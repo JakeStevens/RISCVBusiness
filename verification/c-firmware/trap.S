@@ -41,6 +41,16 @@
   eret
 
   .balign 0x40
+  #set stack pointer (0x3fff_fffc)
+  ori sp, zero, 0x0
+  addi sp, sp, -4
+  ori t0, zero, 0x0c
+  slli t0, t0, 28
+  ori t1, zero, 0x0
+  addi t1, t1, -1
+  xor t0, t0, t1
+  and sp, sp, t0
+  #load address of main (jump does not return)
   la t0, main
   jr t0
 
@@ -99,6 +109,9 @@ j_int:
   j trap_ret
 j_ex:
   jal exception_handler
+  csrr t0, mepc
+  addi t0, t0, 4
+  csrw mepc, t0
 trap_ret:
   #pop modified values of registers (ignore 0-4)
   lw x31, 31*4(sp)
@@ -131,11 +144,6 @@ trap_ret:
   addi sp, sp, 32*4
   #restore return address, update epc and return
   lw ra, 0(sp)
-  sw t0, 0(sp)
-  csrr t0, mepc
-  addi t0, t0, 4
-  csrw mepc, t0
-  lw t0, 0(sp)
   addi sp, sp, 4
   ret
   

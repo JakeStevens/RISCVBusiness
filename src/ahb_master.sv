@@ -32,48 +32,69 @@ module ahb_master (
   ram_if.ram out_ram_if
 );
 
+  typedef enum logic {
+    IDLE,
+    DATA
+  } state_t;
+
+  state_t state, n_state;
+
+  always_ff @ (posedge CLK, negedge nRST) begin
+    if(~nRST)
+      state <= IDLE;
+    else 
+      state <= n_state;
+  end
+
+  assign n_state = (out_ram_if.ren | out_ram_if.wen) ? DATA : IDLE;
+
+  always_comb begin
+    if(out_ram_if.byte_en == 4'b1111)
+      ahb_m.HSIZE = 3'b010; // word
+    else if(out_ram_if.byte_en == 4'b1100 || out_ram_if.byte_en == 4'b0011)
+      ahb_m.HSIZE = 3'b001; // half word
+    else 
+      ahb_m.HSIZE = 3'b000; // byte
+  end
 
   always_comb 
   begin 
-          //-- Read Request --// 
-          if ( out_ram_if.ren ) 
-          begin
-                ahb_m.HTRANS = 2'b10;  
-                ahb_m.HWRITE = 1'b0;  
-                ahb_m.HADDR = out_ram_if.addr;  
-                ahb_m.HWDATA = out_ram_if.wdata;  
-                ahb_m.HSIZE = 3'b010;  
-                ahb_m.HBURST = 0;  
-                ahb_m.HPROT = 0;  
-                ahb_m.HMASTLOCK = 0; 
-          end 
-          //-- Write Request --// 
-          else if ( out_ram_if.wen ) 
-          begin 
-                ahb_m.HTRANS = 2'b10;  
-                ahb_m.HWRITE = 1'b1;  
-                ahb_m.HADDR = out_ram_if.addr;  
-                ahb_m.HWDATA = out_ram_if.wdata;  
-                ahb_m.HSIZE = 3'b010;  
-                ahb_m.HBURST = 0;  
-                ahb_m.HPROT = 0;  
-                ahb_m.HMASTLOCK = 0;  
-          end
-          //-- Default : Not reading / writing --// 
-          else 
-          begin 
-                ahb_m.HTRANS = 2'b00;  
-                ahb_m.HWRITE = 1'b0;  
-                ahb_m.HADDR = 0; 
-                ahb_m.HWDATA = 0;  
-                ahb_m.HSIZE = 3'b000;  
-                ahb_m.HBURST = 0;  
-                ahb_m.HPROT = 0;  
-                ahb_m.HMASTLOCK = 0;  
-          end 
+    //-- Read Request --// 
+    if ( out_ram_if.ren ) 
+    begin
+      ahb_m.HTRANS = 2'b10;  
+      ahb_m.HWRITE = 1'b0;  
+      ahb_m.HADDR = out_ram_if.addr;  
+      ahb_m.HWDATA = out_ram_if.wdata;  
+      ahb_m.HBURST = 0;  
+      ahb_m.HPROT = 0;  
+      ahb_m.HMASTLOCK = 0; 
+    end 
+    //-- Write Request --// 
+    else if ( out_ram_if.wen ) 
+    begin 
+      ahb_m.HTRANS = 2'b10;  
+      ahb_m.HWRITE = 1'b1;  
+      ahb_m.HADDR = out_ram_if.addr;  
+      ahb_m.HWDATA = out_ram_if.wdata;  
+      ahb_m.HBURST = 0;  
+      ahb_m.HPROT = 0;  
+      ahb_m.HMASTLOCK = 0;  
+    end
+    //-- Default : Not reading / writing --// 
+    else 
+    begin 
+      ahb_m.HTRANS = 2'b00;  
+      ahb_m.HWRITE = 1'b0;  
+      ahb_m.HADDR = 0; 
+      ahb_m.HWDATA = 0;  
+      ahb_m.HBURST = 0;  
+      ahb_m.HPROT = 0;  
+      ahb_m.HMASTLOCK = 0;  
+    end 
   end 
 
-  assign out_ram_if.busy = ~ahb_m.HREADY;
+  assign out_ram_if.busy = ~(ahb_m.HREADY & (state == DATA));
   assign out_ram_if.rdata = ahb_m.HRDATA; 
 
 endmodule
