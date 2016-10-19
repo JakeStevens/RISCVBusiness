@@ -10,3 +10,8 @@ verification/asm-tests/RV32I/*.hex
 # proprietary files
 src/altera_mf.v
 src/ram.sv
+# backup files
+fpga/*.bak
+fpga/db
+fpga/incremental_db
+fpga/output_files
