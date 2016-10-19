@@ -39,7 +39,7 @@ interface rv32i_reg_file_if();
   );
 
   modport cu (
-    output rs1, rs2, rd, wen
+    output rs1, rs2, rd
   );
 
 endinterface

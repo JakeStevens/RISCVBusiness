@@ -74,7 +74,7 @@ module csr_rfile (
   assign mstatus.fs     = FS_OFF;
   assign mstatus.sd     = 1'b0;
 
-  assign mtvec = `MTVEC_ADDR;
+  assign mtvec = MTVEC_MEMORY_ADDR;
 
   // Deleg Register Zero in Machine Mode Only
   assign mtdeleg = '0;

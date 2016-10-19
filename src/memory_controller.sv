@@ -193,6 +193,7 @@ module memory_controller (
       4'h2              : out_ram_if.wdata = d_ram_if.wdata << 8;
       4'h4, 4'hc        : out_ram_if.wdata = d_ram_if.wdata << 16;
       4'h8              : out_ram_if.wdata = d_ram_if.wdata << 24;
+      default           : out_ram_if.wdata = d_ram_if.wdata;
     endcase
   end
 

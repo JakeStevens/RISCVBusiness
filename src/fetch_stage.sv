@@ -71,7 +71,9 @@ module fetch_stage (
 
   //Fetch Execute Pipeline Signals
   always_ff @ (posedge CLK, negedge nRST) begin
-    if (!nRST || hazard_if.if_ex_flush)
+    if (!nRST)
+      fetch_ex_if.fetch_ex_reg <= '0;
+    else if (hazard_if.if_ex_flush)
       fetch_ex_if.fetch_ex_reg <= '0;
     else if (!hazard_if.if_ex_stall) begin
       fetch_ex_if.fetch_ex_reg.token       <= 1'b1;

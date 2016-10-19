@@ -97,6 +97,7 @@ module control_unit
       REGREG      : cu_if.alu_b_sel = 2'd1;
       IMMED, LOAD : cu_if.alu_b_sel = 2'd2;
       AUIPC       : cu_if.alu_b_sel = 2'd3;
+      default     : cu_if.alu_b_sel = 2'd1;
     endcase
   end
 

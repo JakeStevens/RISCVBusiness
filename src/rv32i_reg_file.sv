@@ -33,17 +33,16 @@ module rv32i_reg_file (
 
   parameter NUM_REGS = 32;
 
-  word_t  registers [NUM_REGS-1:0];
+  word_t [NUM_REGS-1:0] registers;
 
   always_ff @ (posedge CLK, negedge nRST) begin
     if (~nRST) begin
-      registers[31:1] <= '{default:'0};
+      registers <= '0;
     end else if (rf_if.wen && rf_if.rd) begin
       registers[rf_if.rd] <= rf_if.w_data;
     end
   end 
 
-  assign registers[0] = '0;
   assign rf_if.rs1_data = registers[rf_if.rs1];
   assign rf_if.rs2_data = registers[rf_if.rs2];
 

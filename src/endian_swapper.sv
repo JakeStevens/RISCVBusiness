@@ -28,9 +28,11 @@ module endian_swapper (
   output word_t word_out
 );
 
-  genvar i;
-  for(i=0; i < (WORD_SIZE / 8); i++) begin
-    assign word_out[WORD_SIZE - (8*i) - 1 : WORD_SIZE - (8 * (i+1))] = word_in[((i+1)*8)-1:(i*8)];
-  end
+  generate
+    genvar i;
+    for(i=0; i < (WORD_SIZE / 8); i++) begin : word_assign
+      assign word_out[WORD_SIZE - (8*i) - 1 : WORD_SIZE - (8 * (i+1))] = word_in[((i+1)*8)-1:(i*8)];
+    end : word_assign
+  endgenerate
 
 endmodule

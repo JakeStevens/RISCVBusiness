@@ -119,7 +119,7 @@ package machine_mode_types_pkg;
   parameter MCPUID_EXT_X   = 26'h1 << 23;
   parameter MCPUID_EXT_Y   = 26'h1 << 24;
   parameter MCPUID_EXT_Z   = 26'h1 << 25;
-
+  parameter MTVEC_MEMORY_ADDR = 32'h1c0;
 
   /* mstatus types */
 
@@ -240,8 +240,6 @@ package machine_mode_types_pkg;
   typedef logic [31:0] cycle_t;
   typedef logic [31:0] time_t;
   typedef logic [31:0] instret_t;
-
-  `define MTVEC_ADDR 32'h1C0
 
   //Non Standard Extentions 
   typedef logic [31:0] mtohost_t;

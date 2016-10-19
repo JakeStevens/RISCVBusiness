@@ -171,6 +171,7 @@ module execute_stage(
   
   always_comb begin
     // load_type can be used for store_type as well
+    dram_if.wdata = '0;
     case(cu_if.load_type)
       LB: dram_if.wdata = {4{store_swapped[31:24]}};
       LH: dram_if.wdata = {2{store_swapped[31:16]}};
