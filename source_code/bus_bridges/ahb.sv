@@ -26,7 +26,7 @@
 `include "ram_if.vh"
 `include "ahb_if.vh"
 
-module ahb_master (
+module ahb (
   input CLK, nRST,
   ahb_if.ahb_m ahb_m,
   ram_if.ram out_ram_if

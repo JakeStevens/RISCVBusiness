@@ -14,7 +14,7 @@
 *   limitations under the License.
 *   
 *   
-*   Filename:     bus_trans.sv
+*   Filename:     generic_nonpipeline.sv
 *   
 *   Created by:   Chuan Yean Tan
 *   Email:        tan56@purdue.edu
@@ -24,7 +24,7 @@
 
 `include "ram_if.vh"
 
-module bus_trans (
+module generic_nonpipeline (
   input logic CLK, nRST,
   ram_if pipeline_trans_if, 
   ram_if.cpu out_ram_if

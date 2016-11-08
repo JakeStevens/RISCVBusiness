@@ -71,7 +71,7 @@ module RISCVBusiness (
     //.out_ram_if(ram_if)
   );
 
-  bus_trans bt(
+  generic_nonpipeline bt(
     .CLK(CLK), 
     .nRST(nRST), 
     .pipeline_trans_if(pipeline_trans_if), 
