@@ -44,7 +44,7 @@ module tspp (
   //module instantiations
   fetch_stage fetch_stage_i (.*);
   execute_stage execute_stage_i (.*);
-  nottaken_predictor branch_predictor_i (.*);
+  branch_predictor branch_predictor_i (.*);
   hazard_unit hazard_unit_i (.*);
   prv_block prv_block_i(.*);
 
