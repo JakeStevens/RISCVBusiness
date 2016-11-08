@@ -12,32 +12,36 @@
 *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
-*   
-*   
-*   Filename:     dcache.sv
-*   
-*   Created by:   John Skubic
-*   Email:        jskubic@purdue.edu
-*   Date Created: 06/01/2016
-*   Description:  Data Cache	
+*
+*
+*   Filename:     separate_caches.sv
+*
+*   Created by:   Jacob R. Stevens
+*   Email:        steven69@purdue.edu
+*   Date Created: 11/08/2016
+*   Description: Caches consisting of separate I$ and D$ 
 */
 
-`include "ram_if.vh"
-
-module dcache (
+module separate_caches (
   input logic CLK, nRST,
-  ram_if.cpu mem_ram_if,
-  ram_if.ram proc_ram_if
+  ram_if.cpu icache_mem_ram_if,
+  ram_if.cpu dcache_mem_ram_if,
+  ram_if.ram icache_proc_ram_if,
+  ram_if.ram dcache_proc_ram_if
 );
 
-  //passthrough layer
-  assign mem_ram_if.addr     = proc_ram_if.addr;
-  assign mem_ram_if.ren      = proc_ram_if.ren;
-  assign mem_ram_if.wen      = proc_ram_if.wen;
-  assign mem_ram_if.wdata    = proc_ram_if.wdata;
-  assign mem_ram_if.byte_en  = proc_ram_if.byte_en; 
+  pass_through_dcache dcache(
+    .CLK(CLK),
+    .nRST(nRST),
+    .mem_ram_if(dcache_mem_ram_if),
+    .proc_ram_if(dcache_proc_ram_if)
+  );
 
-  assign proc_ram_if.rdata   = mem_ram_if.rdata;
-  assign proc_ram_if.busy    = mem_ram_if.busy;
+  pass_through_icache icache(
+    .CLK(CLK),
+    .nRST(nRST),
+    .mem_ram_if(icache_mem_ram_if),
+    .proc_ram_if(icache_proc_ram_if)
+  );
 
 endmodule

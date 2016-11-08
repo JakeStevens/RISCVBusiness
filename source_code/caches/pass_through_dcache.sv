@@ -14,17 +14,17 @@
 *   limitations under the License.
 *   
 *   
-*   Filename:     icache.sv
+*   Filename:     dcache.sv
 *   
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 06/01/2016
-*   Description:  Instruction Cache	
+*   Description:  Pass Through Data Cache	
 */
 
 `include "ram_if.vh"
 
-module icache (
+module pass_through_dcache (
   input logic CLK, nRST,
   ram_if.cpu mem_ram_if,
   ram_if.ram proc_ram_if
