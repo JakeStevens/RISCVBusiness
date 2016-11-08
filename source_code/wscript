@@ -1,0 +1,34 @@
+def configure(ctx):
+    ctx.setup_hdl_module('RISCVBusiness',
+      includes = ['include'],
+      src_dir = ['packages', 'standard_core', 'branch_predictors', 'trackers'],
+      tb = 'tb_RISCVBusiness',
+      tb_includes = ['include']
+    )
+    ctx.setup_hdl_module('RISCVBusiness_self_test',
+      includes = ['include'],
+      src_dir = ['packages', 'standard_core', 'branch_predictors', 'trackers'],
+      tb = 'tb_RISCVBusiness_self_test',
+      tb_includes = ['include']
+    )
+    ctx.setup_hdl_module('alu', 
+      includes = ['include'],
+      src_dir = ['packages','standard_core'],
+      tb = 'tb_alu',
+      tb_includes = ['include']
+    )
+    ctx.setup_hdl_module('ahb_master', 
+      includes = ['include'],
+      src_dir = ['packages','standard_core'],
+      tb = 'tb_ahb_master',
+      tb_includes = ['include']
+    )
+    ctx.setup_hdl_module('memory_controller', 
+      includes = ['include'],
+      src_dir = ['packages','standard_core'],
+      tb = 'tb_memory_controller',
+      tb_includes = ['include']
+    )
+
+
+

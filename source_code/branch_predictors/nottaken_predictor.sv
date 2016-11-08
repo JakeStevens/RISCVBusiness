@@ -14,23 +14,22 @@
 *   limitations under the License.
 *
 *
-*   Filename:     branch_predictor.sv
+*   Filename:     nottaken_predictor.sv
 *
-*   Created by:   John Skubic
-*   Email:        jskubic@purdue.edu
-*   Date Created: 06/19/2016
-*   Description:  Branch Predictor, BTB, RAS
-*                 Predictor is not implemented.  This will be left as an
-*                 "always not taken" predictor until it is implemented.
+*   Created by:   Jacob R. Stevens
+*   Email:        steven69@purdue.edu
+*   Date Created: 11/07/2016
+*   Description:  A simple branch predictor that always predicts not taken
 */
 
 `include "predictor_pipeline_if.vh"
 
-module branch_predictor (
+module nottaken_predictor(
   input logic CLK, nRST,
   predictor_pipeline_if.predictor predict_if
 );
 
   assign predict_if.predict_taken = 0;
+  assign predict_if.target_addr = predict_if.current_pc + 4;
 
 endmodule

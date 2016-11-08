@@ -94,14 +94,14 @@ module RISCVBusiness_fpga
     logic [6:0] hex0;
   } display;
 
-  assign HEX0 = display.hex0;
-  assign HEX1 = display.hex1;
-  assign HEX2 = display.hex2;
-  assign HEX3 = display.hex3;
-  assign HEX4 = display.hex4;
-  assign HEX5 = display.hex5;
-  assign HEX6 = display.hex6;
-  assign HEX7 = display.hex7;
+  assign HEX0 = ~display.hex0;
+  assign HEX1 = ~display.hex1;
+  assign HEX2 = ~display.hex2;
+  assign HEX3 = ~display.hex3;
+  assign HEX4 = ~display.hex4;
+  assign HEX5 = ~display.hex5;
+  assign HEX6 = ~display.hex6;
+  assign HEX7 = ~display.hex7;
 
   generate
     genvar seg_select;

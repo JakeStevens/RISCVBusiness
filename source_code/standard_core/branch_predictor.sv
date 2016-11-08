@@ -12,40 +12,25 @@
 *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
-*   
-*   
-*   Filename:     tspp.sv
-*   
+*
+*
+*   Filename:     branch_predictor.sv
+*
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
-*   Date Created: 06/01/2016
-*   Description:  Two Stage Pipeline
+*   Date Created: 06/19/2016
+*   Description:  Branch Predictor, BTB, RAS
+*                 Replace declaration of not taken predictor as desired
 */
 
-`include "fetch_execute_if.vh"
-`include "hazard_unit_if.vh"
 `include "predictor_pipeline_if.vh"
-`include "ram_if.vh"
-`include "prv_pipeline_if.vh"
 
-module tspp (
+module branch_predictor (
   input logic CLK, nRST,
-  output logic halt,
-  ram_if.cpu iram_if,
-  ram_if.cpu dram_if
+  predictor_pipeline_if.predictor predict_if
 );
 
-  //interface instantiations
-  fetch_execute_if      fetch_ex_if();
-  predictor_pipeline_if predict_if();
-  hazard_unit_if        hazard_if();
-  prv_pipeline_if       prv_pipe_if();
-
-  //module instantiations
-  fetch_stage fetch_stage_i (.*);
-  execute_stage execute_stage_i (.*);
-  branch_predictor branch_predictor_i (.*);
-  hazard_unit hazard_unit_i (.*);
-  prv_block prv_block_i(.*);
+  nottaken_predictor predictor(.*);
 
 endmodule
+
