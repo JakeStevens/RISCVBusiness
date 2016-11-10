@@ -27,7 +27,7 @@
 `include "predictor_pipeline_if.vh"
 `include "control_unit_if.vh"
 `include "rv32i_reg_file_if.vh"
-`include "ram_if.vh"
+`include "generic_bus_if.vh"
 `include "alu_if.vh"
 `include "prv_pipeline_if.vh"
 
@@ -36,7 +36,7 @@ module execute_stage(
   fetch_execute_if.execute fetch_ex_if,
   hazard_unit_if.execute hazard_if,
   predictor_pipeline_if.update predict_if,
-  ram_if.cpu dram_if,
+  generic_bus_if.cpu dgen_bus_if,
   prv_pipeline_if.pipe  prv_pipe_if,
   output halt 
 );
@@ -67,7 +67,7 @@ module execute_stage(
   word_t dload_ext;
   logic [3:0] byte_en;
   dmem_extender dmem_ext (
-    .dmem_in(dram_if.rdata),
+    .dmem_in(dgen_bus_if.rdata),
     .load_type(cu_if.load_type),
     .byte_en(byte_en),
     .ext_out(dload_ext)
@@ -161,21 +161,21 @@ module execute_stage(
   *******************************************************/
   logic [1:0] byte_offset;
 
-  assign dram_if.ren           = cu_if.dren & ~mal_addr;
-  assign dram_if.wen           = cu_if.dwen & ~mal_addr;
-  assign dram_if.byte_en       = cu_if.dren ? byte_en:
+  assign dgen_bus_if.ren           = cu_if.dren & ~mal_addr;
+  assign dgen_bus_if.wen           = cu_if.dwen & ~mal_addr;
+  assign dgen_bus_if.byte_en       = cu_if.dren ? byte_en:
                                 {byte_en[0], byte_en[1], byte_en[2], byte_en[3]};
-  assign dram_if.addr          = alu_if.port_out;
-  assign hazard_if.d_ram_busy  = dram_if.busy;
+  assign dgen_bus_if.addr          = alu_if.port_out;
+  assign hazard_if.d_mem_busy  = dgen_bus_if.busy;
   assign byte_offset          = alu_if.port_out[1:0]; 
   
   always_comb begin
     // load_type can be used for store_type as well
-    dram_if.wdata = '0;
+    dgen_bus_if.wdata = '0;
     case(cu_if.load_type)
-      LB: dram_if.wdata = {4{store_swapped[31:24]}};
-      LH: dram_if.wdata = {2{store_swapped[31:16]}};
-      LW: dram_if.wdata = store_swapped; 
+      LB: dgen_bus_if.wdata = {4{store_swapped[31:24]}};
+      LH: dgen_bus_if.wdata = {2{store_swapped[31:16]}};
+      LW: dgen_bus_if.wdata = store_swapped; 
     endcase
   end
 
@@ -247,9 +247,9 @@ module execute_stage(
 
   always_comb begin
     if(byte_en == 4'hf) 
-      mal_addr = (dram_if.addr[1:0] != 2'b00);
+      mal_addr = (dgen_bus_if.addr[1:0] != 2'b00);
     else if (byte_en == 4'h3 || byte_en == 4'hc) begin
-      mal_addr = (dram_if.addr[1:0] == 2'b01 || dram_if.addr[1:0] == 2'b11);
+      mal_addr = (dgen_bus_if.addr[1:0] == 2'b01 || dgen_bus_if.addr[1:0] == 2'b11);
     end
     else 
       mal_addr = 1'b0;
@@ -264,7 +264,7 @@ module execute_stage(
   assign hazard_if.breakpoint   = cu_if.breakpoint;
   assign hazard_if.env_m        = cu_if.ecall_insn;
   assign hazard_if.ret          = cu_if.ret_insn;
-  assign hazard_if.badaddr_e    = dram_if.addr;
+  assign hazard_if.badaddr_e    = dgen_bus_if.addr;
 
   assign hazard_if.epc_e = fetch_ex_if.fetch_ex_reg.pc;
   assign hazard_if.token_ex = fetch_ex_if.fetch_ex_reg.token;

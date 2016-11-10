@@ -25,14 +25,14 @@
 `include "fetch_execute_if.vh"
 `include "hazard_unit_if.vh"
 `include "predictor_pipeline_if.vh"
-`include "ram_if.vh"
+`include "generic_bus_if.vh"
 `include "prv_pipeline_if.vh"
 
 module tspp (
   input logic CLK, nRST,
   output logic halt,
-  ram_if.cpu iram_if,
-  ram_if.cpu dram_if
+  generic_bus_if.cpu igen_bus_if,
+  generic_bus_if.cpu dgen_bus_if
 );
 
   //interface instantiations

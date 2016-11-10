@@ -24,35 +24,15 @@
 *                 and data accesses
 */
 
-`include "ram_if.vh"
+`include "generic_bus_if.vh"
 
 module memory_controller (
   input logic CLK, nRST,
-  ram_if.ram d_ram_if,
-  ram_if.ram i_ram_if,
-  ram_if.cpu out_ram_if
+  generic_bus_if.generic_bus d_gen_bus_if,
+  generic_bus_if.generic_bus i_gen_bus_if,
+  generic_bus_if.cpu out_gen_bus_if
 );
 
-  //Arbitration - give precedence to data transactions
-  //always_comb begin
-  //  if (d_ram_if.wen || d_ram_if.ren) begin
-  //    out_ram_if.wen      = d_ram_if.wen;
-  //    out_ram_if.ren      = d_ram_if.ren;
-  //    out_ram_if.addr     = d_ram_if.addr;
-  //    d_ram_if.busy       = out_ram_if.busy;
-  //    i_ram_if.busy       = 1'b1;
-  //    out_ram_if.byte_en  = d_ram_if.byte_en;
-  //  end else begin
-  //    out_ram_if.wen      = i_ram_if.wen;
-  //    out_ram_if.ren      = i_ram_if.ren;
-  //    out_ram_if.addr     = i_ram_if.addr;
-  //    d_ram_if.busy       = 1'b1;
-  //    i_ram_if.busy       = out_ram_if.busy;
-  //    out_ram_if.byte_en  = i_ram_if.byte_en;
-  //  end
-  //end
-
- 
   /* State Declaration */ 
   typedef enum { 
                     IDLE, 
@@ -78,18 +58,18 @@ module memory_controller (
   begin 
     case(current_state) 
       IDLE: begin
-        if(d_ram_if.ren || d_ram_if.wen) 
+        if(d_gen_bus_if.ren || d_gen_bus_if.wen) 
           next_state = DATA_REQ; 
-        else if(i_ram_if.ren) 
+        else if(i_gen_bus_if.ren) 
           next_state = INSTR_REQ; 
         else 
           next_state = IDLE; 
       end 
 
       INSTR_REQ: begin 
-        if( (d_ram_if.ren || d_ram_if.wen) && !out_ram_if.busy) 
+        if( (d_gen_bus_if.ren || d_gen_bus_if.wen) && !out_gen_bus_if.busy) 
           next_state = DATA_WAIT;
-        else if ( !out_ram_if.busy ) 
+        else if ( !out_gen_bus_if.busy ) 
         begin 
           next_state = IDLE; 
         end 
@@ -102,21 +82,21 @@ module memory_controller (
       end
 
       DATA_INSTR_REQ: begin 
-        if( out_ram_if.busy == 1'b0 ) 
+        if( out_gen_bus_if.busy == 1'b0 ) 
           next_state = INSTR_WAIT; 
         else 
           next_state = DATA_INSTR_REQ; 
       end 
 
       INSTR_WAIT: begin 
-        if ( out_ram_if.busy == 1'b0 ) 
+        if ( out_gen_bus_if.busy == 1'b0 ) 
             next_state = IDLE; 
         else 
             next_state = INSTR_WAIT; 
       end 
 
       DATA_WAIT: begin 
-        if ( out_ram_if.busy == 1'b0 ) 
+        if ( out_gen_bus_if.busy == 1'b0 ) 
             next_state = IDLE; 
         else 
             next_state = INSTR_WAIT; 
@@ -131,56 +111,56 @@ module memory_controller (
   begin 
     case(current_state) 
       IDLE: begin 
-        out_ram_if.wen      = 0;  
-        out_ram_if.ren      = 0;  
-        out_ram_if.addr     = 0;  
-        d_ram_if.busy       = 1'b1;
-        i_ram_if.busy       = 1'b1;
-        out_ram_if.byte_en  = d_ram_if.byte_en;
+        out_gen_bus_if.wen      = 0;  
+        out_gen_bus_if.ren      = 0;  
+        out_gen_bus_if.addr     = 0;  
+        d_gen_bus_if.busy       = 1'b1;
+        i_gen_bus_if.busy       = 1'b1;
+        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
       end
 
       //-- INSTRUCTION REQUEST --// 
       INSTR_REQ: begin 
-        out_ram_if.wen      = i_ram_if.wen;
-        out_ram_if.ren      = i_ram_if.ren;
-        out_ram_if.addr     = i_ram_if.addr;
-        d_ram_if.busy       = 1'b1;
-        i_ram_if.busy       = out_ram_if.busy;
-        out_ram_if.byte_en  = d_ram_if.byte_en;
+        out_gen_bus_if.wen      = i_gen_bus_if.wen;
+        out_gen_bus_if.ren      = i_gen_bus_if.ren;
+        out_gen_bus_if.addr     = i_gen_bus_if.addr;
+        d_gen_bus_if.busy       = 1'b1;
+        i_gen_bus_if.busy       = out_gen_bus_if.busy;
+        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
       end 
       INSTR_WAIT: begin 
-        out_ram_if.wen      = 0;  
-        out_ram_if.ren      = 0;  
-        out_ram_if.addr     = 0;  
-        d_ram_if.busy       = 1'b1;
-        i_ram_if.busy       = out_ram_if.busy;
-        out_ram_if.byte_en  = d_ram_if.byte_en;
+        out_gen_bus_if.wen      = 0;  
+        out_gen_bus_if.ren      = 0;  
+        out_gen_bus_if.addr     = 0;  
+        d_gen_bus_if.busy       = 1'b1;
+        i_gen_bus_if.busy       = out_gen_bus_if.busy;
+        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
       end 
 
       //-- DATA REQUEST --//
       DATA_REQ: begin 
-        out_ram_if.wen      = d_ram_if.wen;
-        out_ram_if.ren      = d_ram_if.ren;
-        out_ram_if.addr     = d_ram_if.addr;
-        d_ram_if.busy       = out_ram_if.busy;
-        i_ram_if.busy       = 1'b1;
-        out_ram_if.byte_en  = d_ram_if.byte_en;
+        out_gen_bus_if.wen      = d_gen_bus_if.wen;
+        out_gen_bus_if.ren      = d_gen_bus_if.ren;
+        out_gen_bus_if.addr     = d_gen_bus_if.addr;
+        d_gen_bus_if.busy       = out_gen_bus_if.busy;
+        i_gen_bus_if.busy       = 1'b1;
+        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
       end 
       DATA_INSTR_REQ: begin 
-        out_ram_if.wen      = i_ram_if.wen;
-        out_ram_if.ren      = i_ram_if.ren;
-        out_ram_if.addr     = i_ram_if.addr;
-        d_ram_if.busy       = out_ram_if.busy;
-        i_ram_if.busy       = 1'b1;
-        out_ram_if.byte_en  = d_ram_if.byte_en;
+        out_gen_bus_if.wen      = i_gen_bus_if.wen;
+        out_gen_bus_if.ren      = i_gen_bus_if.ren;
+        out_gen_bus_if.addr     = i_gen_bus_if.addr;
+        d_gen_bus_if.busy       = out_gen_bus_if.busy;
+        i_gen_bus_if.busy       = 1'b1;
+        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
       end 
       DATA_WAIT: begin 
-        out_ram_if.wen      = d_ram_if.wen;
-        out_ram_if.ren      = d_ram_if.ren;
-        out_ram_if.addr     = d_ram_if.addr;
-        d_ram_if.busy       = 1'b1;
-        i_ram_if.busy       = out_ram_if.busy;
-        out_ram_if.byte_en  = d_ram_if.byte_en;
+        out_gen_bus_if.wen      = d_gen_bus_if.wen;
+        out_gen_bus_if.ren      = d_gen_bus_if.ren;
+        out_gen_bus_if.addr     = d_gen_bus_if.addr;
+        d_gen_bus_if.busy       = 1'b1;
+        i_gen_bus_if.busy       = out_gen_bus_if.busy;
+        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
       end 
     endcase 
   end 
@@ -188,16 +168,16 @@ module memory_controller (
   /*  align the byte enable with the data being selected 
       based on the byte addressing */
   always_comb begin
-    casez (out_ram_if.byte_en)
-      4'hf, 4'h1, 4'h3  : out_ram_if.wdata = d_ram_if.wdata;      
-      4'h2              : out_ram_if.wdata = d_ram_if.wdata << 8;
-      4'h4, 4'hc        : out_ram_if.wdata = d_ram_if.wdata << 16;
-      4'h8              : out_ram_if.wdata = d_ram_if.wdata << 24;
-      default           : out_ram_if.wdata = d_ram_if.wdata;
+    casez (out_gen_bus_if.byte_en)
+      4'hf, 4'h1, 4'h3  : out_gen_bus_if.wdata = d_gen_bus_if.wdata;      
+      4'h2              : out_gen_bus_if.wdata = d_gen_bus_if.wdata << 8;
+      4'h4, 4'hc        : out_gen_bus_if.wdata = d_gen_bus_if.wdata << 16;
+      4'h8              : out_gen_bus_if.wdata = d_gen_bus_if.wdata << 24;
+      default           : out_gen_bus_if.wdata = d_gen_bus_if.wdata;
     endcase
   end
 
-  assign d_ram_if.rdata   = out_ram_if.rdata;
-  assign i_ram_if.rdata   = out_ram_if.rdata;
+  assign d_gen_bus_if.rdata   = out_gen_bus_if.rdata;
+  assign i_gen_bus_if.rdata   = out_gen_bus_if.rdata;
 
 endmodule

@@ -25,14 +25,14 @@
 `include "fetch_execute_if.vh"
 `include "hazard_unit_if.vh"
 `include "predictor_pipeline_if.vh"
-`include "ram_if.vh"
+`include "generic_bus_if.vh"
 
 module fetch_stage (
   input logic CLK, nRST,
   fetch_execute_if.fetch fetch_ex_if,
   hazard_unit_if.fetch hazard_if,
   predictor_pipeline_if.access predict_if,
-  ram_if.cpu iram_if
+  generic_bus_if.cpu igen_bus_if
 );
   import rv32i_types_pkg::*;
 
@@ -57,15 +57,15 @@ module fetch_stage (
 
   //Instruction Access logic
   assign hazard_if.iren        = 1'b1;
-  assign hazard_if.i_ram_busy  = iram_if.busy;
-  assign iram_if.addr         = pc;
-  assign iram_if.ren          = 1'b1;
-  assign iram_if.wen          = 1'b0;
-  assign iram_if.byte_en      = 4'h0;
-  assign iram_if.wdata        = '0;
+  assign hazard_if.i_mem_busy  = igen_bus_if.busy;
+  assign igen_bus_if.addr         = pc;
+  assign igen_bus_if.ren          = 1'b1;
+  assign igen_bus_if.wen          = 1'b0;
+  assign igen_bus_if.byte_en      = 4'h0;
+  assign igen_bus_if.wdata        = '0;
   
   endian_swapper ltb_endian (
-    .word_in(iram_if.rdata),
+    .word_in(igen_bus_if.rdata),
     .word_out(instr)
   );
 
@@ -86,11 +86,11 @@ module fetch_stage (
 
   //Send exceptions to Hazard Unit
   logic mal_addr;
-  assign mal_addr = (iram_if.addr[1:0] != 2'b00);
+  assign mal_addr = (igen_bus_if.addr[1:0] != 2'b00);
   assign hazard_if.fault_insn = 1'b0;
-  assign hazard_if.mal_insn = iram_if.ren & mal_addr;
+  assign hazard_if.mal_insn = igen_bus_if.ren & mal_addr;
 
-  assign hazard_if.badaddr_f = iram_if.addr;
+  assign hazard_if.badaddr_f = igen_bus_if.addr;
   assign hazard_if.epc_f = pc; 
 
 endmodule

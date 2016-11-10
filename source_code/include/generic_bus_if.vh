@@ -22,10 +22,10 @@
 *		Description:  Interface for connecting a requestor to ram.	
 */
 
-`ifndef RAM_IF_VH
-`define RAM_IF_VH
+`ifndef GENERIC_BUS_IF_VH
+`define GENERIC_BUS_IF_VH
 
-interface ram_if ();
+interface generic_bus_if ();
   import rv32i_types_pkg::*;
 
   logic [RAM_ADDR_SIZE-1:0] addr;
@@ -35,7 +35,7 @@ interface ram_if ();
   logic busy;
   logic [3:0] byte_en;
 
-  modport ram (
+  modport generic_bus (
     input addr, ren, wen, wdata, byte_en,
     output rdata, busy
   );
@@ -47,4 +47,4 @@ interface ram_if ();
 
 endinterface
 
-`endif //RAM_BUS_IF_VH
+`endif //GENERIC_BUS_IF_VH

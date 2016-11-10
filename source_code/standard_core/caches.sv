@@ -22,14 +22,14 @@
 *   Description:  Wrapper file that instantiates the desired cache structure 
 */
 
-`include "ram_if.vh"
+`include "generic_bus_if.vh"
 
 module caches(
   input logic CLK, nRST,
-  ram_if.cpu icache_mem_ram_if,
-  ram_if.cpu dcache_mem_ram_if,
-  ram_if.ram icache_proc_ram_if,
-  ram_if.ram dcache_proc_ram_if
+  generic_bus_if.cpu icache_mem_gen_bus_if,
+  generic_bus_if.cpu dcache_mem_gen_bus_if,
+  generic_bus_if.generic_bus icache_proc_gen_bus_if,
+  generic_bus_if.generic_bus dcache_proc_gen_bus_if
 );
 
   separate_caches sep_caches(.*);

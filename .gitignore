@@ -8,8 +8,8 @@ verification/asm-tests/RV32I/*.elf
 verification/asm-tests/RV32I/*.log
 verification/asm-tests/RV32I/*.hex
 # proprietary files
-source_code/standard_core/altera_mf.v
-source_code/standard_core/ram.sv
+source_code/ram/altera_mf.v
+source_code/ram/ram.sv
 # backup files
 source_code/fpga/*.bak
 source_code/fpga/db

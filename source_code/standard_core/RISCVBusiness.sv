@@ -22,21 +22,21 @@
 *   Description:  Top level module for RISCVBusiness
 */
 
-`include "ram_if.vh"
+`include "generic_bus_if.vh"
 
 module RISCVBusiness (
   input logic CLK, nRST,
   output logic halt,
-  ram_if.cpu ram_if
+  generic_bus_if.cpu gen_bus_if
 );
 
   // Interface instantiations
 
-  ram_if tspp_icache_ram_if();
-  ram_if tspp_dcache_ram_if();
-  ram_if icache_mc_if();
-  ram_if dcache_mc_if();
-  ram_if pipeline_trans_if(); 
+  generic_bus_if tspp_icache_gen_bus_if();
+  generic_bus_if tspp_dcache_gen_bus_if();
+  generic_bus_if icache_mc_if();
+  generic_bus_if dcache_mc_if();
+  generic_bus_if pipeline_trans_if(); 
 
   // Module Instantiations
 
@@ -44,33 +44,32 @@ module RISCVBusiness (
     .CLK(CLK),
     .nRST(nRST),
     .halt(halt),
-    .iram_if(tspp_icache_ram_if),
-    .dram_if(tspp_dcache_ram_if)
+    .igen_bus_if(tspp_icache_gen_bus_if),
+    .dgen_bus_if(tspp_dcache_gen_bus_if)
   );
 
   caches caches (
     .CLK(CLK),
     .nRST(nRST),
-    .icache_proc_ram_if(tspp_icache_ram_if),
-    .icache_mem_ram_if(icache_mc_if),
-    .dcache_proc_ram_if(tspp_dcache_ram_if),
-    .dcache_mem_ram_if(dcache_mc_if)
+    .icache_proc_gen_bus_if(tspp_icache_gen_bus_if),
+    .icache_mem_gen_bus_if(icache_mc_if),
+    .dcache_proc_gen_bus_if(tspp_dcache_gen_bus_if),
+    .dcache_mem_gen_bus_if(dcache_mc_if)
   );
 
   memory_controller mc (
     .CLK(CLK),
     .nRST(nRST),
-    .d_ram_if(dcache_mc_if),
-    .i_ram_if(icache_mc_if),
-    .out_ram_if(pipeline_trans_if)
-    //.out_ram_if(ram_if)
+    .d_gen_bus_if(dcache_mc_if),
+    .i_gen_bus_if(icache_mc_if),
+    .out_gen_bus_if(pipeline_trans_if)
   );
 
   generic_nonpipeline bt(
     .CLK(CLK), 
     .nRST(nRST), 
     .pipeline_trans_if(pipeline_trans_if), 
-    .out_ram_if(ram_if)
+    .out_gen_bus_if(gen_bus_if)
   );
 
 endmodule

@@ -22,22 +22,22 @@
 *   Description:  Pass Through Data Cache	
 */
 
-`include "ram_if.vh"
+`include "generic_bus_if.vh"
 
 module pass_through_dcache (
   input logic CLK, nRST,
-  ram_if.cpu mem_ram_if,
-  ram_if.ram proc_ram_if
+  generic_bus_if.cpu mem_gen_bus_if,
+  generic_bus_if.generic_bus proc_gen_bus_if
 );
 
   //passthrough layer
-  assign mem_ram_if.addr     = proc_ram_if.addr;
-  assign mem_ram_if.ren      = proc_ram_if.ren;
-  assign mem_ram_if.wen      = proc_ram_if.wen;
-  assign mem_ram_if.wdata    = proc_ram_if.wdata;
-  assign mem_ram_if.byte_en  = proc_ram_if.byte_en; 
+  assign mem_gen_bus_if.addr     = proc_gen_bus_if.addr;
+  assign mem_gen_bus_if.ren      = proc_gen_bus_if.ren;
+  assign mem_gen_bus_if.wen      = proc_gen_bus_if.wen;
+  assign mem_gen_bus_if.wdata    = proc_gen_bus_if.wdata;
+  assign mem_gen_bus_if.byte_en  = proc_gen_bus_if.byte_en; 
 
-  assign proc_ram_if.rdata   = mem_ram_if.rdata;
-  assign proc_ram_if.busy    = mem_ram_if.busy;
+  assign proc_gen_bus_if.rdata   = mem_gen_bus_if.rdata;
+  assign proc_gen_bus_if.busy    = mem_gen_bus_if.busy;
 
 endmodule

@@ -22,12 +22,12 @@
 *   Description:  Translates pipeline bus to a non-pipeline bus  
 */
 
-`include "ram_if.vh"
+`include "generic_bus_if.vh"
 
 module generic_nonpipeline (
   input logic CLK, nRST,
-  ram_if pipeline_trans_if, 
-  ram_if.cpu out_ram_if
+  generic_bus_if pipeline_trans_if, 
+  generic_bus_if.cpu out_gen_bus_if
 );
 
   logic [31:0] next_wdata;
@@ -37,28 +37,28 @@ module generic_nonpipeline (
   begin 
     if(!nRST) 
     begin 
-      out_ram_if.wen <= pipeline_trans_if.wen; 
-      out_ram_if.ren <= pipeline_trans_if.ren; 
-      out_ram_if.addr <= pipeline_trans_if.addr; 
-      out_ram_if.byte_en <= pipeline_trans_if.byte_en; 
-      out_ram_if.wdata <= next_wdata;
+      out_gen_bus_if.wen <= pipeline_trans_if.wen; 
+      out_gen_bus_if.ren <= pipeline_trans_if.ren; 
+      out_gen_bus_if.addr <= pipeline_trans_if.addr; 
+      out_gen_bus_if.byte_en <= pipeline_trans_if.byte_en; 
+      out_gen_bus_if.wdata <= next_wdata;
     end 
     else 
     begin 
-      if ( out_ram_if.busy == 0 ) 
+      if ( out_gen_bus_if.busy == 0 ) 
       begin 
-        out_ram_if.wen <= pipeline_trans_if.wen; 
-        out_ram_if.ren <= pipeline_trans_if.ren; 
-        out_ram_if.addr <= pipeline_trans_if.addr; 
-        out_ram_if.byte_en <= pipeline_trans_if.byte_en; 
-        out_ram_if.wdata <= next_wdata;
+        out_gen_bus_if.wen <= pipeline_trans_if.wen; 
+        out_gen_bus_if.ren <= pipeline_trans_if.ren; 
+        out_gen_bus_if.addr <= pipeline_trans_if.addr; 
+        out_gen_bus_if.byte_en <= pipeline_trans_if.byte_en; 
+        out_gen_bus_if.wdata <= next_wdata;
       end 
     end 
   end 
 
 
-  assign pipeline_trans_if.busy = (out_ram_if.addr == 0) ? 1 : out_ram_if.busy; 
-  assign pipeline_trans_if.rdata = out_ram_if.rdata;
+  assign pipeline_trans_if.busy = (out_gen_bus_if.addr == 0) ? 1 : out_gen_bus_if.busy; 
+  assign pipeline_trans_if.rdata = out_gen_bus_if.rdata;
   assign next_wdata = pipeline_trans_if.wdata;
 
 endmodule

@@ -27,7 +27,7 @@
 interface hazard_unit_if();
 
   import rv32i_types_pkg::word_t;
-  logic pc_en, npc_sel, i_ram_busy, d_ram_busy, dren, dwen, iren,ret;
+  logic pc_en, npc_sel, i_mem_busy, d_mem_busy, dren, dwen, iren,ret;
   logic branch_taken, prediction, jump, branch, if_ex_stall;
   logic if_ex_flush, mispredict, halt;
   word_t pc; 
@@ -45,7 +45,7 @@ interface hazard_unit_if();
   logic token_ex;
 
   modport hazard_unit (
-    input i_ram_busy, d_ram_busy, dren, dwen, iren, jump,
+    input i_mem_busy, d_mem_busy, dren, dwen, iren, jump,
           branch, mispredict, halt, pc,fault_insn, mal_insn, 
           illegal_insn, fault_l, 
           mal_l, fault_s, mal_s, breakpoint, env_m, ret,
@@ -55,12 +55,12 @@ interface hazard_unit_if();
 
   modport fetch (
     input pc_en, npc_sel, if_ex_stall, if_ex_flush, priv_pc, insert_priv_pc,
-    output i_ram_busy, iren, fault_insn, mal_insn, epc_f, badaddr_f
+    output i_mem_busy, iren, fault_insn, mal_insn, epc_f, badaddr_f
   );
 
   modport execute (
     input if_ex_stall, npc_sel,
-    output d_ram_busy, dren, dwen, jump, branch, mispredict, halt,
+    output d_mem_busy, dren, dwen, jump, branch, mispredict, halt,
     illegal_insn, fault_l, mal_l, fault_s, mal_s, breakpoint, env_m, ret, epc_e,
     badaddr_e, token_ex
   );

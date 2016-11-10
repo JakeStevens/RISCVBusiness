@@ -22,7 +22,7 @@
 *   Description:  Testbench for the alu 
 */
 
-`include "ram_if.vh" 
+`include "generic_bus_if.vh" 
 `include "ahb_if.vh" 
 
 module memory_controller_tb ();
@@ -32,14 +32,14 @@ module memory_controller_tb ();
 
   logic CLK, nRST; 
 
-  ram_if d_ram_if(); 
-  ram_if i_ram_if(); 
-  ram_if out_ram_if(); 
+  generic_bus_if d_gen_bus_if(); 
+  generic_bus_if i_gen_bus_if(); 
+  generic_bus_if out_gen_bus_if(); 
 
   ahb_if ahb_m();
 
-  memory_controller DUT ( CLK, nRST, d_ram_if, i_ram_if, out_ram_if );
-  ahb_master DUT2 ( CLK, nRST, ahb_m, out_ram_if); 
+  memory_controller DUT ( CLK, nRST, d_gen_bus_if, i_gen_bus_if, out_gen_bus_if );
+  ahb_master DUT2 ( CLK, nRST, ahb_m, out_gen_bus_if); 
   
   //-- CLOCK INITIALIZATION --// 
   initial begin : INIT 
@@ -55,25 +55,25 @@ module memory_controller_tb ();
      
     //-- Initial reset --// 
     nRST = 0; 
-    d_ram_if.ren = 0; 
-    d_ram_if.wen = 0;
-    i_ram_if.ren = 0; 
-    i_ram_if.wen = 0;
+    d_gen_bus_if.ren = 0; 
+    d_gen_bus_if.wen = 0;
+    i_gen_bus_if.ren = 0; 
+    i_gen_bus_if.wen = 0;
 
-    i_ram_if.addr = 32'h00000000; 
-    i_ram_if.wdata = 32'h00000000; 
-    i_ram_if.byte_en = 4'h1;
-    d_ram_if.addr = 32'h00000000; 
-    d_ram_if.wdata = 32'h00000000; 
-    d_ram_if.byte_en = 4'h1;
+    i_gen_bus_if.addr = 32'h00000000; 
+    i_gen_bus_if.wdata = 32'h00000000; 
+    i_gen_bus_if.byte_en = 4'h1;
+    d_gen_bus_if.addr = 32'h00000000; 
+    d_gen_bus_if.wdata = 32'h00000000; 
+    d_gen_bus_if.byte_en = 4'h1;
 
     ahb_m.HRDATA = 32'hbad1bad1; 
     ahb_m.HREADY = 0;
     ahb_m.HRESP = 0;
 
     //-- Base Address Initilization --// 
-    i_ram_if.addr = 32'h00000010; 
-    d_ram_if.addr = 32'h00000080; 
+    i_gen_bus_if.addr = 32'h00000010; 
+    d_gen_bus_if.addr = 32'h00000080; 
 
     @(posedge CLK); 
     #(PERIOD); 
@@ -92,11 +92,11 @@ module memory_controller_tb ();
 
   task instruction_read; 
   begin 
-    d_ram_if.ren = 0; 
-    d_ram_if.wen = 0;
-    i_ram_if.ren = 1; 
-    i_ram_if.wen = 0;
-    i_ram_if.addr = i_ram_if.addr + 4; 
+    d_gen_bus_if.ren = 0; 
+    d_gen_bus_if.wen = 0;
+    i_gen_bus_if.ren = 1; 
+    i_gen_bus_if.wen = 0;
+    i_gen_bus_if.addr = i_gen_bus_if.addr + 4; 
     #(5 * PERIOD) 
     ahb_m.HRDATA = 32'hDEADBEEF; 
     ahb_m.HWDATA = 0; 
@@ -104,20 +104,20 @@ module memory_controller_tb ();
     #(PERIOD) 
     ahb_m.HRDATA = 32'hbad1bad1; 
     ahb_m.HREADY = 0; 
-    d_ram_if.ren = 0; 
-    d_ram_if.wen = 0;
-    i_ram_if.ren = 1; 
-    i_ram_if.wen = 0;
+    d_gen_bus_if.ren = 0; 
+    d_gen_bus_if.wen = 0;
+    i_gen_bus_if.ren = 1; 
+    i_gen_bus_if.wen = 0;
   end
   endtask
 
   task data_read; 
   begin 
-    d_ram_if.addr = d_ram_if.addr + 4; 
-    d_ram_if.ren = 1; 
-    d_ram_if.wen = 0;
-    i_ram_if.ren = 1; 
-    i_ram_if.wen = 0;
+    d_gen_bus_if.addr = d_gen_bus_if.addr + 4; 
+    d_gen_bus_if.ren = 1; 
+    d_gen_bus_if.wen = 0;
+    i_gen_bus_if.ren = 1; 
+    i_gen_bus_if.wen = 0;
     #(5 * PERIOD) 
     ahb_m.HRDATA = 32'hDEADBEEF; 
     ahb_m.HWDATA = 0; 
@@ -125,10 +125,10 @@ module memory_controller_tb ();
     #(PERIOD) 
     ahb_m.HRDATA = 32'hDEADBEEF; 
     ahb_m.HREADY = 0; 
-    d_ram_if.ren = 1; 
-    d_ram_if.wen = 0;
-    i_ram_if.ren = 1; 
-    i_ram_if.wen = 0;
+    d_gen_bus_if.ren = 1; 
+    d_gen_bus_if.wen = 0;
+    i_gen_bus_if.ren = 1; 
+    i_gen_bus_if.wen = 0;
     #(5 * PERIOD) 
     ahb_m.HRDATA = 32'hbad1bad1; 
     ahb_m.HWDATA = 0; 
@@ -136,20 +136,20 @@ module memory_controller_tb ();
     #(PERIOD) 
     ahb_m.HRDATA = 32'hbad1bad1; 
     ahb_m.HREADY = 0; 
-    d_ram_if.ren = 0; 
-    d_ram_if.wen = 0;
-    i_ram_if.ren = 1; 
-    i_ram_if.wen = 0;
+    d_gen_bus_if.ren = 0; 
+    d_gen_bus_if.wen = 0;
+    i_gen_bus_if.ren = 1; 
+    i_gen_bus_if.wen = 0;
   end
   endtask
 
   task data_write; 
   begin 
-    d_ram_if.addr = d_ram_if.addr + 4; 
-    d_ram_if.ren = 0; 
-    d_ram_if.wen = 1;
-    i_ram_if.ren = 1; 
-    i_ram_if.wen = 0;
+    d_gen_bus_if.addr = d_gen_bus_if.addr + 4; 
+    d_gen_bus_if.ren = 0; 
+    d_gen_bus_if.wen = 1;
+    i_gen_bus_if.ren = 1; 
+    i_gen_bus_if.wen = 0;
     #(5 * PERIOD) 
     ahb_m.HRDATA = 32'hDEADBEEF; 
     ahb_m.HWDATA = 0; 
@@ -157,10 +157,10 @@ module memory_controller_tb ();
     #(PERIOD) 
     ahb_m.HRDATA = 32'hDEADBEEF; 
     ahb_m.HREADY = 0; 
-    d_ram_if.ren = 0; 
-    d_ram_if.wen = 1;
-    i_ram_if.ren = 1; 
-    i_ram_if.wen = 0;
+    d_gen_bus_if.ren = 0; 
+    d_gen_bus_if.wen = 1;
+    i_gen_bus_if.ren = 1; 
+    i_gen_bus_if.wen = 0;
     #(5 * PERIOD) 
     ahb_m.HRDATA = 32'hbad1bad1; 
     ahb_m.HWDATA = 0; 
@@ -168,10 +168,10 @@ module memory_controller_tb ();
     #(PERIOD) 
     ahb_m.HRDATA = 32'hbad1bad1; 
     ahb_m.HREADY = 0; 
-    d_ram_if.ren = 0; 
-    d_ram_if.wen = 0;
-    i_ram_if.ren = 1; 
-    i_ram_if.wen = 0;
+    d_gen_bus_if.ren = 0; 
+    d_gen_bus_if.wen = 0;
+    i_gen_bus_if.ren = 1; 
+    i_gen_bus_if.wen = 0;
   end 
   endtask
 

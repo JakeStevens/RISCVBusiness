@@ -22,26 +22,28 @@
 *   Description: Caches consisting of separate I$ and D$ 
 */
 
+`include "generic_bus_if.vh"
+
 module separate_caches (
   input logic CLK, nRST,
-  ram_if.cpu icache_mem_ram_if,
-  ram_if.cpu dcache_mem_ram_if,
-  ram_if.ram icache_proc_ram_if,
-  ram_if.ram dcache_proc_ram_if
+  generic_bus_if.cpu icache_mem_gen_bus_if,
+  generic_bus_if.cpu dcache_mem_gen_bus_if,
+  generic_bus_if.generic_bus icache_proc_gen_bus_if,
+  generic_bus_if.generic_bus dcache_proc_gen_bus_if
 );
 
   pass_through_dcache dcache(
     .CLK(CLK),
     .nRST(nRST),
-    .mem_ram_if(dcache_mem_ram_if),
-    .proc_ram_if(dcache_proc_ram_if)
+    .mem_gen_bus_if(dcache_mem_gen_bus_if),
+    .proc_gen_bus_if(dcache_proc_gen_bus_if)
   );
 
   pass_through_icache icache(
     .CLK(CLK),
     .nRST(nRST),
-    .mem_ram_if(icache_mem_ram_if),
-    .proc_ram_if(icache_proc_ram_if)
+    .mem_gen_bus_if(icache_mem_gen_bus_if),
+    .proc_gen_bus_if(icache_proc_gen_bus_if)
   );
 
 endmodule

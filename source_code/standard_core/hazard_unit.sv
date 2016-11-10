@@ -49,8 +49,8 @@ module hazard_unit
   assign dmem_access = (hazard_if.dren || hazard_if.dwen);
   assign branch_jump = hazard_if.jump || 
                         (hazard_if.branch && hazard_if.mispredict);
-  assign wait_for_imem = hazard_if.iren & hazard_if.i_ram_busy;
-  assign wait_for_dmem = dmem_access & hazard_if.d_ram_busy;  
+  assign wait_for_imem = hazard_if.iren & hazard_if.i_mem_busy;
+  assign wait_for_dmem = dmem_access & hazard_if.d_mem_busy;  
   
   assign hazard_if.npc_sel = branch_jump;
   
@@ -59,7 +59,7 @@ module hazard_unit
 
   assign hazard_if.if_ex_flush = ex_flush_hazard | branch_jump |
                                  (wait_for_imem & dmem_access &
-                                    ~hazard_if.d_ram_busy);
+                                    ~hazard_if.d_mem_busy);
 
   assign hazard_if.if_ex_stall = (wait_for_dmem ||
                                  (wait_for_imem & ~dmem_access) ||

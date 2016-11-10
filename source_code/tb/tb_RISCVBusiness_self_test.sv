@@ -26,6 +26,7 @@
 
 
 `include "ram_if.vh"
+`include "generic_bus_if.vh"
 
 `define OUTPUT_FILE_NAME "cpu.hex"
 `define STATS_FILE_NAME "stats.txt"
@@ -46,7 +47,7 @@ module tb_RISCVBusiness_self_test ();
 
   //Interface Instantiations
   ram_if ram_if();
-  ram_if rvb_ram_if();
+  generic_bus_if rvb_gen_bus_if();
   ram_if tb_ram_if();
 
   //Module Instantiations
@@ -55,7 +56,7 @@ module tb_RISCVBusiness_self_test ();
     .CLK(CLK),
     .nRST(nRST),
     .halt(halt),
-    .ram_if(rvb_ram_if)
+    .gen_bus_if(rvb_gen_bus_if)
   );
 
   ram_wrapper ram (
@@ -94,11 +95,12 @@ module tb_RISCVBusiness_self_test ();
   //Ramif Mux
   always_comb begin
     if(ram_control) begin
-      ram_if.addr    =   rvb_ram_if.addr;
-      ram_if.ren     =   rvb_ram_if.ren;
-      ram_if.wen     =   rvb_ram_if.wen;
-      ram_if.wdata   =   rvb_ram_if.wdata;
-      ram_if.byte_en = rvb_ram_if.byte_en;
+      /* No actual bus, so directly connect ram to generic bus interface */
+      ram_if.addr    =   rvb_gen_bus_if.addr;
+      ram_if.ren     =   rvb_gen_bus_if.ren;
+      ram_if.wen     =   rvb_gen_bus_if.wen;
+      ram_if.wdata   =   rvb_gen_bus_if.wdata;
+      ram_if.byte_en =   rvb_gen_bus_if.byte_en;
     end else begin
       ram_if.addr    =   tb_ram_if.addr;
       ram_if.ren     =   tb_ram_if.ren;
@@ -108,8 +110,9 @@ module tb_RISCVBusiness_self_test ();
     end
   end
 
-  assign rvb_ram_if.rdata  = ram_if.rdata;
-  assign rvb_ram_if.busy   = ram_if.busy;
+  /* No actual bus, so directly connect ram to generic bus interface */
+  assign rvb_gen_bus_if.rdata  = ram_if.rdata;
+  assign rvb_gen_bus_if.busy   = ram_if.busy;
   assign tb_ram_if.rdata   = ram_if.rdata;
   assign tb_ram_if.busy    = ram_if.busy;
 
