@@ -1,31 +1,44 @@
 def configure(ctx):
-    ctx.setup_hdl_module('RISCVBusiness',
+    ctx.SFFUnits.add('RISCVBusiness_packages',
+      src_dir = ['packages']
+    )
+    ctx.SFFUnits.add('RISCVBusiness',
       includes = ['include'],
-      src_dir = ['packages', 'caches', 'branch_predictors', 'bus_bridges', 'trackers', 'standard_core'],
+      src_dir = ['caches', 'branch_predictors', 'bus_bridges', 'trackers', 'standard_core', 'ram'],
+      use = ['RISCVBusiness_packages'],
+      tb_use = ['RISCVBusiness_packages'],
       tb = 'tb_RISCVBusiness',
       tb_includes = ['include']
     )
-    ctx.setup_hdl_module('RISCVBusiness_self_test',
+    ctx.SFFUnits.add('RISCVBusiness_self_test',
       includes = ['include'],
-      src_dir = ['packages', 'caches', 'branch_predictors', 'bus_bridges', 'trackers', 'standard_core'],
+      src_dir = ['caches', 'branch_predictors', 'bus_bridges', 'trackers', 'standard_core', 'ram'],
+      use = ['RISCVBusiness_packages'],
+      tb_use = ['RISCVBusiness_packages'],
       tb = 'tb_RISCVBusiness_self_test',
       tb_includes = ['include']
     )
-    ctx.setup_hdl_module('alu', 
+    ctx.SFFUnits.add('alu', 
       includes = ['include'],
-      src_dir = ['packages','standard_core'],
+      src_dir = ['standard_core'],
+      use = ['RISCVBusiness_packages'],
+      tb_use = ['RISCVBusiness_packages'],
       tb = 'tb_alu',
       tb_includes = ['include']
     )
-    ctx.setup_hdl_module('ahb_master', 
+    ctx.SFFUnits.add('ahb_master', 
       includes = ['include'],
-      src_dir = ['packages', 'bus_bridges', 'standard_core'],
+      src_dir = ['bus_bridges', 'standard_core', 'ram'],
+      use = ['RISCVBusiness_packages'],
+      tb_use = ['RISCVBusiness_packages'],
       tb = 'tb_ahb_master',
       tb_includes = ['include']
     )
-    ctx.setup_hdl_module('memory_controller', 
+    ctx.SFFUnits.add('memory_controller', 
       includes = ['include'],
-      src_dir = ['packages', 'bus_bridges', 'standard_core'],
+      src_dir = ['bus_bridges', 'standard_core', 'ram'],
+      use = ['RISCVBusiness_packages'],
+      tb_use = ['RISCVBusiness_packages'],
       tb = 'tb_memory_controller',
       tb_includes = ['include']
     )

@@ -8,16 +8,17 @@ top = '.'
 out = 'build'
 
 def options(ctx):
-    ctx.load('SoC_build_mgr', tooldir=toolpath)
-    ctx.load('Incisive', tooldir=toolpath)
-    ctx.load('Syn_support', tooldir=toolpath)
+    ctx.load('SFFbuildmgr', tooldir=toolpath)
+    ctx.load('SFFincisive', tooldir=toolpath)
+    #ctx.load('Syn_support', tooldir=toolpath)
     ctx.load('why')
 
 def configure(ctx):
-    ctx.load('SoC_build_mgr', tooldir=toolpath)
-    ctx.load('Incisive', tooldir=toolpath)
-    ctx.load('Syn_support', tooldir=toolpath)
+    ctx.load('SFFbuildmgr', tooldir=toolpath)
+    ctx.load('SFFincisive', tooldir=toolpath)
+    #ctx.load('Syn_support', tooldir=toolpath)
     ctx.recurse('source_code')
+    ctx.SFFUnits.finalize()
 
 def build(ctx):
     pass
