@@ -41,6 +41,8 @@ module execute_stage(
   output halt 
 );
 
+  import rv32i_types_pkg::*;
+
   // Interface declarations
   control_unit_if   cu_if();
   rv32i_reg_file_if rf_if(); 
