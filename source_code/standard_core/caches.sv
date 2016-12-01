@@ -31,8 +31,19 @@ module caches(
   generic_bus_if.generic_bus icache_proc_gen_bus_if,
   generic_bus_if.generic_bus dcache_proc_gen_bus_if
 );
+  parameter DCACHE_TYPE = "pass_through";
+  parameter ICACHE_TYPE = "pass_through";
+  parameter CACHE_CONFIG = "separate";
 
-  separate_caches sep_caches(.*);
+  generate
+    case (CACHE_CONFIG)
+      "separate" :  separate_caches #(
+                                      .DCACHE_TYPE(DCACHE_TYPE),
+                                      .ICACHE_TYPE(ICACHE_TYPE))
+                    sep_caches(.*);
+      default : ;
+    endcase
+  endgenerate
 
 endmodule
   

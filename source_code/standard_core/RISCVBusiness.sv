@@ -23,6 +23,7 @@
 */
 
 `include "generic_bus_if.vh"
+`include "component_selection_defines.vh"
 
 module RISCVBusiness (
   input logic CLK, nRST,
@@ -40,7 +41,10 @@ module RISCVBusiness (
 
   // Module Instantiations
 
-  tspp pipeline (
+  tspp #(
+    .BR_PREDICTOR_TYPE(BR_PREDICTOR_TYPE)
+  )
+  pipeline (
     .CLK(CLK),
     .nRST(nRST),
     .halt(halt),
@@ -48,7 +52,12 @@ module RISCVBusiness (
     .dgen_bus_if(tspp_dcache_gen_bus_if)
   );
 
-  caches caches (
+  caches #(
+    .DCACHE_TYPE(DCACHE_TYPE),
+    .ICACHE_TYPE(ICACHE_TYPE),
+    .CACHE_CONFIG(CACHE_CONFIG)
+  ) 
+  caches (
     .CLK(CLK),
     .nRST(nRST),
     .icache_proc_gen_bus_if(tspp_icache_gen_bus_if),

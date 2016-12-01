@@ -29,8 +29,13 @@ module branch_predictor (
   input logic CLK, nRST,
   predictor_pipeline_if.predictor predict_if
 );
-
-  nottaken_predictor predictor(.*);
-
+  parameter BR_PREDICTOR_TYPE = "not_taken";
+  // Predictor used based on the BR_PREDICTOR_TYPE parameter
+  generate
+    case (BR_PREDICTOR_TYPE)
+      "not_taken" : nottaken_predictor predictor(.*);
+      default : ;
+    endcase
+  endgenerate
 endmodule
 

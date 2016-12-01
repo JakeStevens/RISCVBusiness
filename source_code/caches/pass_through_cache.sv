@@ -14,17 +14,17 @@
 *   limitations under the License.
 *   
 *   
-*   Filename:     icache.sv
+*   Filename:     cache.sv
 *   
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 06/01/2016
-*   Description:  Pass Through Instruction Cache	
+*   Description:  Pass Through Cache	
 */
 
 `include "generic_bus_if.vh"
 
-module pass_through_icache (
+module pass_through_cache (
   input logic CLK, nRST,
   generic_bus_if.cpu mem_gen_bus_if,
   generic_bus_if.generic_bus proc_gen_bus_if

@@ -31,19 +31,31 @@ module separate_caches (
   generic_bus_if.generic_bus icache_proc_gen_bus_if,
   generic_bus_if.generic_bus dcache_proc_gen_bus_if
 );
+  parameter DCACHE_TYPE = "pass_through";
+  parameter ICACHE_TYPE = "pass_through";
 
-  pass_through_dcache dcache(
-    .CLK(CLK),
-    .nRST(nRST),
-    .mem_gen_bus_if(dcache_mem_gen_bus_if),
-    .proc_gen_bus_if(dcache_proc_gen_bus_if)
-  );
+  generate
+    case (DCACHE_TYPE)
+      "pass_through" :  pass_through_cache dcache(
+                          .CLK(CLK),
+                          .nRST(nRST),
+                          .mem_gen_bus_if(dcache_mem_gen_bus_if),
+                          .proc_gen_bus_if(dcache_proc_gen_bus_if)
+                        );
+      default : ;
+    endcase
+  endgenerate
 
-  pass_through_icache icache(
-    .CLK(CLK),
-    .nRST(nRST),
-    .mem_gen_bus_if(icache_mem_gen_bus_if),
-    .proc_gen_bus_if(icache_proc_gen_bus_if)
-  );
+  generate
+    case (ICACHE_TYPE)
+      "pass_through" : pass_through_cache icache(
+                          .CLK(CLK),
+                          .nRST(nRST),
+                          .mem_gen_bus_if(icache_mem_gen_bus_if),
+                          .proc_gen_bus_if(icache_proc_gen_bus_if)
+                        );
+      default : ;
+    endcase
+  endgenerate
 
 endmodule
