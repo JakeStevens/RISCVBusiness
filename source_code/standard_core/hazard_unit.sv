@@ -78,6 +78,8 @@ module hazard_unit
 
   assign hazard_if.insert_priv_pc = prv_pipe_if.insert_pc;
   assign hazard_if.priv_pc        = prv_pipe_if.priv_pc;
+  
+  assign hazard_if.iren = !intr; // prevents a false instruction request from being sent
 
   /* Send Exception notifications to Prv Block */
   assign prv_pipe_if.wb_enable    = !hazard_if.if_ex_stall | 

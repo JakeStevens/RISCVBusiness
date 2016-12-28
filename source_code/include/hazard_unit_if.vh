@@ -45,17 +45,17 @@ interface hazard_unit_if();
   logic token_ex;
 
   modport hazard_unit (
-    input i_mem_busy, d_mem_busy, dren, dwen, iren, jump,
+    input i_mem_busy, d_mem_busy, dren, dwen, jump,
           branch, mispredict, halt, pc,fault_insn, mal_insn, 
           illegal_insn, fault_l, 
           mal_l, fault_s, mal_s, breakpoint, env_m, ret,
           epc_f, epc_e, badaddr_f, badaddr_e, token_ex,
-    output pc_en, npc_sel, if_ex_stall, if_ex_flush, priv_pc, insert_priv_pc
+    output pc_en, npc_sel, if_ex_stall, if_ex_flush, priv_pc, insert_priv_pc, iren
   );
 
   modport fetch (
-    input pc_en, npc_sel, if_ex_stall, if_ex_flush, priv_pc, insert_priv_pc,
-    output i_mem_busy, iren, fault_insn, mal_insn, epc_f, badaddr_f
+    input pc_en, npc_sel, if_ex_stall, if_ex_flush, priv_pc, insert_priv_pc, iren,
+    output i_mem_busy, fault_insn, mal_insn, epc_f, badaddr_f
   );
 
   modport execute (

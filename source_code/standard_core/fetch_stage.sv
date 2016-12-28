@@ -56,10 +56,9 @@ module fetch_stage (
                 (predict_if.predict_taken ? predict_if.target_addr : pc4));
 
   //Instruction Access logic
-  assign hazard_if.iren        = 1'b1;
   assign hazard_if.i_mem_busy  = igen_bus_if.busy;
   assign igen_bus_if.addr         = pc;
-  assign igen_bus_if.ren          = 1'b1;
+  assign igen_bus_if.ren          = hazard_if.iren;
   assign igen_bus_if.wen          = 1'b0;
   assign igen_bus_if.byte_en      = 4'h0;
   assign igen_bus_if.wdata        = '0;

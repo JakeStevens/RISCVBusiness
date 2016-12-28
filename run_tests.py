@@ -50,9 +50,9 @@ def parse_arguments():
       parser = argparse.ArgumentParser(description="Run various processor tests. This script expects to be run at the top level of the RISCV Business directory")
       parser.add_argument('--arch', '-a', dest='arch', type=str,
                           default="RV32I",
-                          help="Specify the architecture targeted. Default: RV32I")
+                          help="Specify the architecture targeted. Option(s): RV32I Default: RV32I")
       parser.add_argument('--test', '-t', dest='test_type', type=str, default="",
-                          help="Specify what type of tests to run. Default: asm")
+                          help="Specify what type of tests to run. Option(s): asm,selfasm,c Default: asm")
       parser.add_argument('file_name', metavar='file_name', type=str,
                           nargs='?',
                           help="Run all tests that begin with this string. Optional")
