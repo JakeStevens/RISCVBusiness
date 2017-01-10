@@ -24,13 +24,13 @@
 */
 
 `include "predictor_pipeline_if.vh"
+`include "component_selection_defines.vh"
 
 module branch_predictor (
   input logic CLK, nRST,
   predictor_pipeline_if.predictor predict_if
 );
-  parameter BR_PREDICTOR_TYPE = "not_taken";
-  // Predictor used based on the BR_PREDICTOR_TYPE parameter
+  // Predictor used based on the BR_PREDICTOR_TYPE definition 
   generate
     case (BR_PREDICTOR_TYPE)
       "not_taken" : nottaken_predictor predictor(.*);

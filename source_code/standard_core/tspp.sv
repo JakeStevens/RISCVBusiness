@@ -34,9 +34,6 @@ module tspp (
   generic_bus_if.cpu igen_bus_if,
   generic_bus_if.cpu dgen_bus_if
 );
-  // Parameters link from top level to configurable component(s)
-  parameter BR_PREDICTOR_TYPE = "NOTTAKEN";
-
   //interface instantiations
   fetch_execute_if      fetch_ex_if();
   predictor_pipeline_if predict_if();
@@ -46,9 +43,7 @@ module tspp (
   //module instantiations
   fetch_stage fetch_stage_i (.*);
   execute_stage execute_stage_i (.*);
-  branch_predictor #(
-    .BR_PREDICTOR_TYPE(BR_PREDICTOR_TYPE)
-  ) branch_predictor_i (.*);
+  branch_predictor branch_predictor_i (.*);
   hazard_unit hazard_unit_i (.*);
   prv_block prv_block_i(.*);
 

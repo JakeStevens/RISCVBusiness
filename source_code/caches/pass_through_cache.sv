@@ -14,7 +14,7 @@
 *   limitations under the License.
 *   
 *   
-*   Filename:     cache.sv
+*   Filename:     pass_through_cache.sv
 *   
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu

@@ -23,7 +23,7 @@
 */
 
 `include "generic_bus_if.vh"
-
+`include "component_selection_defines.vh"
 module caches(
   input logic CLK, nRST,
   generic_bus_if.cpu icache_mem_gen_bus_if,
@@ -31,16 +31,9 @@ module caches(
   generic_bus_if.generic_bus icache_proc_gen_bus_if,
   generic_bus_if.generic_bus dcache_proc_gen_bus_if
 );
-  parameter DCACHE_TYPE = "pass_through";
-  parameter ICACHE_TYPE = "pass_through";
-  parameter CACHE_CONFIG = "separate";
-
   generate
     case (CACHE_CONFIG)
-      "separate" :  separate_caches #(
-                                      .DCACHE_TYPE(DCACHE_TYPE),
-                                      .ICACHE_TYPE(ICACHE_TYPE))
-                    sep_caches(.*);
+      "separate" :  separate_caches sep_caches(.*);
       default : ;
     endcase
   endgenerate
