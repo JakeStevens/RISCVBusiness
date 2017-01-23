@@ -23,11 +23,18 @@
 */
 
 `include "generic_bus_if.vh"
+`include "ahb_if.vh"
+`include "component_selection_defines.vh"
 
 module RISCVBusiness (
   input logic CLK, nRST,
   output logic halt,
+
+  `ifdef BUS_INTERFACE_GENERIC
   generic_bus_if.cpu gen_bus_if
+  `elsif BUS_INTERFACE_AHB
+  ahb_if.m ahb_master
+  `endif
 );
 
   // Interface instantiations
@@ -65,11 +72,29 @@ module RISCVBusiness (
     .out_gen_bus_if(pipeline_trans_if)
   );
 
-  generic_nonpipeline bt(
-    .CLK(CLK), 
-    .nRST(nRST), 
-    .pipeline_trans_if(pipeline_trans_if), 
-    .out_gen_bus_if(gen_bus_if)
-  );
+  // Instantiate the chosen bus interface
+
+  generate 
+    case (BUS_INTERFACE_TYPE) 
+      "generic_bus_if" : begin
+        generic_nonpipeline bt(
+          .CLK(CLK), 
+          .nRST(nRST), 
+          .pipeline_trans_if(pipeline_trans_if), 
+          .out_gen_bus_if(gen_bus_if)
+        );
+      end
+      "ahb_if" : begin
+        ahb bt (
+          .CLK(CLK),
+          .nRST(nRST),
+          .out_gen_bus_if(pipeline_trans_if),
+          .ahb_m(ahb_master)
+        );
+      end
+      default : $error("Configurable Component: Invalid Bus Interface");
+    endcase
+
+  endgenerate
 
 endmodule

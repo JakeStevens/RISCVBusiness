@@ -29,4 +29,14 @@ localparam BR_PREDICTOR_TYPE = "not_taken";
 localparam DCACHE_TYPE = "pass_through";
 localparam ICACHE_TYPE = "pass_through";
 localparam CACHE_CONFIG = "separate";
+
+/*  
+ *  Only one of the BUS_INTERFACE defines should be uncommented 
+ *  The parameter BUS_INTERFACE_TYPE should match the uncommented bus if
+ */
+
+//`define BUS_INTERFACE_AHB 1 
+`define BUS_INTERFACE_GENERIC 1 
+localparam BUS_INTERFACE_TYPE = "generic_bus_if";
+
 `endif // COMPONENT_SELECTION_DEFINES_VH
