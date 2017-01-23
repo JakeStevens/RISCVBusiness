@@ -26,6 +26,7 @@
 `include "hazard_unit_if.vh"
 `include "predictor_pipeline_if.vh"
 `include "generic_bus_if.vh"
+`include "component_selection_defines.vh"
 
 module fetch_stage (
   input logic CLK, nRST,
@@ -63,11 +64,6 @@ module fetch_stage (
   assign igen_bus_if.byte_en      = 4'h0;
   assign igen_bus_if.wdata        = '0;
   
-  endian_swapper ltb_endian (
-    .word_in(igen_bus_if.rdata),
-    .word_out(instr)
-  );
-
   //Fetch Execute Pipeline Signals
   always_ff @ (posedge CLK, negedge nRST) begin
     if (!nRST)
@@ -78,7 +74,7 @@ module fetch_stage (
       fetch_ex_if.fetch_ex_reg.token       <= 1'b1;
       fetch_ex_if.fetch_ex_reg.pc          <= pc;
       fetch_ex_if.fetch_ex_reg.pc4         <= pc4;
-      fetch_ex_if.fetch_ex_reg.instr       <= instr;
+      fetch_ex_if.fetch_ex_reg.instr       <= igen_bus_if.rdata;//instr;
       fetch_ex_if.fetch_ex_reg.prediction  <= predict_if.predict_taken;
     end
   end
@@ -91,6 +87,18 @@ module fetch_stage (
 
   assign hazard_if.badaddr_f = igen_bus_if.addr;
   assign hazard_if.epc_f = pc; 
+
+  // Choose the endianness of the data coming into the processor
+  generate
+    if (BUS_ENDIANNESS == "big")
+    begin
+      assign instr = igen_bus_if.rdata;
+    end else if (BUS_ENDIANNESS == "little")
+      endian_swapper ltb_endian(igen_bus_if.rdata, instr);
+    else begin
+    //TODO ERROR
+    end
+  endgenerate
 
 endmodule
 

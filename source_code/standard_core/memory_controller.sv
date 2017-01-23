@@ -25,6 +25,7 @@
 */
 
 `include "generic_bus_if.vh"
+`include "component_selection_defines.vh"
 
 module memory_controller (
   input logic CLK, nRST,
@@ -43,7 +44,10 @@ module memory_controller (
                     DATA_WAIT
                     } state_t; 
 
-  state_t current_state, next_state; 
+  state_t current_state, next_state;
+
+  /* Internal Signals */
+  logic [31:0] wdata, rdata; 
 
   always_ff @ (posedge CLK, negedge nRST) 
   begin 
@@ -109,6 +113,7 @@ module memory_controller (
   /* State Output Logic */ 
   always_comb 
   begin 
+    out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
     case(current_state) 
       IDLE: begin 
         out_gen_bus_if.wen      = 0;  
@@ -116,7 +121,6 @@ module memory_controller (
         out_gen_bus_if.addr     = 0;  
         d_gen_bus_if.busy       = 1'b1;
         i_gen_bus_if.busy       = 1'b1;
-        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
       end
 
       //-- INSTRUCTION REQUEST --// 
@@ -126,7 +130,6 @@ module memory_controller (
         out_gen_bus_if.addr     = i_gen_bus_if.addr;
         d_gen_bus_if.busy       = 1'b1;
         i_gen_bus_if.busy       = out_gen_bus_if.busy;
-        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
       end 
       INSTR_WAIT: begin 
         out_gen_bus_if.wen      = 0;  
@@ -134,7 +137,6 @@ module memory_controller (
         out_gen_bus_if.addr     = 0;  
         d_gen_bus_if.busy       = 1'b1;
         i_gen_bus_if.busy       = out_gen_bus_if.busy;
-        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
       end 
 
       //-- DATA REQUEST --//
@@ -144,7 +146,6 @@ module memory_controller (
         out_gen_bus_if.addr     = d_gen_bus_if.addr;
         d_gen_bus_if.busy       = out_gen_bus_if.busy;
         i_gen_bus_if.busy       = 1'b1;
-        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
       end 
       DATA_INSTR_REQ: begin 
         out_gen_bus_if.wen      = i_gen_bus_if.wen;
@@ -152,7 +153,6 @@ module memory_controller (
         out_gen_bus_if.addr     = i_gen_bus_if.addr;
         d_gen_bus_if.busy       = out_gen_bus_if.busy;
         i_gen_bus_if.busy       = 1'b1;
-        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
       end 
       DATA_WAIT: begin 
         out_gen_bus_if.wen      = d_gen_bus_if.wen;
@@ -160,24 +160,40 @@ module memory_controller (
         out_gen_bus_if.addr     = d_gen_bus_if.addr;
         d_gen_bus_if.busy       = 1'b1;
         i_gen_bus_if.busy       = out_gen_bus_if.busy;
-        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
       end 
     endcase 
-  end 
+  end
 
+  generate
+    if(BUS_ENDIANNESS == "big")
+    begin
+      assign wdata  = d_gen_bus_if.wdata;
+      assign rdata  = out_gen_bus_if.rdata;
+    end else if (BUS_ENDIANNESS ==  "little")
+    begin
+      logic [31:0] little_endian_wdata, little_endian_rdata;
+      endian_swapper wswap(d_gen_bus_if.wdata, little_endian_wdata);
+      endian_swapper rswap(out_gen_bus_if.rdata, little_endian_rdata);
+      assign wdata  = little_endian_wdata;
+      assign rdata  = little_endian_rdata;
+    end else
+    begin
+    //TODO ERROR
+    end
+  endgenerate
+ 
   /*  align the byte enable with the data being selected 
       based on the byte addressing */
   always_comb begin
-    casez (out_gen_bus_if.byte_en)
-      4'hf, 4'h1, 4'h3  : out_gen_bus_if.wdata = d_gen_bus_if.wdata;      
-      4'h2              : out_gen_bus_if.wdata = d_gen_bus_if.wdata << 8;
-      4'h4, 4'hc        : out_gen_bus_if.wdata = d_gen_bus_if.wdata << 16;
-      4'h8              : out_gen_bus_if.wdata = d_gen_bus_if.wdata << 24;
-      default           : out_gen_bus_if.wdata = d_gen_bus_if.wdata;
+    casez (d_gen_bus_if.byte_en)
+      4'b1111, 4'b0011, 4'b0001 : out_gen_bus_if.wdata = wdata;      
+      4'b0010                   : out_gen_bus_if.wdata = wdata << 8;
+      4'b0100, 4'b1100          : out_gen_bus_if.wdata = wdata << 16;
+      4'b1000                   : out_gen_bus_if.wdata = wdata << 24;
+      default                   : out_gen_bus_if.wdata = wdata;
     endcase
   end
 
-  assign d_gen_bus_if.rdata   = out_gen_bus_if.rdata;
-  assign i_gen_bus_if.rdata   = out_gen_bus_if.rdata;
-
+  assign d_gen_bus_if.rdata   = rdata;
+  assign i_gen_bus_if.rdata   = rdata;
 endmodule

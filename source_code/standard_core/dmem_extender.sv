@@ -31,53 +31,46 @@ module dmem_extender (
   output word_t  ext_out
 );
 
-  word_t  dmem_swapped;
-
-  //fix the endianess of the incoming data
-  endian_swapper  e_swap_i (
-    .word_in(dmem_in),
-    .word_out(dmem_swapped)
-  );
 
   always_comb begin
     casez (load_type) 
       LB  : begin
         casez (byte_en)
-          4'b0001   : ext_out = $signed(dmem_swapped[7:0]);
-          4'b0010   : ext_out = $signed(dmem_swapped[15:8]);
-          4'b0100   : ext_out = $signed(dmem_swapped[23:16]);
-          4'b1000   : ext_out = $signed(dmem_swapped[31:24]);
+          4'b0001   : ext_out = $signed(dmem_in[7:0]);
+          4'b0010   : ext_out = $signed(dmem_in[15:8]);
+          4'b0100   : ext_out = $signed(dmem_in[23:16]);
+          4'b1000   : ext_out = $signed(dmem_in[31:24]);
           default   : ext_out = '0;
         endcase
       end
 
       LBU : begin
         casez (byte_en)
-          4'b0001   : ext_out = dmem_swapped[7:0];
-          4'b0010   : ext_out = dmem_swapped[15:8];
-          4'b0100   : ext_out = dmem_swapped[23:16];
-          4'b1000   : ext_out = dmem_swapped[31:24];
+          4'b0001   : ext_out = dmem_in[7:0];
+          4'b0010   : ext_out = dmem_in[15:8];
+          4'b0100   : ext_out = dmem_in[23:16];
+          4'b1000   : ext_out = dmem_in[31:24];
           default   : ext_out = '0;
         endcase
       end
 
       LH  : begin
         casez (byte_en)
-          4'b0011   : ext_out = $signed(dmem_swapped[15:0]);
-          4'b1100   : ext_out = $signed(dmem_swapped[31:16]);
+          4'b0011   : ext_out = $signed(dmem_in[15:0]);
+          4'b1100   : ext_out = $signed(dmem_in[31:16]);
           default   : ext_out = '0;
         endcase
       end
 
       LHU : begin
         casez (byte_en)
-          4'b0011   : ext_out = dmem_swapped[15:0];
-          4'b1100   : ext_out = dmem_swapped[31:16];
+          4'b0011   : ext_out = dmem_in[15:0];
+          4'b1100   : ext_out = dmem_in[31:16];
           default   : ext_out = '0;
         endcase
       end
 
-      LW            : ext_out = dmem_swapped;
+      LW            : ext_out = dmem_in;
 
       default       : ext_out = '0;
     endcase

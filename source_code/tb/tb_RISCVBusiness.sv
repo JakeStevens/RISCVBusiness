@@ -26,6 +26,7 @@
 
 `include "ram_if.vh"
 `include "generic_bus_if.vh"
+`include "component_selection_defines.vh"
 
 `define OUTPUT_FILE_NAME "cpu.hex"
 `define STATS_FILE_NAME "stats.txt"
@@ -38,7 +39,7 @@ module tb_RISCVBusiness ();
   logic CLK, nRST;
   logic ram_control; // 1 -> CORE, 0 -> TB
   logic halt;
-  logic [31:0] addr, data;
+  logic [31:0] addr, data_temp, data;
   logic [63:0] hexdump_temp;
   logic [7:0] checksum;
   integer fptr, stats_ptr;
@@ -63,6 +64,12 @@ module tb_RISCVBusiness ();
     .nRST(nRST),
     .ram_if(ram_if)
   );
+
+  if (BUS_ENDIANNESS == "big")
+    endian_swapper swap(data_temp, data);
+  else if (BUS_ENDIANNESS == "little")
+    assign data = data_temp;
+  else ;//TODO:ERROR
 
   bind execute_stage cpu_tracker cpu_track1 (
     .CLK(CLK),
@@ -91,6 +98,8 @@ module tb_RISCVBusiness ();
     .branch_result(predict_if.branch_result)
   );
      
+
+  
 
   //Ramif Mux
   always_comb begin
@@ -177,7 +186,8 @@ module tb_RISCVBusiness ();
     fptr = $fopen(`OUTPUT_FILE_NAME, "w");
 
     for(addr = 32'h100; addr < 32'h2000; addr+=4) begin
-      read_ram(addr, data);
+      read_ram(addr, data_temp);
+      #(PERIOD/4);
       hexdump_temp = {8'h04, addr[15:0]>>2, 8'h00, data};
       checksum = calculate_crc(hexdump_temp);
       if(data != 0)

@@ -26,6 +26,7 @@
 `include "hazard_unit_if.vh"
 `include "predictor_pipeline_if.vh"
 `include "control_unit_if.vh"
+`include "component_selection_defines.vh"
 `include "rv32i_reg_file_if.vh"
 `include "generic_bus_if.vh"
 `include "alu_if.vh"
@@ -67,13 +68,31 @@ module execute_stage(
   );
 
   word_t dload_ext;
-  logic [3:0] byte_en;
+  logic [3:0] byte_en, byte_en_temp;
   dmem_extender dmem_ext (
     .dmem_in(dgen_bus_if.rdata),
     .load_type(cu_if.load_type),
     .byte_en(byte_en),
     .ext_out(dload_ext)
   );
+
+  /*******************************************************
+  *** Choose the Endianness Coming into the processor
+  *******************************************************/
+  generate
+    if (BUS_ENDIANNESS == "big")
+    begin
+      assign byte_en = byte_en_temp;
+    end else if (BUS_ENDIANNESS == "little")
+    begin
+      assign byte_en = cu_if.dren ? byte_en_temp :
+              {byte_en_temp[0], byte_en_temp[1],
+              byte_en_temp[2], byte_en_temp[3]};
+    end else
+    begin
+    //TODO ERROR
+    end
+  endgenerate
 
   assign cu_if.instr = fetch_ex_if.fetch_ex_reg.instr;
 
@@ -165,8 +184,7 @@ module execute_stage(
 
   assign dgen_bus_if.ren           = cu_if.dren & ~mal_addr;
   assign dgen_bus_if.wen           = cu_if.dwen & ~mal_addr;
-  assign dgen_bus_if.byte_en       = cu_if.dren ? byte_en:
-                                {byte_en[0], byte_en[1], byte_en[2], byte_en[3]};
+  assign dgen_bus_if.byte_en       = byte_en;
   assign dgen_bus_if.addr          = alu_if.port_out;
   assign hazard_if.d_mem_busy  = dgen_bus_if.busy;
   assign byte_offset          = alu_if.port_out[1:0]; 
@@ -175,9 +193,9 @@ module execute_stage(
     // load_type can be used for store_type as well
     dgen_bus_if.wdata = '0;
     case(cu_if.load_type)
-      LB: dgen_bus_if.wdata = {4{store_swapped[31:24]}};
-      LH: dgen_bus_if.wdata = {2{store_swapped[31:16]}};
-      LW: dgen_bus_if.wdata = store_swapped; 
+      LB: dgen_bus_if.wdata = {4{rf_if.rs2_data[7:0]}};
+      LH: dgen_bus_if.wdata = {2{rf_if.rs2_data[15:0]}};
+      LW: dgen_bus_if.wdata = rf_if.rs2_data; 
     endcase
   end
 
@@ -189,38 +207,38 @@ module execute_stage(
     unique case(cu_if.load_type)
       LB : begin
         unique case(byte_offset)
-          2'b00   : byte_en = 4'b0001;
-          2'b01   : byte_en = 4'b0010;
-          2'b10   : byte_en = 4'b0100;
-          2'b11   : byte_en = 4'b1000;
-          default : byte_en = 4'b0000;
+          2'b00   : byte_en_temp = 4'b0001;
+          2'b01   : byte_en_temp = 4'b0010;
+          2'b10   : byte_en_temp = 4'b0100;
+          2'b11   : byte_en_temp = 4'b1000;
+          default : byte_en_temp = 4'b0000;
         endcase
       end
       LBU : begin
         unique case(byte_offset)
-          2'b00   : byte_en = 4'b0001;
-          2'b01   : byte_en = 4'b0010;
-          2'b10   : byte_en = 4'b0100;
-          2'b11   : byte_en = 4'b1000;
-          default : byte_en = 4'b0000;
+          2'b00   : byte_en_temp = 4'b0001;
+          2'b01   : byte_en_temp = 4'b0010;
+          2'b10   : byte_en_temp = 4'b0100;
+          2'b11   : byte_en_temp = 4'b1000;
+          default : byte_en_temp = 4'b0000;
         endcase
       end
       LH : begin
         unique case(byte_offset)
-          2'b00   : byte_en = 4'b0011;
-          2'b10   : byte_en = 4'b1100;
-          default : byte_en = 4'b0000;
+          2'b00   : byte_en_temp = 4'b0011;
+          2'b10   : byte_en_temp = 4'b1100;
+          default : byte_en_temp = 4'b0000;
         endcase
       end
       LHU : begin
         unique case(byte_offset)
-          2'b00   : byte_en = 4'b0011;
-          2'b10   : byte_en = 4'b1100;
-          default : byte_en = 4'b0000;
+          2'b00   : byte_en_temp = 4'b0011;
+          2'b10   : byte_en_temp = 4'b1100;
+          default : byte_en_temp = 4'b0000;
         endcase
       end
-      LW:           byte_en = 4'b1111;
-      default :     byte_en = 4'b0000;
+      LW:           byte_en_temp = 4'b1111;
+      default :     byte_en_temp = 4'b0000;
     endcase
   end
 

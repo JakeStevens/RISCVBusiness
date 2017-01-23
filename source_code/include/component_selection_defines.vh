@@ -25,8 +25,9 @@
 `ifndef COMPONENT_SELECTION_DEFINES_VH
 `define COMPONENT_SELECTION_DEFINES_VH
 
-localparam BR_PREDICTOR_TYPE = "not_taken";
-localparam DCACHE_TYPE = "pass_through";
-localparam ICACHE_TYPE = "pass_through";
-localparam CACHE_CONFIG = "separate";
+localparam BR_PREDICTOR_TYPE  = "not_taken";
+localparam DCACHE_TYPE        = "pass_through";
+localparam ICACHE_TYPE        = "pass_through";
+localparam CACHE_CONFIG       = "separate";
+localparam BUS_ENDIANNESS     = "big";
 `endif // COMPONENT_SELECTION_DEFINES_VH
