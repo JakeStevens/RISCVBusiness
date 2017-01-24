@@ -113,12 +113,12 @@ module memory_controller (
   /* State Output Logic */ 
   always_comb 
   begin 
-    out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
     case(current_state) 
       IDLE: begin 
         out_gen_bus_if.wen      = 0;  
         out_gen_bus_if.ren      = 0;  
         out_gen_bus_if.addr     = 0;  
+        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
         d_gen_bus_if.busy       = 1'b1;
         i_gen_bus_if.busy       = 1'b1;
       end
@@ -128,6 +128,7 @@ module memory_controller (
         out_gen_bus_if.wen      = i_gen_bus_if.wen;
         out_gen_bus_if.ren      = i_gen_bus_if.ren;
         out_gen_bus_if.addr     = i_gen_bus_if.addr;
+        out_gen_bus_if.byte_en  = i_gen_bus_if.byte_en;
         d_gen_bus_if.busy       = 1'b1;
         i_gen_bus_if.busy       = out_gen_bus_if.busy;
       end 
@@ -135,6 +136,7 @@ module memory_controller (
         out_gen_bus_if.wen      = 0;  
         out_gen_bus_if.ren      = 0;  
         out_gen_bus_if.addr     = 0;  
+        out_gen_bus_if.byte_en  = i_gen_bus_if.byte_en;
         d_gen_bus_if.busy       = 1'b1;
         i_gen_bus_if.busy       = out_gen_bus_if.busy;
       end 
@@ -144,6 +146,7 @@ module memory_controller (
         out_gen_bus_if.wen      = d_gen_bus_if.wen;
         out_gen_bus_if.ren      = d_gen_bus_if.ren;
         out_gen_bus_if.addr     = d_gen_bus_if.addr;
+        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
         d_gen_bus_if.busy       = out_gen_bus_if.busy;
         i_gen_bus_if.busy       = 1'b1;
       end 
@@ -151,6 +154,7 @@ module memory_controller (
         out_gen_bus_if.wen      = i_gen_bus_if.wen;
         out_gen_bus_if.ren      = i_gen_bus_if.ren;
         out_gen_bus_if.addr     = i_gen_bus_if.addr;
+        out_gen_bus_if.byte_en  = i_gen_bus_if.byte_en;
         d_gen_bus_if.busy       = out_gen_bus_if.busy;
         i_gen_bus_if.busy       = 1'b1;
       end 
@@ -158,6 +162,7 @@ module memory_controller (
         out_gen_bus_if.wen      = d_gen_bus_if.wen;
         out_gen_bus_if.ren      = d_gen_bus_if.ren;
         out_gen_bus_if.addr     = d_gen_bus_if.addr;
+        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
         d_gen_bus_if.busy       = 1'b1;
         i_gen_bus_if.busy       = out_gen_bus_if.busy;
       end 

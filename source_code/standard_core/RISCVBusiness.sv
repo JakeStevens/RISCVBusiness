@@ -33,7 +33,7 @@ module RISCVBusiness (
   `ifdef BUS_INTERFACE_GENERIC
   generic_bus_if.cpu gen_bus_if
   `elsif BUS_INTERFACE_AHB
-  ahb_if.m ahb_master
+  ahb_if.ahb_m ahb_master
   `endif
 );
 

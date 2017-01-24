@@ -61,7 +61,7 @@ module fetch_stage (
   assign igen_bus_if.addr         = pc;
   assign igen_bus_if.ren          = hazard_if.iren;
   assign igen_bus_if.wen          = 1'b0;
-  assign igen_bus_if.byte_en      = 4'h0;
+  assign igen_bus_if.byte_en      = 4'b1111;
   assign igen_bus_if.wdata        = '0;
   
   //Fetch Execute Pipeline Signals
