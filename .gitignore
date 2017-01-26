@@ -15,3 +15,7 @@ source_code/fpga/*.bak
 source_code/fpga/db
 source_code/fpga/incremental_db
 source_code/fpga/output_files
+# Ignore open vim files
+*.swp
+# Ignore waf lock
+*.lock-waf*
