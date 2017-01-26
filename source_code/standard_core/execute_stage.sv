@@ -90,7 +90,7 @@ module execute_stage(
               byte_en_temp[2], byte_en_temp[3]};
     end else
     begin
-    //TODO ERROR
+      $error("Configurable Component: Invalid bus endianness");
     end
   endgenerate
 

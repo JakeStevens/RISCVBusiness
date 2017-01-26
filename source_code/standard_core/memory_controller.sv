@@ -183,7 +183,7 @@ module memory_controller (
       assign rdata  = little_endian_rdata;
     end else
     begin
-    //TODO ERROR
+      $error("Configurable Component: Invalid bus endianness");
     end
   endgenerate
  

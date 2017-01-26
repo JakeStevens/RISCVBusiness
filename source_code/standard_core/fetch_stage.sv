@@ -96,7 +96,7 @@ module fetch_stage (
     end else if (BUS_ENDIANNESS == "little")
       endian_swapper ltb_endian(igen_bus_if.rdata, instr);
     else begin
-    //TODO ERROR
+      $error("Configurable Component: Invalid bus endianness");
     end
   endgenerate
 
