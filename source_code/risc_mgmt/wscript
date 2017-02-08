@@ -1,0 +1,8 @@
+#! /usr/bin/env python
+#encoding: utf-8
+
+def configure(cnf):
+  cnf.recurse(extensions)
+
+def sim_source(cnf):
+  cnf.recurse(extensions)

@@ -4,7 +4,7 @@ def configure(ctx):
     )
     ctx.SFFUnits.add('RISCVBusiness',
       includes = ['include'],
-      src_dir = ['caches', 'branch_predictors', 'bus_bridges', 'trackers', 'standard_core', 'ram'],
+      src_dir = ['caches', 'branch_predictors', 'bus_bridges', 'trackers', 'standard_core', 'ram', 'risc_mgmt'],
       use = ['RISCVBusiness_packages'],
       tb_use = ['RISCVBusiness_packages'],
       tb = 'tb_RISCVBusiness',
@@ -12,7 +12,7 @@ def configure(ctx):
     )
     ctx.SFFUnits.add('RISCVBusiness_self_test',
       includes = ['include'],
-      src_dir = ['caches', 'branch_predictors', 'bus_bridges', 'trackers', 'standard_core', 'ram'],
+      src_dir = ['caches', 'branch_predictors', 'bus_bridges', 'trackers', 'standard_core', 'ram', 'risc_mgmt'],
       use = ['RISCVBusiness_packages'],
       tb_use = ['RISCVBusiness_packages'],
       tb = 'tb_RISCVBusiness_self_test',
