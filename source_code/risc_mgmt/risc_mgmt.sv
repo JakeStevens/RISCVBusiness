@@ -24,21 +24,25 @@
 *                 and the standard core. 
 *
 *                 This version will connect extensions
-*                 to a two stage pipeline.
+*                 to a two stage pipeline (tspp).
 */
 
 `include "risc_mgmt_macros.vh"
+`include "risc_mgmt_if.vh"
 
 module risc_mgmt (
-  input logic CLK, nRST
-  //TODO
+  input logic CLK, nRST,
+  risc_mgmt_if.ts_rmgmt rmif 
 );
   import rv32i_types_pkg::*;
   import alu_types_pkg::*;
 
-  parameter N_EXTENSIONS = 1;
+  parameter   N_EXTENSIONS = `N_RMGMT_EXTENSIONS;
+  localparam  N_EXT_BITS = $clog2(N_EXTENSIONS);
 
-  /* Signal Instantiations */
+  /******************************************************************
+  * Signal Instantiations 
+  ******************************************************************/ 
 
   // Decode Stage Signals
   logic   [N_EXTENSIONS-1:0]        d_insn_claim;
@@ -85,5 +89,87 @@ module risc_mgmt (
   
   `ADD_EXTENSION(template,0) 
    
+ 
+  /******************************************************************
+  * Begin RISC-MGMT Logic 
+  ******************************************************************/ 
   
+  /*  Extension Tokens  */
+  integer i;
+  logic [N_EXTENSIONS-1:0]  tokens;
+  logic ext_is_active;
+  logic [N_EXT_BITS-1:0]    active_ext;
+
+  assign tokens           = d_insn_claim;
+  assign ext_is_active    = |tokens;
+  assign rmif.active_insn = ext_is_active;
+
+  always_comb begin
+    active_ext = 0;
+    for(i = 0; i < N_EXTENSIONS; i++) begin
+      if(tokens[i]) 
+        active_ext = i;
+    end
+  end
+
+ 
+  /* Pipeline Control / Automatic Clock Gating
+  *  Not present in 2 stage pipeline implementation
+  *  All pipeline control is handled in standard core automatically
+  *  Stalls will be forwarded to the standard core
+  */
+  assign rmif.decode_bubble   = d_bubble_req[active_ext] && ext_is_active;
+  assign rmif.execute_stall   = e_busy[active_ext] && ext_is_active;
+  assign rmif.memory_stall    = m_busy[active_ext] && ext_is_active; 
+
+
+  /* Registerfile / Forwarding Logic
+  *  Forwarding not present in 2 stage pipeline
+  */
+  
+  // Reg reads and decode
+  assign req_reg_r      = ext_is_active;
+  assign rmif.rsel_s_0  = d_rsel_s_0[active_ext];
+  assign rmif.rsel_s_1  = d_rsel_s_1[active_ext];
+  assign rmif.rsel_d    = d_rsel_d[active_ext];
+  assign e_rdata_s_0    = {N_EXTENSIONS{rmif.rdata_s_0}};
+  assign e_rdata_s_1    = {N_EXTENSIONS{rmif.rdata_s_1}};
+
+  // Reg Writeback
+  assign rmif.req_reg_w = (e_reg_w[active_ext] || m_reg_w[active_ext]) && ext_is_active;
+  assign rmif.reg_w     = e_reg_w[active_ext] || m_reg_w[active_ext];
+  assign rmif.reg_wdata = e_reg_w[active_ext] ? e_reg_wdata[active_ext] : m_reg_wdata[active_ext];
+
+
+  /*  ALU Access Control  */
+
+  assign rmif.req_alu     = e_alu_access[active_ext] && ext_is_active;
+  assign rmif.alu_data_0  = e_alu_data_0[active_ext];
+  assign rmif.alu_data_1  = e_alu_data_1[active_ext];
+  assign rmif.alu_op      = e_alu_op[active_ext];
+  assign e_alu_res        = {N_EXTENSIONS{rmif.alu_res}}; 
+
+
+  /*  Branch Jump Control  */
+  assign rmif.req_br_j    = e_branch_jump[active_ext] && ext_is_active;
+  assign rmif.branch_jump = e_branch_jump[active_ext];
+  assign rmif.br_j_addr   = e_br_j_addr[active_ext];
+
+
+  /*  Memory Access Control  */
+
+  assign rmif.req_mem   = (m_mem_ren[active_ext] || m_mem_wen[active_ext]) && ext_is_active;
+  assign rmif.mem_addr  = m_mem_addr[active_ext];
+  assign rmif.mem_store = m_mem_store[active_ext];
+  assign rmif.mem_ren   = m_mem_ren[active_ext];
+  assign rmif.mem_wen   = m_mem_wen[active_ext];
+  assign m_mem_busy     = {N_EXTENSIONS{rmif.mem_busy}};
+  assign m_mem_load     = {N_EXTENSIONS{rmif.mem_load}};
+   
+
+  /*  Exception Reporting  */
+  assign rmif.exception  = (e_exception[active_ext] || m_exception[active_ext]) && ext_is_active;
+  assign rmif.ex_cause   = active_ext;
+   
+
 endmodule

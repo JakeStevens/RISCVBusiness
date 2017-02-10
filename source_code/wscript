@@ -42,3 +42,11 @@ def configure(ctx):
       tb = 'tb_memory_controller',
       tb_includes = ['include']
     )
+    ctx.SFFUnits.add('risc_mgmt',
+      includes = ['include'],
+      src_dir = ['risc_mgmt'], 
+      use = ['RISCVBusiness_packages'],
+      tb_use = ['RISCVBusiness_packages'],
+      tb = 'tb_risc_mgmt',
+      tb_includes = ['include']
+    )
