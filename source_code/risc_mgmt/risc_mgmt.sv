@@ -91,7 +91,7 @@ module risc_mgmt (
   ******************************************************************/ 
   
   /* Send instruction to extensions */
-  assign d_insn = {N_EXTENSIONS{rm_if.insn}};
+  assign d_insn = {N_EXTENSIONS{rmif.insn}};
 
   /*  Extension Tokens  */
 
@@ -130,12 +130,12 @@ module risc_mgmt (
   */
   
   // Reg reads and decode
-  assign rm_if.req_reg_r      = ext_is_active;
-  assign rm_if.rsel_s_0  = d_rsel_s_0[active_ext];
-  assign rm_if.rsel_s_1  = d_rsel_s_1[active_ext];
-  assign rm_if.rsel_d    = d_rsel_d[active_ext];
-  assign e_rdata_s_0    = {N_EXTENSIONS{rm_if.rdata_s_0}};
-  assign e_rdata_s_1    = {N_EXTENSIONS{rm_if.rdata_s_1}};
+  assign rmif.req_reg_r      = ext_is_active;
+  assign rmif.rsel_s_0  = d_rsel_s_0[active_ext];
+  assign rmif.rsel_s_1  = d_rsel_s_1[active_ext];
+  assign rmif.rsel_d    = d_rsel_d[active_ext];
+  assign e_rdata_s_0    = {N_EXTENSIONS{rmif.rdata_s_0}};
+  assign e_rdata_s_1    = {N_EXTENSIONS{rmif.rdata_s_1}};
 
   // Reg Writeback
   assign rm_if.req_reg_w = (e_reg_w[active_ext] || m_reg_w[active_ext]) && ext_is_active;

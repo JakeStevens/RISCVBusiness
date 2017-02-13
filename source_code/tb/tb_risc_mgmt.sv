@@ -57,6 +57,7 @@ module tb_risc_mgmt();
   /*  TB Run  */
   
   assign rmif.insn = insn;
+  assign rmif.alu_res = rmif.alu_data_1 + rmif.alu_data_0;
   
   initial begin
     // Reset DUT
@@ -78,6 +79,7 @@ module tb_risc_mgmt();
     // Test coming out of reset
     assert (rmif.req_reg_r == 0)  else $error("req_reg_r incorrect on PU\n");
     assert (rmif.req_reg_w == 0)  else $error("req_reg_w incorrect on PU\n");
+    assert (rmif.req_alu == 0)    else $error("req_alu incorrect on PU\n");
     assert (rmif.req_br_j == 0)   else $error("req_br_j incorrect on PU\n");
     assert (rmif.req_mem == 0)    else $error("req_mem incorrect on PU\n");
     assert (rmif.exception == 0)  else $error("exception incorrect on PU\n");
@@ -98,6 +100,7 @@ module tb_risc_mgmt();
     #(1);
     assert (rmif.req_reg_r == 1)  else $error("req_reg_r incorrect on RTYPE\n");
     assert (rmif.req_reg_w == 1)  else $error("req_reg_w incorrect on RTYPE\n");
+    assert (rmif.req_alu == 0)    else $error("req_alu incorrect on RTYPE\n");
     assert (rmif.req_br_j == 0)   else $error("req_br_j incorrect on RTYPE\n");
     assert (rmif.req_mem == 0)    else $error("req_mem incorrect on RTYPE\n");
     assert (rmif.exception == 0)  else $error("exception incorrect on RTYPE\n");
@@ -118,11 +121,27 @@ module tb_risc_mgmt();
     assert (counter == 5'd16)     else $error("counter was %d, expected %d on RTYPE_STALL\n", counter, 16);
     assert (rmif.req_reg_r == 1)  else $error("req_reg_r incorrect on RTYPE_STALL\n");
     assert (rmif.req_reg_w == 1)  else $error("req_reg_w incorrect on RTYPE_STALL\n");
+    assert (rmif.req_alu == 0)    else $error("req_alu incorrect on RTYPE_STALL\n");
     assert (rmif.req_br_j == 0)   else $error("req_br_j incorrect on RTYPE_STALL\n");
     assert (rmif.req_mem == 0)    else $error("req_mem incorrect on RTYPE_STALL\n");
     assert (rmif.exception == 0)  else $error("exception incorrect on RTYPE_STALL\n");
     assert (rmif.reg_wdata == 32'h1100_1016) else $error("reg_data incorrect on RTYPE_STALL\n");
     
+
+    // Test RTYPE_ALU insn
+    @(posedge CLK);
+    insn.funct = RTYPE_ALU;
+    #(1);
+
+    assert (rmif.req_reg_r == 1)  else $error("req_reg_r incorrect on RTYPE_ALU\n");
+    assert (rmif.req_reg_w == 1)  else $error("req_reg_w incorrect on RTYPE_ALU\n");
+    assert (rmif.req_alu == 1)    else $error("req_alu incorrect on RTYPE_ALU\n");
+    assert (rmif.req_br_j == 0)   else $error("req_br_j incorrect on RTYPE_ALU\n");
+    assert (rmif.req_mem == 0)    else $error("req_mem incorrect on RTYPE_ALU\n");
+    assert (rmif.exception == 0)  else $error("exception incorrect on RTYPE_ALU\n");
+    assert (rmif.reg_wdata == 32'h1100_1011) else $error("reg_data incorrect on RTYPE_ALU\n");
+
+
     // Test BR_J insn
     @(posedge CLK);
     insn.funct = BR_J;
@@ -130,6 +149,7 @@ module tb_risc_mgmt();
 
     assert (rmif.req_reg_r == 1)  else $error("req_reg_r incorrect on BR_J\n");
     assert (rmif.req_reg_w == 0)  else $error("req_reg_w incorrect on BR_J\n");
+    assert (rmif.req_alu == 0)    else $error("req_alu incorrect on BR_J\n");
     assert (rmif.req_br_j == 1)   else $error("req_br_j incorrect on BR_J\n");
     assert (rmif.req_mem == 0)    else $error("req_mem incorrect on BR_J\n");
     assert (rmif.exception == 0)  else $error("exception incorrect on BR_J\n");
@@ -152,6 +172,7 @@ module tb_risc_mgmt();
     assert (rmif.memory_stall == 0)  else $error("memory_stall incorrect on MEM_LOAD\n");
     assert (rmif.req_reg_r == 1)  else $error("req_reg_r incorrect on MEM_LOAD\n");
     assert (rmif.req_reg_w == 1)  else $error("req_reg_w incorrect on MEM_LOAD\n");
+    assert (rmif.req_alu == 0)    else $error("req_alu incorrect on MEM_LOAD\n");
     assert (rmif.req_br_j == 0)   else $error("req_br_j incorrect on MEM_LOAD\n");
     assert (rmif.req_mem == 1)    else $error("req_mem incorrect on MEM_LOAD\n");
     assert (rmif.exception == 0)  else $error("exception incorrect on MEM_LOAD\n");
@@ -176,6 +197,7 @@ module tb_risc_mgmt();
     assert (rmif.memory_stall == 0)  else $error("memory_stall incorrect on MEM_STORE\n");
     assert (rmif.req_reg_r == 1)  else $error("req_reg_r incorrect on MEM_STORE\n");
     assert (rmif.req_reg_w == 0)  else $error("req_reg_w incorrect on MEM_STORE\n");
+    assert (rmif.req_alu == 0)    else $error("req_alu incorrect on MEM_STORE\n");
     assert (rmif.req_br_j == 0)   else $error("req_br_j incorrect on MEM_STORE\n");
     assert (rmif.req_mem == 1)    else $error("req_mem incorrect on MEM_STORE\n");
     assert (rmif.exception == 0)  else $error("exception incorrect on MEM_STORE\n");
@@ -192,6 +214,7 @@ module tb_risc_mgmt();
 
     assert (rmif.req_reg_r == 1)  else $error("req_reg_r incorrect on EXCEPTION\n");
     assert (rmif.req_reg_w == 0)  else $error("req_reg_w incorrect on EXCEPTION\n");
+    assert (rmif.req_alu == 0)    else $error("req_alu incorrect on EXCEPTION\n");
     assert (rmif.req_br_j == 0)   else $error("req_br_j incorrect on EXCEPTION\n");
     assert (rmif.req_mem == 0)    else $error("req_mem incorrect on EXCEPTION\n");
     assert (rmif.exception == 1)  else $error("exception incorrect on EXCEPTION\n");
@@ -202,13 +225,10 @@ module tb_risc_mgmt();
     #(1);
     assert (rmif.req_reg_r == 1)  else $error("req_reg_r incorrect on NOP\n");
     assert (rmif.req_reg_w == 0)  else $error("req_reg_w incorrect on NOP\n");
+    assert (rmif.req_alu == 0)    else $error("req_alu incorrect on NOP\n");
     assert (rmif.req_br_j == 0)   else $error("req_br_j incorrect on NOP\n");
     assert (rmif.req_mem == 0)    else $error("req_mem incorrect on NOP\n");
     assert (rmif.exception == 0)  else $error("exception incorrect on NOP)\n");
-
-    @(posedge CLK);
-    insn.opcode = 7'b000_1010;
-    @(posedge CLK);
 
     $display("Testing Finished\n");
     $finish;

@@ -69,17 +69,19 @@ interface risc_mgmt_if ();
 
   modport ts_rmgmt (
     output req_reg_r, req_reg_w, rsel_s_0, rsel_s_1, 
-      rsel_d, reg_w, reg_wdata, req_br_j, branch_jump, 
+      rsel_d, reg_w, reg_wdata, req_alu, 
+      alu_data_0, alu_data_1, alu_op, req_br_j, branch_jump, 
       br_j_addr, req_mem, mem_addr, mem_store, mem_ren, 
       mem_wen, decode_bubble, execute_stall, memory_stall, 
-      active_insn, exception, ex_cause, ex_token,
-    input rdata_s_0, rdata_s_1, mem_load, mem_busy, insn 
+      active_insn, exception, ex_cause,
+    input rdata_s_0, rdata_s_1, alu_res, mem_load, mem_busy, insn 
   );
 
   modport ts_pipe (
-    output rdata_s_0, rdata_s_1, mem_load, mem_busy, insn,
+    output rdata_s_0, rdata_s_1, alu_res, mem_load, mem_busy, insn,
     input req_reg_r, req_reg_w, rsel_s_0, rsel_s_1, 
-      rsel_d, reg_w, reg_wdata, req_br_j, branch_jump, 
+      rsel_d, reg_w, reg_wdata, req_alu, 
+      alu_data_0, alu_data_1, alu_op, req_br_j, branch_jump, 
       br_j_addr, req_mem, mem_addr, mem_store, mem_ren, 
       mem_wen, decode_bubble, execute_stall, memory_stall, 
       active_insn, exception, ex_cause
