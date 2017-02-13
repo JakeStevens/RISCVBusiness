@@ -28,12 +28,14 @@
 `ifndef RISC_MGMT_IF_VH
 `define RISC_MGMT_IF_VH
 
-`define N_RMGMT_EXTENSIONS 1
+`include "component_selection_defines.vh"
 
 interface risc_mgmt_if ();
 
   import rv32i_types_pkg::*;
   import alu_types_pkg::*;
+
+  word_t insn;
 
   // register signals
   logic req_reg_r;
@@ -43,7 +45,7 @@ interface risc_mgmt_if ();
   logic[4:0] rsel_d;
   word_t rdata_s_0, rdata_s_1;
   logic reg_w;
-  logic reg_wdata;
+  word_t reg_wdata;
 
   // ALU signals
   logic req_alu;
@@ -68,22 +70,26 @@ interface risc_mgmt_if ();
 
   // exception signals
   logic exception;
-  logic [`N_RMGMT_EXTENSIONS-1:0] ex_cause;
+  logic [`NUM_EXTENSIONS-1:0] ex_cause;
 
   modport ts_rmgmt (
-    input req_reg_r, req_reg_w, rsel_s_0, rsel_s_1, rsel_d, reg_w, reg_wdata, req_alu, 
-      alu_data_0, alu_data_1, alu_op, req_br_j, branch_jump, br_j_addr, req_mem, mem_addr,
-      mem_store, mem_ren, mem_wen, decode_bubble, execute_stall, memory_stall, active_insn, 
-      exception, ex_cause,
-    output rdata_s_0, rdata_s_1, alu_res, mem_load, mem_busy 
+    output req_reg_r, req_reg_w, rsel_s_0, rsel_s_1, 
+      rsel_d, reg_w, reg_wdata, req_alu, 
+      alu_data_0, alu_data_1, alu_op, req_br_j, branch_jump, 
+      br_j_addr, req_mem, mem_addr, mem_store, mem_ren, 
+      mem_wen, decode_bubble, execute_stall, memory_stall, 
+      active_insn, exception, ex_cause,
+    input rdata_s_0, rdata_s_1, alu_res, mem_load, mem_busy, insn 
   );
 
   modport ts_pipe (
-    input rdata_s_0, rdata_s_1, alu_res, mem_load, mem_busy,
-    output req_reg_r, req_reg_w, rsel_s_0, rsel_s_1, rsel_d, reg_w, reg_wdata, req_alu, 
-      alu_data_0, alu_data_1, alu_op, req_br_j, branch_jump, br_j_addr, req_mem, mem_addr,
-      mem_store, mem_ren, mem_wen, decode_bubble, execute_stall, memory_stall, active_insn, 
-      exception, ex_cause
+    output rdata_s_0, rdata_s_1, alu_res, mem_load, mem_busy, insn,
+    input req_reg_r, req_reg_w, rsel_s_0, rsel_s_1, 
+      rsel_d, reg_w, reg_wdata, req_alu, 
+      alu_data_0, alu_data_1, alu_op, req_br_j, branch_jump, 
+      br_j_addr, req_mem, mem_addr, mem_store, mem_ren, 
+      mem_wen, decode_bubble, execute_stall, memory_stall, 
+      active_insn, exception, ex_cause
   );
 
 endinterface

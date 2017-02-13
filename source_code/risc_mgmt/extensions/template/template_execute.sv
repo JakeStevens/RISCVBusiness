@@ -25,6 +25,7 @@
 `include "risc_mgmt_execute_if.vh"
 
 module template_execute (
+  input logic CLK, nRST,
   //risc mgmt connection
   risc_mgmt_execute_if.ext eif,
   //stage to stage connection

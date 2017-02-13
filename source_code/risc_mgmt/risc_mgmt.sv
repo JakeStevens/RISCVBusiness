@@ -28,6 +28,7 @@
 */
 
 `include "risc_mgmt_macros.vh"
+`include "component_selection_defines.vh"
 `include "risc_mgmt_if.vh"
 
 module risc_mgmt (
@@ -37,7 +38,7 @@ module risc_mgmt (
   import rv32i_types_pkg::*;
   import alu_types_pkg::*;
 
-  parameter   N_EXTENSIONS = `N_RMGMT_EXTENSIONS;
+  parameter   N_EXTENSIONS = `NUM_EXTENSIONS;
   localparam  N_EXT_BITS = $clog2(N_EXTENSIONS);
 
   /******************************************************************
@@ -45,6 +46,7 @@ module risc_mgmt (
   ******************************************************************/ 
 
   // Decode Stage Signals
+  word_t  [N_EXTENSIONS-1:0]        d_insn;
   logic   [N_EXTENSIONS-1:0]        d_insn_claim;
   logic   [N_EXTENSIONS-1:0]        d_bubble_req;  
   logic   [N_EXTENSIONS-1:0][4:0]   d_rsel_s_0;
@@ -57,7 +59,7 @@ module risc_mgmt (
   word_t  [N_EXTENSIONS-1:0]        e_rdata_s_0;
   word_t  [N_EXTENSIONS-1:0]        e_rdata_s_1;
   logic   [N_EXTENSIONS-1:0]        e_branch_jump;
-  logic   [N_EXTENSIONS-1:0]        e_br_j_addr;
+  word_t  [N_EXTENSIONS-1:0]        e_br_j_addr;
   word_t  [N_EXTENSIONS-1:0]        e_reg_wdata;
   logic   [N_EXTENSIONS-1:0]        e_reg_w;
   logic   [N_EXTENSIONS-1:0]        e_alu_access;
@@ -82,19 +84,23 @@ module risc_mgmt (
   /******************************************************************
   *   Extension connections
   *
-  *   This is where the ADD_EXTENSION macro should be used to connect
-  *   extensions to RISC-MGMT
-  *  
+  *   Modify RISC_MGMT_EXTENSIONS in component_selection_defines.vh 
+  *   to edit the included instruction extensions
+  *
   ******************************************************************/ 
   
-  `ADD_EXTENSION(template,0) 
+  `RISC_MGMT_EXTENSIONS
    
  
   /******************************************************************
   * Begin RISC-MGMT Logic 
   ******************************************************************/ 
   
+  /* Send instruction to extensions */
+  assign d_insn = {N_EXTENSIONS{rmif.insn}};
+
   /*  Extension Tokens  */
+
   integer i;
   logic [N_EXTENSIONS-1:0]  tokens;
   logic ext_is_active;
@@ -128,7 +134,7 @@ module risc_mgmt (
   */
   
   // Reg reads and decode
-  assign req_reg_r      = ext_is_active;
+  assign rmif.req_reg_r      = ext_is_active;
   assign rmif.rsel_s_0  = d_rsel_s_0[active_ext];
   assign rmif.rsel_s_1  = d_rsel_s_1[active_ext];
   assign rmif.rsel_d    = d_rsel_d[active_ext];
@@ -151,6 +157,7 @@ module risc_mgmt (
 
 
   /*  Branch Jump Control  */
+
   assign rmif.req_br_j    = e_branch_jump[active_ext] && ext_is_active;
   assign rmif.branch_jump = e_branch_jump[active_ext];
   assign rmif.br_j_addr   = e_br_j_addr[active_ext];

@@ -25,6 +25,7 @@
 `include "risc_mgmt_decode_if.vh"
 
 module template_decode (
+  input logic CLK, nRST,
   //risc mgmt connection
   risc_mgmt_decode_if.ext dif,
   //stage to stage connection

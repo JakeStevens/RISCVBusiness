@@ -5,6 +5,8 @@
 
 def configure(cnf):
   cnf.recurse(template)
+  cnf.recurse(test)
 
 def sim_source(cnf):
   cnf.recurse(template)
+  cnf.recurse(test)

@@ -40,4 +40,11 @@ localparam BUS_ENDIANNESS     = "big";
 `define BUS_INTERFACE_GENERIC 
 localparam BUS_INTERFACE_TYPE = "generic_bus_if";
 
+/* RISC-MGMT Configurations */
+`define NUM_EXTENSIONS 1
+// Add RISC-MGMT Extensions here: 
+// ADD_EXTENSION(<extension_name>,<extension_id>)
+`define RISC_MGMT_EXTENSIONS \
+  `ADD_EXTENSION(test,0)
+
 `endif // COMPONENT_SELECTION_DEFINES_VH
