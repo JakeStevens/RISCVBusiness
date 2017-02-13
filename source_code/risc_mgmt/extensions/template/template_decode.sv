@@ -32,6 +32,11 @@ module template_decode (
   output template_pkg::decode_execute_t idex
 );
 
+  parameter OPCODE = 7'b000_1011;
 
+  // prevent this extension from accessing core
+  assign dif.insn_claim = (dif.insn[6:0] == OPCODE);
+  assign dif.bubble_req = 1'b0;
+  
 
 endmodule

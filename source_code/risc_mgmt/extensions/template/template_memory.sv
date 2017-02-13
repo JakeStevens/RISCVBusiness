@@ -32,6 +32,11 @@ module template_memory (
   input template_pkg::execute_memory_t exmem
 );
 
-
+  //prevent this extension from accessing the core
+  assign mif.exception = 1'b0;
+  assign mif.busy = 1'b0;
+  assign mif.reg_w = 1'b0;
+  assign mif.mem_ren = 1'b0;
+  assign mif.mem_wen = 1'b0;
 
 endmodule

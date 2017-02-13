@@ -33,6 +33,11 @@ module template_execute (
   output  template_pkg::execute_memory_t exmem
 );
 
-
+  //prevent this extension from accessing the core
+  assign eif.exception = 1'b0;
+  assign eif.busy = 1'b0;
+  assign eif.reg_w = 1'b0;
+  assign eif.branch_jump = 1'b0;
+  assign eif.alu_access = 1'b0;
 
 endmodule

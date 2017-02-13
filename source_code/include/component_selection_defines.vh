@@ -44,7 +44,8 @@ localparam BUS_INTERFACE_TYPE = "generic_bus_if";
 `define NUM_EXTENSIONS 1
 // Add RISC-MGMT Extensions here: 
 // ADD_EXTENSION(<extension_name>,<extension_id>)
+// ADD_EXTENSION_WITH_OPCODE(<extension_name>,<extension_id>,<extension_opcode>)
 `define RISC_MGMT_EXTENSIONS \
-  `ADD_EXTENSION(test,0)
+  `ADD_EXTENSION_WITH_OPCODE(template,1,7'b000_1011)
 
 `endif // COMPONENT_SELECTION_DEFINES_VH

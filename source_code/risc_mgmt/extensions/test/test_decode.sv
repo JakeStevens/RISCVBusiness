@@ -32,9 +32,9 @@ module test_decode (
   output test_pkg::decode_execute_t idex
 );
 
+  parameter OPCODE = 7'b000_1011;
+  
   import test_pkg::*;
-
-  localparam OPCODE = 7'b000_1011;
 
   test_insn_t insn;
   
