@@ -230,6 +230,10 @@ module tb_risc_mgmt();
     assert (rmif.req_mem == 0)    else $error("req_mem incorrect on NOP\n");
     assert (rmif.exception == 0)  else $error("exception incorrect on NOP)\n");
 
+    @(posedge CLK);
+    insn.opcode = 7'b000_1010;
+    @(posedge CLK);
+
     $display("Testing Finished\n");
     $finish;
   end
