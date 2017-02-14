@@ -14,7 +14,7 @@
 *   limitations under the License.
 *
 *
-*   Filename:     load_byte_signed.S
+*   Filename:     store_half.S
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
