@@ -7,6 +7,8 @@ meminit.ver
 verification/asm-tests/RV32I/*.elf
 verification/asm-tests/RV32I/*.log
 verification/asm-tests/RV32I/*.hex
+# config files are auto-generated
+source_code/include/component_selection_defines.vh
 # proprietary files
 source_code/ram/altera_mf.v
 source_code/ram/altera_mf.sv

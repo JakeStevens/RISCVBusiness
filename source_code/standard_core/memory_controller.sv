@@ -186,19 +186,8 @@ module memory_controller (
       $error("Configurable Component: Invalid bus endianness");
     end
   endgenerate
- 
-  /*  align the byte enable with the data being selected 
-      based on the byte addressing */
-  always_comb begin
-    casez (d_gen_bus_if.byte_en)
-      4'b1111, 4'b0011, 4'b0001 : out_gen_bus_if.wdata = wdata;      
-      4'b0010                   : out_gen_bus_if.wdata = wdata << 8;
-      4'b0100, 4'b1100          : out_gen_bus_if.wdata = wdata << 16;
-      4'b1000                   : out_gen_bus_if.wdata = wdata << 24;
-      default                   : out_gen_bus_if.wdata = wdata;
-    endcase
-  end
 
+  assign out_gen_bus_if.wdata = wdata;
   assign d_gen_bus_if.rdata   = rdata;
   assign i_gen_bus_if.rdata   = rdata;
 endmodule
