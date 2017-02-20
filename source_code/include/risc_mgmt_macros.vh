@@ -71,7 +71,6 @@
   assign e_reg_w[EXT_ID]              = ``EXT_NAME``_exif.reg_w;                                                      \
   assign ``EXT_NAME``_exif.rdata_s_0  = e_rdata_s_0[EXT_ID];                                                          \
   assign ``EXT_NAME``_exif.rdata_s_1  = e_rdata_s_1[EXT_ID];                                                          \
-  assign ``EXT_NAME``_exif.alu_res    = e_alu_res[EXT_ID];                                                            \
   // memory stage connections to RISC-MGMT  \
   assign m_exception[EXT_ID]          = ``EXT_NAME``_memif.exception;                                                 \
   assign m_busy[EXT_ID]               = ``EXT_NAME``_memif.busy;                                                      \
@@ -85,7 +84,7 @@
   assign ``EXT_NAME``_memif.mem_load  = m_mem_load[EXT_ID];
 
 
-`define ADD_EXTENSION_WITH_OPCODE(EXT_NAME,EXT_ID,EXT_OPCODE)                                                                     \
+`define ADD_EXTENSION_WITH_OPCODE(EXT_NAME,EXT_ID,EXT_OPCODE)                                                         \
   // instantiate stage to stage interfaces  \
   ``EXT_NAME``_pkg::decode_execute_t ``EXT_NAME``_idex;                                                               \
   ``EXT_NAME``_pkg::execute_memory_t ``EXT_NAME``_exmem;                                                              \
@@ -111,13 +110,8 @@
   assign e_br_j_addr[EXT_ID]          = ``EXT_NAME``_exif.br_j_addr;                                                  \
   assign e_reg_wdata[EXT_ID]          = ``EXT_NAME``_exif.reg_wdata;                                                  \
   assign e_reg_w[EXT_ID]              = ``EXT_NAME``_exif.reg_w;                                                      \
-  assign e_alu_access[EXT_ID]         = ``EXT_NAME``_exif.alu_access;                                                 \
-  assign e_alu_data_0[EXT_ID]         = ``EXT_NAME``_exif.alu_data_0;                                                 \
-  assign e_alu_data_1[EXT_ID]         = ``EXT_NAME``_exif.alu_data_1;                                                 \
-  assign e_alu_op[EXT_ID]             = ``EXT_NAME``_exif.alu_op;                                                     \
   assign ``EXT_NAME``_exif.rdata_s_0  = e_rdata_s_0[EXT_ID];                                                          \
   assign ``EXT_NAME``_exif.rdata_s_1  = e_rdata_s_1[EXT_ID];                                                          \
-  assign ``EXT_NAME``_exif.alu_res    = e_alu_res[EXT_ID];                                                            \
   // memory stage connections to RISC-MGMT  \
   assign m_exception[EXT_ID]          = ``EXT_NAME``_memif.exception;                                                 \
   assign m_busy[EXT_ID]               = ``EXT_NAME``_memif.busy;                                                      \
