@@ -36,7 +36,6 @@ module risc_mgmt (
   risc_mgmt_if.ts_rmgmt rmif 
 );
   import rv32i_types_pkg::*;
-  import alu_types_pkg::*;
 
   parameter   N_EXTENSIONS = `NUM_EXTENSIONS;
   localparam  N_EXT_BITS = $clog2(N_EXTENSIONS);
@@ -62,11 +61,6 @@ module risc_mgmt (
   word_t  [N_EXTENSIONS-1:0]        e_br_j_addr;
   word_t  [N_EXTENSIONS-1:0]        e_reg_wdata;
   logic   [N_EXTENSIONS-1:0]        e_reg_w;
-  logic   [N_EXTENSIONS-1:0]        e_alu_access;
-  word_t  [N_EXTENSIONS-1:0]        e_alu_data_0; 
-  word_t  [N_EXTENSIONS-1:0]        e_alu_data_1;
-  word_t  [N_EXTENSIONS-1:0]        e_alu_res;
-  aluop_t [N_EXTENSIONS-1:0]        e_alu_op;
 
   //Memory Stage Signals
   logic   [N_EXTENSIONS-1:0]        m_exception; 
@@ -146,16 +140,7 @@ module risc_mgmt (
   assign rmif.reg_w     = e_reg_w[active_ext] || m_reg_w[active_ext];
   assign rmif.reg_wdata = e_reg_w[active_ext] ? e_reg_wdata[active_ext] : m_reg_wdata[active_ext];
 
-
-  /*  ALU Access Control  */
-
-  assign rmif.req_alu     = e_alu_access[active_ext] && ext_is_active;
-  assign rmif.alu_data_0  = e_alu_data_0[active_ext];
-  assign rmif.alu_data_1  = e_alu_data_1[active_ext];
-  assign rmif.alu_op      = e_alu_op[active_ext];
-  assign e_alu_res        = {N_EXTENSIONS{rmif.alu_res}}; 
-
-
+  
   /*  Branch Jump Control  */
 
   assign rmif.req_br_j    = e_branch_jump[active_ext] && ext_is_active;

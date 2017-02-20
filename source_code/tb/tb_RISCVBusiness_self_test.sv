@@ -27,6 +27,7 @@
 
 `include "ram_if.vh"
 `include "generic_bus_if.vh"
+`include "component_selection_defines.vh"
 
 `define OUTPUT_FILE_NAME "cpu.hex"
 `define STATS_FILE_NAME "stats.txt"

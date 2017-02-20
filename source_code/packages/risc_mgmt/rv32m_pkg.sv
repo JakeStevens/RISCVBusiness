@@ -14,62 +14,50 @@
 *   limitations under the License.
 *
 *
-*   Filename:     template_pkg.sv
+*   Filename:     rv32m_pkg.sv
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 02/07/2017
-*   Description:  ISA extension used for the RISC-MGMT testbench 
+*   Description:  Types for the RV32M standard extension 
 */
 
-`ifndef TEST_PKG_SV
-`define TEST_PKG_SV
+`ifndef RV32M_PKG_SV
+`define RV32M_PKG_SV
 
-package test_pkg;
+package rv32m_pkg;
+
+  localparam RV32M_OPCODE = 7'b0110011;
+
+  typedef struct packed {
+    logic [6:0] ignored;
+    logic [4:0] rs2;
+    logic [4:0] rs1;
+    logic [2:0] funct;
+    logic [4:0] rd;
+    logic [6:0] opcode;
+  } rv32m_insn_t;
 
   // Interface between the decode and execute stage
   // This must be named "decode_execute_t"
   typedef struct packed {
-    logic rtype;
-    logic rtype_stall;
-    logic br_j;
-    logic mem_lw;
-    logic mem_sw;
-    logic exception;
-    logic nop;
-    logic [8:0] imm;
+    logic mul;
+    logic div;
+    logic rem;
+    logic usign_usign;
+    logic sign_sign;
+    logic sign_usign;
+    logic start;
   } decode_execute_t;
 
   // Interface between the execute and memory stage
   // This must be named "execute_memory_t"
   typedef struct packed {
-    logic mem_lw;
-    logic mem_sw;  
-    logic nop;  
-    logic exception;
-    logic [31:0] mem_addr;
-    logic [31:0] mem_store;
+    logic signal;
   } execute_memory_t;
 
-  typedef enum logic [3:0] {
-    RTYPE,
-    RTYPE_STALL_5, 
-    BR_J,
-    MEM_LOAD,
-    MEM_STORE,
-    EXCEPTION,
-    NOP
-  } test_funct_t;
-
-  typedef struct packed {
-    logic [5:0]   imm;
-    test_funct_t  funct;
-    logic [4:0]   rs_d;
-    logic [4:0]   rs_0;
-    logic [4:0]   rs_1;  
-    logic [6:0]   opcode;
-  } test_insn_t;
+  
 
 endpackage
 
-`endif //TEST_PKG_SV
+`endif //RV32M_PKG_SV

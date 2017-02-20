@@ -14,29 +14,30 @@
 *   limitations under the License.
 *
 *
-*   Filename:     template_execute.sv
+*   Filename:     rv32n_memory.sv
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 02/07/2017
-*   Description:  <add description here>
+*   Description:  Memory stage for standard RV32M extension
+*                 This stage will do nothing. 
 */
 
-`include "risc_mgmt_execute_if.vh"
+`include "risc_mgmt_memory_if.vh"
 
-module template_execute (
+module rv32m_memory (
   input logic CLK, nRST,
   //risc mgmt connection
-  risc_mgmt_execute_if.ext eif,
+  risc_mgmt_memory_if.ext mif,
   //stage to stage connection
-  input   template_pkg::decode_execute_t idex,
-  output  template_pkg::execute_memory_t exmem
+  input rv32m_pkg::execute_memory_t exmem
 );
 
   //prevent this extension from accessing the core
-  assign eif.exception = 1'b0;
-  assign eif.busy = 1'b0;
-  assign eif.reg_w = 1'b0;
-  assign eif.branch_jump = 1'b0;
+  assign mif.exception = 1'b0;
+  assign mif.busy = 1'b0;
+  assign mif.reg_w = 1'b0;
+  assign mif.mem_ren = 1'b0;
+  assign mif.mem_wen = 1'b0;
 
 endmodule

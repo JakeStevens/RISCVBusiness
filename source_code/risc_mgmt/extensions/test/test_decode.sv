@@ -49,7 +49,6 @@ module test_decode (
   /*  decode execute connection */
   assign idex.rtype       = (insn.funct == RTYPE);
   assign idex.rtype_stall = (insn.funct == RTYPE_STALL_5);
-  assign idex.rtype_alu   = (insn.funct == RTYPE_ALU);
   assign idex.br_j        = (insn.funct == BR_J);
   assign idex.mem_lw      = (insn.funct == MEM_LOAD);
   assign idex.mem_sw      = (insn.funct == MEM_STORE);

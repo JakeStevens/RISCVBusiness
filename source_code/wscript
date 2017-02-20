@@ -50,3 +50,11 @@ def configure(ctx):
       tb = 'tb_risc_mgmt',
       tb_includes = ['include']
     )
+    ctx.SFFUnits.add('shift_add_multiplier',
+      includes = ['include'],
+      src_dir = ['risc_mgmt'], 
+      use = ['RISCVBusiness_packages'],
+      tb_use = ['RISCVBusiness_packages'],
+      tb = 'tb_shift_add_multiplier',
+      tb_includes = ['include']
+    )

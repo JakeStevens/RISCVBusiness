@@ -33,8 +33,6 @@ module test_execute (
   output  test_pkg::execute_memory_t exmem
 );
 
-  import alu_types_pkg::*;
-
   logic stall_insn;
   logic stall_complete;
   logic [3:0] stall_count;
@@ -56,10 +54,6 @@ module test_execute (
     eif.reg_wdata   = 0;
     eif.branch_jump = 0;
     eif.br_j_addr   = 0;
-    eif.alu_access  = 0;
-    eif.alu_data_0  = 0;
-    eif.alu_data_1  = 0;
-    eif.alu_op      = aluop_t'(0);
     stall_insn      = 0;
 
     if          (idex.rtype) begin
@@ -70,13 +64,6 @@ module test_execute (
       eif.reg_w =  1;
       eif.busy  = ~stall_complete;
       eif.reg_wdata = eif.rdata_s_0 + eif.rdata_s_1 + {{24{1'b0}}, idex.imm};
-    end else if (idex.rtype_alu) begin
-      eif.reg_w = 1;
-      eif.alu_access = 1;
-      eif.alu_op = ALU_ADD;
-      eif.alu_data_0 = eif.rdata_s_0;
-      eif.alu_data_1 = eif.rdata_s_1;
-      eif.reg_wdata = eif.alu_res;
     end else if (idex.br_j) begin
       eif.branch_jump = 1;
       eif.br_j_addr = eif.rdata_s_0;

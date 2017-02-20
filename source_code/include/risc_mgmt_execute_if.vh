@@ -27,7 +27,6 @@
 
 interface risc_mgmt_execute_if ();
   import rv32i_types_pkg::*;
-  import alu_types_pkg::*;
 
   //general execute stage signals
   logic exception, busy, reg_w;
@@ -37,21 +36,14 @@ interface risc_mgmt_execute_if ();
   logic branch_jump;
   word_t br_j_addr;
 
-  //ALU access signals
-  logic alu_access;
-  word_t alu_data_0, alu_data_1, alu_res;
-  aluop_t alu_op;
-
   modport rmgmt (
     input exception, busy, reg_w, reg_wdata, branch_jump, br_j_addr,
-    alu_access, alu_data_0, alu_data_1, alu_op,
-    output rdata_s_0, rdata_s_1, alu_res
+    output rdata_s_0, rdata_s_1
   );
 
   modport ext (    
-    input rdata_s_0, rdata_s_1, alu_res,
-    output exception, busy, reg_w, reg_wdata, branch_jump, br_j_addr,
-    alu_access, alu_data_0, alu_data_1, alu_op
+    input rdata_s_0, rdata_s_1, 
+    output exception, busy, reg_w, reg_wdata, branch_jump, br_j_addr
   );  
 
 endinterface

@@ -14,29 +14,50 @@
 *   limitations under the License.
 *
 *
-*   Filename:     template_execute.sv
+*   Filename:     multiply.S
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
-*   Date Created: 02/07/2017
-*   Description:  <add description here>
+*   Date Created: 02/17/2017
+*   Description:  multiply test case
 */
 
-`include "risc_mgmt_execute_if.vh"
+#include "riscv_test.h"
 
-module template_execute (
-  input logic CLK, nRST,
-  //risc mgmt connection
-  risc_mgmt_execute_if.ext eif,
-  //stage to stage connection
-  input   template_pkg::decode_execute_t idex,
-  output  template_pkg::execute_memory_t exmem
-);
+RVTEST_DATA_DUMP_BEGIN
 
-  //prevent this extension from accessing the core
-  assign eif.exception = 1'b0;
-  assign eif.busy = 1'b0;
-  assign eif.reg_w = 1'b0;
-  assign eif.branch_jump = 1'b0;
+RVTEST_INTVEC_USER_BEGIN
+  nop
+RVTEST_INTVEC_SUPER_BEGIN
+  nop
+RVTEST_INTVEC_HYPER_BEGIN
+  nop
+RVTEST_INTVEC_MACH_BEGIN
+  eret
 
-endmodule
+RVTEST_CODE_BEGIN
+
+main:
+  la x1, tdat0
+  la x2, tdat1
+  mul x3, x1, x2
+  mulh x4, x1, x2
+  mulhsu x5, x1, x2
+  mulhu x6, x1, x2
+  la x7, tdat1
+  sw x3, 4(x7)
+  sw x4, 8(x7)
+  sw x5, 12(x7)
+  sw x6, 16(x7)
+
+RVTEST_CODE_END
+
+.data
+#test data goes here
+tdat0:  .word 0xf00ff00f
+tdat1:  .word 0x00550000
+
+RVTEST_DATA_DUMP_END
+
+
+
