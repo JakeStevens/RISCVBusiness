@@ -28,14 +28,15 @@
 package rv32m_pkg;
 
   localparam RV32M_OPCODE = 7'b0110011;
+  localparam RV32M_OPCODE_MINOR = 7'b0000001;
 
   typedef struct packed {
-    logic [6:0] ignored;
+    logic [6:0] opcode_minor;
     logic [4:0] rs2;
     logic [4:0] rs1;
     logic [2:0] funct;
     logic [4:0] rd;
-    logic [6:0] opcode;
+    logic [6:0] opcode_major;
   } rv32m_insn_t;
 
   // Interface between the decode and execute stage

@@ -40,7 +40,7 @@ module rv32m_decode (
   
   assign insn = rv32m_insn_t'(dif.insn);
 
-  assign dif.insn_claim = (insn.opcode == OPCODE);
+  assign dif.insn_claim = (insn.opcode_major == OPCODE) && (insn.opcode_minor == RV32M_OPCODE_MINOR);
   assign dif.rsel_s_0 = insn.rs1;
   assign dif.rsel_s_1 = insn.rs2;
   assign dif.rsel_d   = insn.rd;

@@ -30,7 +30,7 @@
 
 `define OUTPUT_FILE_NAME "cpu.hex"
 `define STATS_FILE_NAME "stats.txt"
-`define CLK_TIMEOUT 10000
+`define RVB_CLK_TIMEOUT 10000
 
 module tb_RISCVBusiness ();
    
@@ -145,7 +145,7 @@ module tb_RISCVBusiness ();
 
     nRST = 1;
     
-    while (halt == 0 && clk_count != `CLK_TIMEOUT) begin
+    while (halt == 0 && clk_count != `RVB_CLK_TIMEOUT) begin
       @(posedge CLK);
       clk_count++;
       if (ram_if.addr == 16'h0000 & !ram_if.busy & ram_if.wen)
@@ -155,7 +155,7 @@ module tb_RISCVBusiness ();
     dump_stats();
     dump_ram();
 
-    if (clk_count == `CLK_TIMEOUT) 
+    if (clk_count == `RVB_CLK_TIMEOUT) 
       $display("ERROR: Test timed out");
 
     $finish;

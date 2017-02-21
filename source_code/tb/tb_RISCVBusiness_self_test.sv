@@ -31,7 +31,7 @@
 
 `define OUTPUT_FILE_NAME "cpu.hex"
 `define STATS_FILE_NAME "stats.txt"
-`define CLK_TIMEOUT 1000000
+`define RVBSELF_CLK_TIMEOUT 1000000
 
 module tb_RISCVBusiness_self_test ();
    
@@ -143,7 +143,7 @@ module tb_RISCVBusiness_self_test ();
 
     nRST = 1;
     
-    while (halt == 0 && clk_count != `CLK_TIMEOUT) begin
+    while (halt == 0 && clk_count != `RVBSELF_CLK_TIMEOUT) begin
       @(posedge CLK);
       clk_count++;
       if(ram_if.addr == 16'h0000 & !ram_if.busy & ram_if.wen) begin
@@ -155,7 +155,7 @@ module tb_RISCVBusiness_self_test ();
     dump_ram();
 
     // Check Register 28 to see if test passed or failed
-    if (clk_count == `CLK_TIMEOUT)
+    if (clk_count == `RVBSELF_CLK_TIMEOUT)
       $display("ERROR: Test timed out");
     else if(DUT.pipeline.execute_stage_i.rf.registers[28] != 32'h1)
       $display("ERROR: Test %0d did not pass",
