@@ -56,8 +56,8 @@ module rv32m_decode (
                             || (insn.funct == 3'b111); 
   assign idex.sign_sign   = (insn.funct == 3'b001) || (insn.funct == 3'b100) 
                             || (insn.funct == 3'b110) || (insn.funct == 3'b000);
-  assign idex.sign_unsign = insn.funct == 3'b010;
+  assign idex.sign_usign = insn.funct == 3'b010;
 
-  assign lower_word = |insn.funct[1:0]; // only valid for mul 
+  assign idex.lower_word = ~(|insn.funct[1:0]); // only valid for mul 
 
 endmodule

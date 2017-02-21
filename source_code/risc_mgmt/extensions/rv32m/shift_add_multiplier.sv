@@ -36,15 +36,16 @@ module shift_add_multiplier # (
   output logic finished
 );
 
-  logic [N-1:0] multiplier_reg, multiplicand_reg, multiplier_ext, multiplicand_ext; 
+  logic [(N*2)-1:0] multiplier_reg, multiplicand_reg;
+  logic [(N*2)-1:0] multiplier_ext, multiplicand_ext; 
   logic [(N*2)-1:0] partial_product;
   logic mult_complete, adjust_product;
 
   assign mult_complete    = !(|multiplier_reg);
   assign adjust_product   = (is_signed[0] & multiplier[N-1]) ^ (is_signed[1] & multiplicand[N-1]);
-  assign partial_product  = multiplier_reg[0] ? {{(N-1){1'b0}}, multiplicand_reg}: '0;
-  assign multiplier_ext   = (~multiplier) + 1;
-  assign multiplicand_ext   = (~multiplicand) + 1;
+  assign partial_product  = multiplier_reg[0] ? multiplicand_reg : '0;
+  assign multiplier_ext   = (~{{N{multiplier[N-1]}},multiplier}) + 1;
+  assign multiplicand_ext = (~{{N{multiplicand[N-1]}},multiplicand}) + 1;
 
   always_ff @ (posedge CLK, negedge nRST) begin
     if (~nRST) 
@@ -60,12 +61,11 @@ module shift_add_multiplier # (
       multiplicand_reg  <= '0;
       multiplier_reg    <= '0;
       product           <= '0;
-    end
-    else if(start) begin
-      multiplicand_reg  <= (is_signed[1] && multiplicand[N-1]) ? multiplicand_ext : multiplicand; 
-      multiplier_reg    <= (is_signed[0] && multiplier[N-1]) ? multiplier_ext : multiplier;
+    end else if(start) begin
+      multiplicand_reg  <= (is_signed[1] && multiplicand[N-1]) ? multiplicand_ext : {{N{1'b0}}, multiplicand}; 
+      multiplier_reg    <= (is_signed[0] && multiplier[N-1]) ? multiplier_ext : {{N{1'b0}}, multiplier};
       product           <= '0;
-    end else if (mult_complete) begin // adjust sign on product
+    end else if (mult_complete & ~finished) begin // adjust sign on product
       multiplicand_reg  <= multiplicand_reg; 
       multiplier_reg    <= multiplier_reg;
       product           <= adjust_product ? (~product)+1 : product;

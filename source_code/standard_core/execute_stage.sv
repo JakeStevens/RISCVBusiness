@@ -31,6 +31,7 @@
 `include "generic_bus_if.vh"
 `include "alu_if.vh"
 `include "prv_pipeline_if.vh"
+`include "risc_mgmt_if.vh"
 
 module execute_stage(
   input logic CLK, nRST,
@@ -39,7 +40,8 @@ module execute_stage(
   predictor_pipeline_if.update predict_if,
   generic_bus_if.cpu dgen_bus_if,
   prv_pipeline_if.pipe  prv_pipe_if,
-  output halt 
+  output halt,
+  risc_mgmt_if.ts_execute rm_if
 );
 
   import rv32i_types_pkg::*;
@@ -76,6 +78,15 @@ module execute_stage(
     .ext_out(dload_ext)
   );
 
+
+  /*******************************************************
+  * MISC RISC-MGMT Logic
+  *******************************************************/
+
+  assign rm_if.rdata_s_0 = rf_if.rs1_data;
+  assign rm_if.rdata_s_1 = rf_if.rs2_data;
+
+
   /*******************************************************
   *** Choose the Endianness Coming into the processor
   *******************************************************/
@@ -95,6 +106,7 @@ module execute_stage(
   endgenerate
 
   assign cu_if.instr = fetch_ex_if.fetch_ex_reg.instr;
+  assign rm_if.insn  = fetch_ex_if.fetch_ex_reg.instr;
 
   /*******************************************************
   *** Sign Extensions 
@@ -147,20 +159,28 @@ module execute_stage(
   end
 
   always_comb begin
-    case(cu_if.w_sel)
-      3'd0    : rf_if.w_data = dload_ext;
-      3'd1    : rf_if.w_data = fetch_ex_if.fetch_ex_reg.pc4;
-      3'd2    : rf_if.w_data = cu_if.imm_U;
-      3'd3    : rf_if.w_data = alu_if.port_out;
-      3'd4    : rf_if.w_data = prv_pipe_if.rdata;
-      default : rf_if.w_data = '0; 
-    endcase
+    if(rm_if.req_reg_w) begin
+      rf_if.w_data = rm_if.reg_wdata;
+    end else begin
+      case(cu_if.w_sel)
+        3'd0    : rf_if.w_data = dload_ext;
+        3'd1    : rf_if.w_data = fetch_ex_if.fetch_ex_reg.pc4;
+        3'd2    : rf_if.w_data = cu_if.imm_U;
+        3'd3    : rf_if.w_data = alu_if.port_out;
+        3'd4    : rf_if.w_data = prv_pipe_if.rdata;
+        default : rf_if.w_data = '0; 
+      endcase
+    end
   end
 
-  assign rf_if.wen = cu_if.wen & (~hazard_if.if_ex_stall | hazard_if.npc_sel) & ~(cu_if.dren & mal_addr); 
+  assign rf_if.wen = (cu_if.wen | (rm_if.req_reg_w & rm_if.reg_w)) & (~hazard_if.if_ex_stall | hazard_if.npc_sel) & 
+                    ~(cu_if.dren & mal_addr); 
   /*******************************************************
   *** Branch Target Resolution and Associated Logic 
   *******************************************************/
+
+  //TODO: RISC-MGMT tie in to branch/jump logic
+
   word_t resolved_addr;
   assign branch_if.rs1_data    = rf_if.rs1_data;
   assign branch_if.rs2_data    = rf_if.rs2_data;
@@ -180,6 +200,9 @@ module execute_stage(
   /*******************************************************
   *** Data Ram Interface Logic 
   *******************************************************/
+
+  //TODO: RISC-MGMT memory tie in
+
   logic [1:0] byte_offset;
 
   assign dgen_bus_if.ren           = cu_if.dren & ~mal_addr;
@@ -276,7 +299,7 @@ module execute_stage(
   end
 
   //Send exceptions to Hazard Unit
-  assign hazard_if.illegal_insn = cu_if.illegal_insn | prv_pipe_if.invalid_csr;
+  assign hazard_if.illegal_insn = (cu_if.illegal_insn & ~rm_if.ex_token) | prv_pipe_if.invalid_csr;
   assign hazard_if.fault_l      = 1'b0; 
   assign hazard_if.mal_l        = cu_if.dren & mal_addr;
   assign hazard_if.fault_s      = 1'b0;

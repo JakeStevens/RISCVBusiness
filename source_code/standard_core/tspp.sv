@@ -27,12 +27,14 @@
 `include "predictor_pipeline_if.vh"
 `include "generic_bus_if.vh"
 `include "prv_pipeline_if.vh"
+`include "risc_mgmt_if.vh"
 
 module tspp (
   input logic CLK, nRST,
   output logic halt,
   generic_bus_if.cpu igen_bus_if,
-  generic_bus_if.cpu dgen_bus_if
+  generic_bus_if.cpu dgen_bus_if,
+  risc_mgmt_if rm_if
 );
   //interface instantiations
   fetch_execute_if      fetch_ex_if();

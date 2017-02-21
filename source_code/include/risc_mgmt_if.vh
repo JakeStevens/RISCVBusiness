@@ -61,6 +61,7 @@ interface risc_mgmt_if ();
   logic execute_stall;
   logic memory_stall;
   logic active_insn; 
+  logic ex_token;
 
   // exception signals
   logic exception;
@@ -71,7 +72,7 @@ interface risc_mgmt_if ();
       rsel_d, reg_w, reg_wdata, req_br_j, branch_jump, 
       br_j_addr, req_mem, mem_addr, mem_store, mem_ren, 
       mem_wen, decode_bubble, execute_stall, memory_stall, 
-      active_insn, exception, ex_cause,
+      active_insn, exception, ex_cause, ex_token,
     input rdata_s_0, rdata_s_1, mem_load, mem_busy, insn 
   );
 
@@ -81,6 +82,19 @@ interface risc_mgmt_if ();
       rsel_d, reg_w, reg_wdata, req_br_j, branch_jump, 
       br_j_addr, req_mem, mem_addr, mem_store, mem_ren, 
       mem_wen, decode_bubble, execute_stall, memory_stall, 
+      active_insn, exception, ex_cause
+  );
+
+  modport ts_execute (
+    output rdata_s_0, rdata_s_1, mem_load, mem_busy, insn,
+    input req_reg_r, req_reg_w, rsel_s_0, rsel_s_1,
+      rsel_d, reg_w, reg_wdata, req_br_j, branch_jump,
+      br_j_addr, req_mem, mem_addr, mem_store, mem_ren,
+      mem_wen, ex_token 
+  );
+
+  modport ts_hazard (
+    input decode_bubble, execute_stall, memory_stall,
       active_insn, exception, ex_cause
   );
 

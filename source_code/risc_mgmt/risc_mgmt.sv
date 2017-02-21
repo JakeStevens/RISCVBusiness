@@ -33,7 +33,7 @@
 
 module risc_mgmt (
   input logic CLK, nRST,
-  risc_mgmt_if.ts_rmgmt rmif 
+  risc_mgmt_if.ts_rmgmt rm_if 
 );
   import rv32i_types_pkg::*;
 
@@ -91,7 +91,7 @@ module risc_mgmt (
   ******************************************************************/ 
   
   /* Send instruction to extensions */
-  assign d_insn = {N_EXTENSIONS{rmif.insn}};
+  assign d_insn = {N_EXTENSIONS{rm_if.insn}};
 
   /*  Extension Tokens  */
 
@@ -102,7 +102,9 @@ module risc_mgmt (
 
   assign tokens           = d_insn_claim;
   assign ext_is_active    = |tokens;
-  assign rmif.active_insn = ext_is_active;
+  assign rm_if.active_insn = ext_is_active;
+
+  assign rm_if.ex_token = ext_is_active;
 
   always_comb begin
     active_ext = 0;
@@ -118,9 +120,9 @@ module risc_mgmt (
   *  All pipeline control is handled in standard core automatically
   *  Stalls will be forwarded to the standard core
   */
-  assign rmif.decode_bubble   = d_bubble_req[active_ext] && ext_is_active;
-  assign rmif.execute_stall   = e_busy[active_ext] && ext_is_active;
-  assign rmif.memory_stall    = m_busy[active_ext] && ext_is_active; 
+  assign rm_if.decode_bubble   = d_bubble_req[active_ext] && ext_is_active;
+  assign rm_if.execute_stall   = e_busy[active_ext] && ext_is_active;
+  assign rm_if.memory_stall    = m_busy[active_ext] && ext_is_active; 
 
 
   /* Registerfile / Forwarding Logic
@@ -128,40 +130,40 @@ module risc_mgmt (
   */
   
   // Reg reads and decode
-  assign rmif.req_reg_r      = ext_is_active;
-  assign rmif.rsel_s_0  = d_rsel_s_0[active_ext];
-  assign rmif.rsel_s_1  = d_rsel_s_1[active_ext];
-  assign rmif.rsel_d    = d_rsel_d[active_ext];
-  assign e_rdata_s_0    = {N_EXTENSIONS{rmif.rdata_s_0}};
-  assign e_rdata_s_1    = {N_EXTENSIONS{rmif.rdata_s_1}};
+  assign rm_if.req_reg_r      = ext_is_active;
+  assign rm_if.rsel_s_0  = d_rsel_s_0[active_ext];
+  assign rm_if.rsel_s_1  = d_rsel_s_1[active_ext];
+  assign rm_if.rsel_d    = d_rsel_d[active_ext];
+  assign e_rdata_s_0    = {N_EXTENSIONS{rm_if.rdata_s_0}};
+  assign e_rdata_s_1    = {N_EXTENSIONS{rm_if.rdata_s_1}};
 
   // Reg Writeback
-  assign rmif.req_reg_w = (e_reg_w[active_ext] || m_reg_w[active_ext]) && ext_is_active;
-  assign rmif.reg_w     = e_reg_w[active_ext] || m_reg_w[active_ext];
-  assign rmif.reg_wdata = e_reg_w[active_ext] ? e_reg_wdata[active_ext] : m_reg_wdata[active_ext];
+  assign rm_if.req_reg_w = (e_reg_w[active_ext] || m_reg_w[active_ext]) && ext_is_active;
+  assign rm_if.reg_w     = e_reg_w[active_ext] || m_reg_w[active_ext];
+  assign rm_if.reg_wdata = e_reg_w[active_ext] ? e_reg_wdata[active_ext] : m_reg_wdata[active_ext];
 
   
   /*  Branch Jump Control  */
 
-  assign rmif.req_br_j    = e_branch_jump[active_ext] && ext_is_active;
-  assign rmif.branch_jump = e_branch_jump[active_ext];
-  assign rmif.br_j_addr   = e_br_j_addr[active_ext];
+  assign rm_if.req_br_j    = e_branch_jump[active_ext] && ext_is_active;
+  assign rm_if.branch_jump = e_branch_jump[active_ext];
+  assign rm_if.br_j_addr   = e_br_j_addr[active_ext];
 
 
   /*  Memory Access Control  */
 
-  assign rmif.req_mem   = (m_mem_ren[active_ext] || m_mem_wen[active_ext]) && ext_is_active;
-  assign rmif.mem_addr  = m_mem_addr[active_ext];
-  assign rmif.mem_store = m_mem_store[active_ext];
-  assign rmif.mem_ren   = m_mem_ren[active_ext];
-  assign rmif.mem_wen   = m_mem_wen[active_ext];
-  assign m_mem_busy     = {N_EXTENSIONS{rmif.mem_busy}};
-  assign m_mem_load     = {N_EXTENSIONS{rmif.mem_load}};
+  assign rm_if.req_mem   = (m_mem_ren[active_ext] || m_mem_wen[active_ext]) && ext_is_active;
+  assign rm_if.mem_addr  = m_mem_addr[active_ext];
+  assign rm_if.mem_store = m_mem_store[active_ext];
+  assign rm_if.mem_ren   = m_mem_ren[active_ext];
+  assign rm_if.mem_wen   = m_mem_wen[active_ext];
+  assign m_mem_busy     = {N_EXTENSIONS{rm_if.mem_busy}};
+  assign m_mem_load     = {N_EXTENSIONS{rm_if.mem_load}};
    
 
   /*  Exception Reporting  */
-  assign rmif.exception  = (e_exception[active_ext] || m_exception[active_ext]) && ext_is_active;
-  assign rmif.ex_cause   = active_ext;
+  assign rm_if.exception  = (e_exception[active_ext] || m_exception[active_ext]) && ext_is_active;
+  assign rm_if.ex_cause   = active_ext;
    
 
 endmodule

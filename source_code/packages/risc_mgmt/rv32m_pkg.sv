@@ -47,6 +47,7 @@ package rv32m_pkg;
     logic usign_usign;
     logic sign_sign;
     logic sign_usign;
+    logic lower_word;
     logic start;
   } decode_execute_t;
 

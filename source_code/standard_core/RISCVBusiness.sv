@@ -25,6 +25,7 @@
 `include "generic_bus_if.vh"
 `include "ahb_if.vh"
 `include "component_selection_defines.vh"
+`include "risc_mgmt_if.vh"
 
 module RISCVBusiness (
   input logic CLK, nRST,
@@ -44,6 +45,7 @@ module RISCVBusiness (
   generic_bus_if icache_mc_if();
   generic_bus_if dcache_mc_if();
   generic_bus_if pipeline_trans_if(); 
+  risc_mgmt_if   rm_if();
 
   // Module Instantiations
 
@@ -52,7 +54,14 @@ module RISCVBusiness (
     .nRST(nRST),
     .halt(halt),
     .igen_bus_if(tspp_icache_gen_bus_if),
-    .dgen_bus_if(tspp_dcache_gen_bus_if)
+    .dgen_bus_if(tspp_dcache_gen_bus_if),
+    .rm_if(rm_if)
+  );
+
+  risc_mgmt rmgmt (
+    .CLK(CLK),
+    .nRST(nRST),
+    .rm_if(rm_if)
   );
 
   caches caches (

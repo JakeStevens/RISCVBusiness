@@ -57,8 +57,10 @@ module rv32m_execute (
 
   // Module instantiations
   shift_add_multiplier #(.N(WORD_SIZE)) mult_i (
+    .CLK(CLK),
+    .nRST(nRST),
     .multiplicand(multiplicand),
-    .multiplier(mutliplier),
+    .multiplier(multiplier),
     .product(product),
     .is_signed(is_signed),
     .start(mul_start),
@@ -66,11 +68,11 @@ module rv32m_execute (
   );
 
   // Signal Assignments
-  assign mul_start    = operand_diff && idex.mul;
-  assign is_signed    = operand_diff ? is_signed_curr : is_signed_save;
-  assign multiplicand = operand_diff ? eif.rdata_s_0 : op_a_save;
-  assign multiplier   = operand_diff ? eif.rdata_s_1 : op_b_save;
-  assign is_signed = idex.usign_usign ? 2'b00 : (
+  assign mul_start      = operand_diff && idex.mul;
+  assign is_signed      = operand_diff ? is_signed_curr : is_signed_save;
+  assign multiplicand   = operand_diff ? eif.rdata_s_0 : op_a_save;
+  assign multiplier     = operand_diff ? eif.rdata_s_1 : op_b_save;
+  assign is_signed_curr = idex.usign_usign ? 2'b00 : (
                      idex.sign_sign ? 2'b11 : 2'b10);
  
   // operand saver to detect a new multiplication request

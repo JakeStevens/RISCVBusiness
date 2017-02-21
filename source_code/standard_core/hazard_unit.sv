@@ -25,11 +25,13 @@
 
 `include "hazard_unit_if.vh"
 `include "prv_pipeline_if.vh"
+`include "risc_mgmt_if.vh"
 
 module hazard_unit
 (
   hazard_unit_if.hazard_unit hazard_if,
-  prv_pipeline_if.hazard  prv_pipe_if
+  prv_pipeline_if.hazard  prv_pipe_if,
+  risc_mgmt_if.ts_hazard rm_if
 );
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;
@@ -46,6 +48,8 @@ module hazard_unit
   logic e_f_stage;
   logic intr;
 
+  //TODO: RISC-MGMT stall due to memory
+
   assign dmem_access = (hazard_if.dren || hazard_if.dwen);
   assign branch_jump = hazard_if.jump || 
                         (hazard_if.branch && hazard_if.mispredict);
@@ -54,7 +58,7 @@ module hazard_unit
   
   assign hazard_if.npc_sel = branch_jump;
   
-  assign hazard_if.pc_en = (~wait_for_dmem&~wait_for_imem&~hazard_if.halt&~ex_flush_hazard) |
+  assign hazard_if.pc_en = (~wait_for_dmem&~wait_for_imem&~hazard_if.halt&~ex_flush_hazard&~rm_if.execute_stall&~rm_if.memory_stall) |
                             branch_jump | prv_pipe_if.insert_pc | prv_pipe_if.ret; 
 
   assign hazard_if.if_ex_flush = ex_flush_hazard | branch_jump |
@@ -63,7 +67,8 @@ module hazard_unit
 
   assign hazard_if.if_ex_stall = (wait_for_dmem ||
                                  (wait_for_imem & ~dmem_access) ||
-                                 hazard_if.halt) & (~ex_flush_hazard | e_ex_stage);
+                                 hazard_if.halt) & (~ex_flush_hazard | e_ex_stage) || 
+                                 rm_if.execute_stall || rm_if.decode_bubble;
 
   /* Hazards due to Interrupts/Exceptions */
   assign prv_pipe_if.ret = hazard_if.ret;
@@ -73,7 +78,7 @@ module hazard_unit
   assign e_f_stage = hazard_if.fault_insn | hazard_if.mal_insn;
   assign intr = ~e_ex_stage & ~e_f_stage & prv_pipe_if.intr;
 
-  assign prv_pipe_if.pipe_clear = e_ex_stage | ~hazard_if.token_ex;
+  assign prv_pipe_if.pipe_clear = e_ex_stage | ~(hazard_if.token_ex | rm_if.active_insn);
   assign ex_flush_hazard =  ((intr | e_f_stage) & ~wait_for_dmem) | e_ex_stage | prv_pipe_if.ret;
 
   assign hazard_if.insert_priv_pc = prv_pipe_if.insert_pc;
@@ -82,6 +87,9 @@ module hazard_unit
   assign hazard_if.iren = !intr; // prevents a false instruction request from being sent
 
   /* Send Exception notifications to Prv Block */
+
+  //TODO: RISC-MGMT exception tie in
+
   assign prv_pipe_if.wb_enable    = !hazard_if.if_ex_stall | 
                                     hazard_if.jump |
                                     hazard_if.branch; //Because 2 stages
