@@ -58,3 +58,11 @@ def configure(ctx):
       tb = 'tb_shift_add_multiplier',
       tb_includes = ['include']
     )
+    ctx.SFFUnits.add('shift_test_restore_divider',
+      includes = ['include'],
+      src_dir = ['risc_mgmt'], 
+      use = ['RISCVBusiness_packages'],
+      tb_use = ['RISCVBusiness_packages'],
+      tb = 'tb_shift_test_restore_divider',
+      tb_includes = ['include']
+    )
