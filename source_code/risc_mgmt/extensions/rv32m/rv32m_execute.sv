@@ -137,7 +137,7 @@ module rv32m_execute (
         eif.reg_wdata = idex.lower_word ? product[WORD_SIZE-1:0] : product[(WORD_SIZE*2)-1 : WORD_SIZE];
       end
       3'b01? : begin // DIV
-        eif.busy = ~div_finished | div_zero | overflow; 
+        eif.busy = ~div_finished & ~(div_zero | overflow); 
         if(div_zero) begin
           eif.reg_wdata = idex.sign_sign ? 32'hffff_ffff : 32'h7fff_ffff;
         end else if (overflow) begin
@@ -147,7 +147,7 @@ module rv32m_execute (
         end
       end
       3'b001 : begin // REM
-        eif.busy = ~div_finished | div_zero | overflow;
+        eif.busy = ~div_finished & ~(div_zero | overflow);
         if(div_zero) begin
           eif.reg_wdata = dividend;
         end else if (overflow) begin
