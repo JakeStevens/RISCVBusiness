@@ -43,7 +43,7 @@ module fetch_stage (
 
   //PC logic
 
-  always @ (posedge CLK, negedge nRST) begin
+  always_ff @ (posedge CLK, negedge nRST) begin
     if(~nRST) begin
       pc <= RESET_PC;
     end else if (hazard_if.pc_en) begin
@@ -83,21 +83,16 @@ module fetch_stage (
   logic mal_addr;
   assign mal_addr = (igen_bus_if.addr[1:0] != 2'b00);
   assign hazard_if.fault_insn = 1'b0;
-  assign hazard_if.mal_insn = igen_bus_if.ren & mal_addr;
-
+  assign hazard_if.mal_insn = mal_addr;  
   assign hazard_if.badaddr_f = igen_bus_if.addr;
   assign hazard_if.epc_f = pc; 
 
   // Choose the endianness of the data coming into the processor
   generate
     if (BUS_ENDIANNESS == "big")
-    begin
       assign instr = igen_bus_if.rdata;
-    end else if (BUS_ENDIANNESS == "little")
+    else if (BUS_ENDIANNESS == "little")
       endian_swapper ltb_endian(igen_bus_if.rdata, instr);
-    else begin
-      $error("Configurable Component: Invalid bus endianness");
-    end
   endgenerate
 
 endmodule

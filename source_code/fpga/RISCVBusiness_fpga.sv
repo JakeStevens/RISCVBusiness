@@ -21,7 +21,7 @@
 *   Date Created: 10/18/2016
 *   Description:  Top level module for RISCVBusiness on an FPGA
 */
-`include "ram_if.vh"
+`include "generic_bus_if.vh"
  
 module RISCVBusiness_fpga
 (
@@ -61,19 +61,19 @@ module RISCVBusiness_fpga
   end
   
   //portmap
-  ram_if ram_if();
+  generic_bus_if gen_bus_if();
   logic halt;
   RISCVBusiness proc (
     .CLK(CLOCK_50),
     .nRST(nRST),
     .halt(halt),
-    .ram_if(ram_if)
+    .gen_bus_if(gen_bus_if)
   );
 
   ram_wrapper ram (
     .CLK(CLOCK_50),
     .nRST(nRST),
-    .ram_if(ram_if)
+    .gen_bus_if(gen_bus_if)
   );
 
 
@@ -109,7 +109,7 @@ module RISCVBusiness_fpga
     begin: seven_seg_display_controller
       always_comb
       begin
-        casez(ram_if.rdata[31-seg_select*4:(31-(seg_select+1)*4) + 1])
+        casez(gen_bus_if.rdata[31-seg_select*4:(31-(seg_select+1)*4) + 1])
           4'h0: display[55-seg_select*7:(55-(seg_select + 1) * 7) + 1] = 7'b0111111;
           4'h1: display[55-seg_select*7:(55-(seg_select + 1) * 7) + 1] = 7'b0000110;
           4'h2: display[55-seg_select*7:(55-(seg_select + 1) * 7) + 1] = 7'b1011011;

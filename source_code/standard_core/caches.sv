@@ -34,7 +34,6 @@ module caches(
   generate
     case (CACHE_CONFIG)
       "separate" :  separate_caches sep_caches(.*);
-      default : $error("Configurable Component: Invalid Cache Config");
     endcase
   endgenerate
 

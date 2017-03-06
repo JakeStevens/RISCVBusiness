@@ -24,11 +24,11 @@
 *                 provided, an emulated ram module must be created.
 */
 
-`include "ram_if.vh"
+`include "generic_bus_if.vh"
 
 module ram_wrapper (
   input logic CLK, nRST,
-  ram_if.ram ram_if
+  generic_bus_if.generic_bus gen_bus_if
 );
 
   ram #(.LAT(0)) v_lat_ram (.*);
