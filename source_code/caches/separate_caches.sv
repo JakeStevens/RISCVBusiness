@@ -40,7 +40,6 @@ module separate_caches (
                           .mem_gen_bus_if(dcache_mem_gen_bus_if),
                           .proc_gen_bus_if(dcache_proc_gen_bus_if)
                         );
-      default : $error("Configurable Component: Invalid dcache type") ;
     endcase
   endgenerate
 
@@ -52,7 +51,6 @@ module separate_caches (
                           .mem_gen_bus_if(icache_mem_gen_bus_if),
                           .proc_gen_bus_if(icache_proc_gen_bus_if)
                         );
-      default : $error("Configurable Component: Invalid icache type") ;
     endcase
   endgenerate
 

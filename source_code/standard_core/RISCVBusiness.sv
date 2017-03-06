@@ -92,7 +92,6 @@ module RISCVBusiness (
           .ahb_m(ahb_master)
         );
       end
-      default : $error("Configurable Component: Invalid Bus Interface");
     endcase
 
   endgenerate

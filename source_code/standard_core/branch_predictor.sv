@@ -34,7 +34,6 @@ module branch_predictor (
   generate
     case (BR_PREDICTOR_TYPE)
       "not_taken" : nottaken_predictor predictor(.*);
-      default : $error("Configurable Component: Invalid Branch Predictor");
     endcase
   endgenerate
 endmodule

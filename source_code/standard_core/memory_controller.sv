@@ -181,9 +181,6 @@ module memory_controller (
       endian_swapper rswap(out_gen_bus_if.rdata, little_endian_rdata);
       assign wdata  = little_endian_wdata;
       assign rdata  = little_endian_rdata;
-    end else
-    begin
-      $error("Configurable Component: Invalid bus endianness");
     end
   endgenerate
 

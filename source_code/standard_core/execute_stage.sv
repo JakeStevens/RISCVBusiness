@@ -88,9 +88,6 @@ module execute_stage(
       assign byte_en = cu_if.dren ? byte_en_temp :
               {byte_en_temp[0], byte_en_temp[1],
               byte_en_temp[2], byte_en_temp[3]};
-    end else
-    begin
-      $error("Configurable Component: Invalid bus endianness");
     end
   endgenerate
 

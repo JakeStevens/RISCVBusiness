@@ -24,7 +24,6 @@
 */
 
 
-`include "ram_if.vh"
 `include "generic_bus_if.vh"
 `include "component_selection_defines.vh"
 
@@ -46,9 +45,9 @@ module tb_RISCVBusiness ();
   integer clk_count;
 
   //Interface Instantiations
-  ram_if ram_if();
+  generic_bus_if gen_bus_if();
   generic_bus_if rvb_gen_bus_if();
-  ram_if tb_ram_if();
+  generic_bus_if tb_gen_bus_if();
 
   //Module Instantiations
 
@@ -62,7 +61,7 @@ module tb_RISCVBusiness ();
   ram_wrapper ram (
     .CLK(CLK),
     .nRST(nRST),
-    .ram_if(ram_if)
+    .gen_bus_if(gen_bus_if)
   );
 
   if (BUS_ENDIANNESS == "big")
@@ -105,25 +104,25 @@ module tb_RISCVBusiness ();
   always_comb begin
     if(ram_control) begin
       /* No actual bus, so directly connect ram to generic bus interface */
-      ram_if.addr    =   rvb_gen_bus_if.addr;
-      ram_if.ren     =   rvb_gen_bus_if.ren;
-      ram_if.wen     =   rvb_gen_bus_if.wen;
-      ram_if.wdata   =   rvb_gen_bus_if.wdata;
-      ram_if.byte_en =   rvb_gen_bus_if.byte_en;
+      gen_bus_if.addr    =   rvb_gen_bus_if.addr;
+      gen_bus_if.ren     =   rvb_gen_bus_if.ren;
+      gen_bus_if.wen     =   rvb_gen_bus_if.wen;
+      gen_bus_if.wdata   =   rvb_gen_bus_if.wdata;
+      gen_bus_if.byte_en =   rvb_gen_bus_if.byte_en;
     end else begin
-      ram_if.addr    =   tb_ram_if.addr;
-      ram_if.ren     =   tb_ram_if.ren;
-      ram_if.wen     =   tb_ram_if.wen;
-      ram_if.wdata   =   tb_ram_if.wdata;
-      ram_if.byte_en = tb_ram_if.byte_en;
+      gen_bus_if.addr    =   tb_gen_bus_if.addr;
+      gen_bus_if.ren     =   tb_gen_bus_if.ren;
+      gen_bus_if.wen     =   tb_gen_bus_if.wen;
+      gen_bus_if.wdata   =   tb_gen_bus_if.wdata;
+      gen_bus_if.byte_en = tb_gen_bus_if.byte_en;
     end
   end
 
   /* No actual bus, so directly connect ram to generic bus interface */
-  assign rvb_gen_bus_if.rdata  = ram_if.rdata;
-  assign rvb_gen_bus_if.busy   = ram_if.busy;
-  assign tb_ram_if.rdata   = ram_if.rdata;
-  assign tb_ram_if.busy    = ram_if.busy;
+  assign rvb_gen_bus_if.rdata  = gen_bus_if.rdata;
+  assign rvb_gen_bus_if.busy   = gen_bus_if.busy;
+  assign tb_gen_bus_if.rdata   = gen_bus_if.rdata;
+  assign tb_gen_bus_if.busy    = gen_bus_if.busy;
 
   //Clock generation
   initial begin : INIT
@@ -148,8 +147,8 @@ module tb_RISCVBusiness ();
     while (halt == 0 && clk_count != `CLK_TIMEOUT) begin
       @(posedge CLK);
       clk_count++;
-      if (ram_if.addr == 16'h0000 & !ram_if.busy & ram_if.wen)
-        $write("%c",ram_if.wdata[31:24]);
+      if (gen_bus_if.addr == 16'h0000 & !gen_bus_if.busy & gen_bus_if.wen)
+        $write("%c",gen_bus_if.wdata[31:24]);
     end
 
     dump_stats();
@@ -177,11 +176,11 @@ module tb_RISCVBusiness ();
 
   task dump_ram ();
     ram_control = 0;
-    tb_ram_if.addr = 0;
-    tb_ram_if.ren = 0;
-    tb_ram_if.wen = 0;
-    tb_ram_if.wdata = 0;
-    tb_ram_if.byte_en = 4'hf;
+    tb_gen_bus_if.addr = 0;
+    tb_gen_bus_if.ren = 0;
+    tb_gen_bus_if.wen = 0;
+    tb_gen_bus_if.wdata = 0;
+    tb_gen_bus_if.byte_en = 4'hf;
 
     fptr = $fopen(`OUTPUT_FILE_NAME, "w");
 
@@ -200,12 +199,12 @@ module tb_RISCVBusiness ();
 
   task read_ram (input logic [31:0] raddr, output logic [31:0] rdata);
     @(posedge CLK);
-    tb_ram_if.addr = raddr;
-    tb_ram_if.ren = 1;
+    tb_gen_bus_if.addr = raddr;
+    tb_gen_bus_if.ren = 1;
     @(posedge CLK);
-    while(tb_ram_if.busy == 1) @(posedge CLK);
-    rdata = tb_ram_if.rdata;
-    tb_ram_if.ren = 0;
+    while(tb_gen_bus_if.busy == 1) @(posedge CLK);
+    rdata = tb_gen_bus_if.rdata;
+    tb_gen_bus_if.ren = 0;
   endtask
 
   function [7:0] calculate_crc (logic [63:0] hex_line);
