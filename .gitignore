@@ -20,5 +20,7 @@ source_code/fpga/incremental_db
 source_code/fpga/output_files
 # Ignore open vim files
 *.swp
+# Ignore git merge temporary files
+*.orig
 # Ignore waf lock
 *.lock-waf*
