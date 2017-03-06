@@ -102,20 +102,19 @@ module rv32m_execute (
     .finished(mul_finished)
   );
 
-  // Signal Assignments
-  assign mul_start      = operand_diff && idex.mul;
-  assign is_signed      = operand_diff ? is_signed_curr : is_signed_save;
-  assign multiplicand   = operand_diff ? eif.rdata_s_0 : op_a_save;
-  assign multiplier     = operand_diff ? eif.rdata_s_1 : op_b_save;
-  assign is_signed_curr = idex.usign_usign ? 2'b00 : (
-                     idex.sign_sign ? 2'b11 : 2'b10);
- 
-  // operand saver to detect a new multiplication request
+  
+  /* DIVISION / REMAINDER */
 
-  assign operand_diff = ((op_a_save != eif.rdata_s_0) || 
-                        (op_b_save != eif.rdata_s_1) ||
-                        (is_signed_save != is_signed_curr)) &&
-                        idex.start;
+  logic overflow, div_zero, div_finished;
+  word_t  divisor, dividend, quotient, remainder, divisor_save, dividend_save;
+  logic div_operand_diff;
+  logic div_start;
+
+  assign divisor    = op_b;
+  assign dividend   = op_a;
+  assign overflow   = (dividend == 32'h8000_0000) && (divisor == 32'hffff_ffff) && idex.sign_sign;
+  assign div_zero   = (divisor == 32'h0);  
+  assign div_start  = operand_diff && ~operation[2] & ~overflow & ~div_zero;
 
   shift_test_restore_divider #(.N(WORD_SIZE)) div_i (
     .CLK(CLK),
