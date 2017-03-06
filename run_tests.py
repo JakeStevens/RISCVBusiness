@@ -389,6 +389,8 @@ def run_sim(file_name):
         print line
       return -2
     subprocess.call(['mv', 'build/cpu.hex', output_dir + 'cpu.hex'])
+    if(os.path.exists('build/stats.txt')):
+      subprocess.call(['mv', 'build/stats.txt', output_dir + 'stats.txt'])
     return 0
 
 def run_self_sim(file_name):
@@ -409,6 +411,8 @@ def run_self_sim(file_name):
       for line in log:
         print line
       return -2
+    if(os.path.exists('build/stats.txt')):
+      subprocess.call(['mv', 'build/stats.txt', output_dir + 'stats.txt'])
     return 0
 
 def run_spike_asm(file_name):

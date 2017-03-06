@@ -54,7 +54,15 @@ module execute_stage(
   branch_res_if     branch_if(); 
  
   // Module instantiations
-  control_unit cu (.*);
+  control_unit cu (
+    .cu_if(cu_if),
+    .rf_if(rf_if),
+    .rmgmt_rsel_s_0(rm_if.rsel_s_0),
+    .rmgmt_rsel_s_1(rm_if.rsel_s_1),
+    .rmgmt_rsel_d(rm_if.rsel_d),
+    .rmgmt_req_reg_r(rm_if.req_reg_r),
+    .rmgmt_req_reg_w(rm_if.req_reg_w)
+  );
   rv32i_reg_file rf (.*);
   alu alu (.*);
   jump_calc jump_calc (.*);

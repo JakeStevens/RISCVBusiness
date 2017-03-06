@@ -69,7 +69,7 @@ module rv32m_execute (
       is_signed_save  <= '0;
       operation_save  <= '0; 
     end
-    if (operand_diff) begin
+    else if (operand_diff) begin
       op_a_save       <= eif.rdata_s_0;
       op_b_save       <= eif.rdata_s_1;
       is_signed_save  <= is_signed_curr;
