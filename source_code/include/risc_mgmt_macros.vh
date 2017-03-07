@@ -82,7 +82,27 @@
   assign m_mem_store[EXT_ID]          = ``EXT_NAME``_memif.mem_store;                                                 \
   assign ``EXT_NAME``_memif.mem_busy  = m_mem_busy[EXT_ID];                                                           \
   assign ``EXT_NAME``_memif.mem_load  = m_mem_load[EXT_ID];
-
+ 
+/*****************************************************************************
+ *  ADD_EXTENSION_WITH_OPCODE
+ *
+ *  This macro will instantiate all the interfaces and modules needed for an 
+ *  extension.
+ *
+ *  This version of ADD_EXTENSION will connect the extension to a two stage
+ *  inorder pipeline.  To have ADD_EXTENSION connect the extension to a deeper
+ *  pipeline, pipeline registers should be inserted between stages using the
+ *  structs in the pkg for the module.  Enable and flush signals should be
+ *  connected to each pipeline register  
+ *
+ *  After instantiation, the interface will be connected to the RISC-MGMT
+ *  logic based off of EXT_ID.  EXT_ID must be unique to the extension and
+ *  must be less than NUM_EXTENSIONS.
+ *
+ *  This macro will also override the opcode parameter for portibility of 
+ *  nonstandard extensions.
+ *
+ ****************************************************************************/
 
 `define ADD_EXTENSION_WITH_OPCODE(EXT_NAME,EXT_ID,EXT_OPCODE)                                                         \
   // instantiate stage to stage interfaces  \

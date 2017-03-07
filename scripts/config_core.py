@@ -45,6 +45,15 @@ UARCH_PARAMS = \
     'bus_interface_type' : ['ahb_if', 'generic_bus_if']
   }
 
+RISC_MGMT_PARAMS = \
+  {
+    # Valid standard extensions
+    'standard_extensions' : ['rv32m'],
+    # Valid nonstandard extensions
+    'nonstandard_extensions' : ['template']
+  }
+
+NONSTANDARD_OPCODES = ["7'b000_1011", "7'b010_1011", "7'b101_1011", "7'b111_1011"]
 
 # Returns an object containing the parsed configuration file.
 # Currently uses PyYAML and YAML format
@@ -70,6 +79,7 @@ def create_include(config):
 
   # Handle localparam configurations
   isa_params = config['isa_params']
+  include_file.write('// ISA Params:\n') 
   for isa_param in isa_params:
     try:
       if isa_params[isa_param] not in ISA_PARAMS[isa_param]:
@@ -87,6 +97,7 @@ def create_include(config):
       include_file.write(line)
     except TypeError:
       sys.exit('Type Error. Please check to make sure .yml file is correct.')
+  include_file.write('\n// Microarch Params:\n') 
   uarch_params = config['microarch_params']
   for uarch_param in uarch_params:
     if uarch_params[uarch_param] not in UARCH_PARAMS[uarch_param]:
@@ -104,10 +115,49 @@ def create_include(config):
   bus_define = '`define BUS_INTERFACE_' + bus_type.upper() + '\n'
   include_file.write(bus_define)
 
+  # Handling of RISC-MGMT Extensions
+  rmgmt_extensions = []
+  try:
+    rmgmt_params = config['risc_mgmt_params']
+    for rmgmt_param in rmgmt_params:
+      extensions = rmgmt_params[rmgmt_param].split(' ')
+      extensions = [s.strip('-') for s in extensions]
+      for extension in extensions:
+        if extension not in RISC_MGMT_PARAMS[rmgmt_param]:
+          err = 'Unsupported extension: ' + extension
+          sys.exit(err)
+        else:
+          rmgmt_extensions.append([extension, rmgmt_param])
+  except:
+    err = "Error Parsing RISC-MGMT extension configuration."
+    sys.exit(err) 
+
+  # Need to at least have the nop extension
+  if(len(rmgmt_extensions) == 0):
+    rmgmt_extensions.append(['template', 'nonstandard_extension'])
+  include_file.write('\n// RISC-MGMT Extensions:\n') 
+  include_file.write('`define NUM_EXTENSIONS ' + str(len(rmgmt_extensions)) + '\n')
+  include_file.write('`define RISC_MGMT_EXTENSIONS\t\\\n')
+  ext_num = 0
+  nonstandard_num = 0
+  for extension in rmgmt_extensions:
+    if(extension[1] == 'standard_extensions'):
+      include_file.write('\t`ADD_EXTENSION('+extension[0]+','+str(ext_num)+")")
+    elif (nonstandard_num < len(NONSTANDARD_OPCODES)):
+      include_file.write('\t`ADD_EXTENSION_WITH_OPCODE('+extension[0]+','+
+        str(ext_num)+','+NONSTANDARD_OPCODES[nonstandard_num]+")")
+      nonstandard_num = nonstandard_num + 1
+    ext_num = ext_num + 1
+    if(ext_num != len(rmgmt_extensions)):
+      include_file.write('\t\\\n')
+    else:
+      include_file.write('\n')
+
   # Write include footer to file
-  footer = '`endif // COMPONENT_SELECTION_DEFINES_VH\n'
+  footer = '\n`endif // COMPONENT_SELECTION_DEFINES_VH\n'
   include_file.write(footer)
   include_file.close()
+  
 
 
 if __name__ == '__main__':
