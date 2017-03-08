@@ -43,7 +43,7 @@ int main(void) {
   a = -31;
   b = -6;
   c = a%b;
-  if(c != 1)
+  if(c != -1)
     TEST_FINISH_FAIL(3)
 
   //divide by zero
