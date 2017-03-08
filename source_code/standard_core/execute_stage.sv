@@ -78,7 +78,7 @@ module execute_stage(
   );
 
   word_t dload_ext;
-  logic [3:0] byte_en, byte_en_temp;
+  logic [3:0] byte_en, byte_en_temp, byte_en_standard;
   dmem_extender dmem_ext (
     .dmem_in(dgen_bus_if.rdata),
     .load_type(cu_if.load_type),
@@ -213,25 +213,30 @@ module execute_stage(
   *** Data Ram Interface Logic 
   *******************************************************/
 
-  //TODO: RISC-MGMT memory tie in
-
   logic [1:0] byte_offset;
 
-  assign dgen_bus_if.ren           = cu_if.dren & ~mal_addr;
-  assign dgen_bus_if.wen           = cu_if.dwen & ~mal_addr;
-  assign dgen_bus_if.byte_en       = byte_en;
-  assign dgen_bus_if.addr          = alu_if.port_out;
-  assign hazard_if.d_mem_busy  = dgen_bus_if.busy;
-  assign byte_offset          = alu_if.port_out[1:0]; 
+  // RISC-MGMT connections
+  assign rm_if.mem_load = dgen_bus_if.rdata;
+
+  assign dgen_bus_if.ren        = rm_if.req_mem ? rm_if.mem_ren : cu_if.dren & ~mal_addr;
+  assign dgen_bus_if.wen        = rm_if.req_mem ? rm_if.mem_wen : cu_if.dwen & ~mal_addr;
+  assign byte_en_temp           = rm_if.req_mem ? rm_if.mem_byte_en : byte_en_standard;
+  assign dgen_bus_if.byte_en    = byte_en;
+  assign dgen_bus_if.addr       = rm_if.req_mem ? rm_if.mem_addr : alu_if.port_out;
+  assign hazard_if.d_mem_busy   = dgen_bus_if.busy;
+  assign byte_offset            = alu_if.port_out[1:0]; 
   
   always_comb begin
-    // load_type can be used for store_type as well
     dgen_bus_if.wdata = '0;
-    case(cu_if.load_type)
-      LB: dgen_bus_if.wdata = {4{rf_if.rs2_data[7:0]}};
-      LH: dgen_bus_if.wdata = {2{rf_if.rs2_data[15:0]}};
-      LW: dgen_bus_if.wdata = rf_if.rs2_data; 
-    endcase
+    if (rm_if.req_mem)
+      dgen_bus_if.wdata = rm_if.mem_store;
+    else begin
+      case(cu_if.load_type) // load_type can be used for store_type as well
+        LB: dgen_bus_if.wdata = {4{rf_if.rs2_data[7:0]}};
+        LH: dgen_bus_if.wdata = {2{rf_if.rs2_data[15:0]}};
+        LW: dgen_bus_if.wdata = rf_if.rs2_data; 
+      endcase
+    end
   end
 
 
@@ -242,38 +247,38 @@ module execute_stage(
     unique case(cu_if.load_type)
       LB : begin
         unique case(byte_offset)
-          2'b00   : byte_en_temp = 4'b0001;
-          2'b01   : byte_en_temp = 4'b0010;
-          2'b10   : byte_en_temp = 4'b0100;
-          2'b11   : byte_en_temp = 4'b1000;
-          default : byte_en_temp = 4'b0000;
+          2'b00   : byte_en_standard = 4'b0001;
+          2'b01   : byte_en_standard = 4'b0010;
+          2'b10   : byte_en_standard = 4'b0100;
+          2'b11   : byte_en_standard = 4'b1000;
+          default : byte_en_standard = 4'b0000;
         endcase
       end
       LBU : begin
         unique case(byte_offset)
-          2'b00   : byte_en_temp = 4'b0001;
-          2'b01   : byte_en_temp = 4'b0010;
-          2'b10   : byte_en_temp = 4'b0100;
-          2'b11   : byte_en_temp = 4'b1000;
-          default : byte_en_temp = 4'b0000;
+          2'b00   : byte_en_standard = 4'b0001;
+          2'b01   : byte_en_standard = 4'b0010;
+          2'b10   : byte_en_standard = 4'b0100;
+          2'b11   : byte_en_standard = 4'b1000;
+          default : byte_en_standard = 4'b0000;
         endcase
       end
       LH : begin
         unique case(byte_offset)
-          2'b00   : byte_en_temp = 4'b0011;
-          2'b10   : byte_en_temp = 4'b1100;
-          default : byte_en_temp = 4'b0000;
+          2'b00   : byte_en_standard = 4'b0011;
+          2'b10   : byte_en_standard = 4'b1100;
+          default : byte_en_standard = 4'b0000;
         endcase
       end
       LHU : begin
         unique case(byte_offset)
-          2'b00   : byte_en_temp = 4'b0011;
-          2'b10   : byte_en_temp = 4'b1100;
-          default : byte_en_temp = 4'b0000;
+          2'b00   : byte_en_standard = 4'b0011;
+          2'b10   : byte_en_standard = 4'b1100;
+          default : byte_en_standard = 4'b0000;
         endcase
       end
-      LW:           byte_en_temp = 4'b1111;
-      default :     byte_en_temp = 4'b0000;
+      LW:           byte_en_standard = 4'b1111;
+      default :     byte_en_standard = 4'b0000;
     endcase
   end
 

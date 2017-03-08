@@ -78,6 +78,7 @@
   assign m_mem_addr[EXT_ID]           = ``EXT_NAME``_memif.mem_addr;                                                  \
   assign m_mem_ren[EXT_ID]            = ``EXT_NAME``_memif.mem_ren;                                                   \
   assign m_mem_wen[EXT_ID]            = ``EXT_NAME``_memif.mem_wen;                                                   \
+  assign m_mem_byte_en[EXT_ID]        = ``EXT_NAME``_memif.mem_byte_en;                                               \
   assign m_reg_wdata[EXT_ID]          = ``EXT_NAME``_memif.reg_wdata;                                                 \
   assign m_reg_w[EXT_ID]              = ``EXT_NAME``_memif.reg_w;                                                     \
   assign m_mem_store[EXT_ID]          = ``EXT_NAME``_memif.mem_store;                                                 \
@@ -140,6 +141,7 @@
   assign m_mem_addr[EXT_ID]           = ``EXT_NAME``_memif.mem_addr;                                                  \
   assign m_mem_ren[EXT_ID]            = ``EXT_NAME``_memif.mem_ren;                                                   \
   assign m_mem_wen[EXT_ID]            = ``EXT_NAME``_memif.mem_wen;                                                   \
+  assign m_mem_byte_en[EXT_ID]        = ``EXT_NAME``_memif.mem_byte_en;                                               \
   assign m_reg_wdata[EXT_ID]          = ``EXT_NAME``_memif.reg_wdata;                                                 \
   assign m_reg_w[EXT_ID]              = ``EXT_NAME``_memif.reg_w;                                                     \
   assign m_mem_store[EXT_ID]          = ``EXT_NAME``_memif.mem_store;                                                 \

@@ -70,6 +70,7 @@ module risc_mgmt (
   logic   [N_EXTENSIONS-1:0]        m_mem_ren;
   logic   [N_EXTENSIONS-1:0]        m_mem_wen;
   logic   [N_EXTENSIONS-1:0]        m_mem_busy;
+  logic   [N_EXTENSIONS-1:0][3:0]   m_mem_byte_en;
   word_t  [N_EXTENSIONS-1:0]        m_mem_load;
   word_t  [N_EXTENSIONS-1:0]        m_mem_store; 
   logic   [N_EXTENSIONS-1:0]        m_reg_wdata;
@@ -131,12 +132,12 @@ module risc_mgmt (
   */
   
   // Reg reads and decode
-  assign rm_if.req_reg_r      = ext_is_active;
-  assign rm_if.rsel_s_0  = d_rsel_s_0[active_ext];
-  assign rm_if.rsel_s_1  = d_rsel_s_1[active_ext];
-  assign rm_if.rsel_d    = d_rsel_d[active_ext];
-  assign e_rdata_s_0    = {N_EXTENSIONS{rm_if.rdata_s_0}};
-  assign e_rdata_s_1    = {N_EXTENSIONS{rm_if.rdata_s_1}};
+  assign rm_if.req_reg_r  = ext_is_active;
+  assign rm_if.rsel_s_0   = d_rsel_s_0[active_ext];
+  assign rm_if.rsel_s_1   = d_rsel_s_1[active_ext];
+  assign rm_if.rsel_d     = d_rsel_d[active_ext];
+  assign e_rdata_s_0      = {N_EXTENSIONS{rm_if.rdata_s_0}};
+  assign e_rdata_s_1      = {N_EXTENSIONS{rm_if.rdata_s_1}};
 
   // Reg Writeback
   assign rm_if.req_reg_w = (e_reg_w[active_ext] || m_reg_w[active_ext]) && ext_is_active;
@@ -153,14 +154,15 @@ module risc_mgmt (
 
   /*  Memory Access Control  */
 
-  assign rm_if.req_mem   = (m_mem_ren[active_ext] || m_mem_wen[active_ext]) && ext_is_active;
-  assign rm_if.mem_addr  = m_mem_addr[active_ext];
-  assign rm_if.mem_store = m_mem_store[active_ext];
-  assign rm_if.mem_ren   = m_mem_ren[active_ext];
-  assign rm_if.mem_wen   = m_mem_wen[active_ext];
-  assign m_mem_busy     = {N_EXTENSIONS{rm_if.mem_busy}};
-  assign m_mem_load     = {N_EXTENSIONS{rm_if.mem_load}};
-   
+  assign rm_if.req_mem      = (m_mem_ren[active_ext] || m_mem_wen[active_ext]) && ext_is_active;
+  assign rm_if.mem_addr     = m_mem_addr[active_ext];
+  assign rm_if.mem_byte_en  = m_mem_byte_en[active_ext];
+  assign rm_if.mem_store    = m_mem_store[active_ext];
+  assign rm_if.mem_ren      = m_mem_ren[active_ext];
+  assign rm_if.mem_wen      = m_mem_wen[active_ext];
+  assign m_mem_busy         = {N_EXTENSIONS{rm_if.mem_busy}};
+  assign m_mem_load         = {N_EXTENSIONS{rm_if.mem_load}};
+
 
   /*  Exception Reporting  */
   assign rm_if.exception  = (e_exception[active_ext] || m_exception[active_ext]) && ext_is_active;

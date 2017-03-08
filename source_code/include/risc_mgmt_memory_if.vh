@@ -34,18 +34,21 @@ interface risc_mgmt_memory_if ();
 
   //memory signals
   logic mem_ren, mem_wen, mem_busy;
+  logic [3:0] mem_byte_en;
   word_t mem_addr, mem_load, mem_store;
 
   modport rmgmt (
     input exception, busy, reg_w, reg_wdata, 
     mem_ren, mem_wen, mem_addr, mem_store,
+    mem_byte_en,
     output mem_load, mem_busy
   );
 
   modport ext (
     input mem_load, mem_busy,
     output exception, busy, reg_w, reg_wdata, 
-    mem_ren, mem_wen, mem_addr, mem_store
+    mem_ren, mem_wen, mem_addr, mem_store,
+    mem_byte_en
   ); 
 
 endinterface
