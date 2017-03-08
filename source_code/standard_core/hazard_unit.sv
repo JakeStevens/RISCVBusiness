@@ -48,7 +48,10 @@ module hazard_unit
   logic e_f_stage;
   logic intr;
 
-  //TODO: RISC-MGMT stall due to memory
+  logic rmgmt_stall, rmgmt_bubble;
+  
+  assign rmgmt_bubble = rm_if.decode_bubble;
+  assign rmgmt_stall = rm_if.memory_stall | rm_if.execute_stall;
 
   assign dmem_access = (hazard_if.dren || hazard_if.dwen);
   assign branch_jump = hazard_if.jump || 
@@ -58,7 +61,7 @@ module hazard_unit
   
   assign hazard_if.npc_sel = branch_jump;
   
-  assign hazard_if.pc_en = (~wait_for_dmem&~wait_for_imem&~hazard_if.halt&~ex_flush_hazard&~rm_if.execute_stall&~rm_if.memory_stall) |
+  assign hazard_if.pc_en = (~wait_for_dmem&~wait_for_imem&~hazard_if.halt&~ex_flush_hazard&~rmgmt_stall&~rmgmt_bubble) |
                             branch_jump | prv_pipe_if.insert_pc | prv_pipe_if.ret; 
 
   assign hazard_if.if_ex_flush = ex_flush_hazard | branch_jump |
@@ -88,8 +91,6 @@ module hazard_unit
 
   /* Send Exception notifications to Prv Block */
 
-  //TODO: RISC-MGMT exception tie in
-
   assign prv_pipe_if.wb_enable    = !hazard_if.if_ex_stall | 
                                     hazard_if.jump |
                                     hazard_if.branch; //Because 2 stages
@@ -102,8 +103,11 @@ module hazard_unit
   assign prv_pipe_if.mal_s        = hazard_if.mal_s;
   assign prv_pipe_if.breakpoint   = hazard_if.breakpoint;
   assign prv_pipe_if.env_m        = hazard_if.env_m;
-
-  assign prv_pipe_if.epc = e_ex_stage ? hazard_if.epc_e : hazard_if.epc_f;
-  assign prv_pipe_if.badaddr = (hazard_if.mal_insn | hazard_if.fault_insn) ? hazard_if.badaddr_f : hazard_if.badaddr_e; 
+  assign prv_pipe_if.ex_rmgmt     = rm_if.exception;
+  
+  assign prv_pipe_if.ex_rmgmt_cause = rm_if.ex_cause;
+  assign prv_pipe_if.epc = (e_ex_stage | rm_if.exception) ? hazard_if.epc_e : hazard_if.epc_f;
+  assign prv_pipe_if.badaddr = (hazard_if.mal_insn | hazard_if.fault_insn) ? hazard_if.badaddr_f : 
+                              (rm_if.exception ? rm_if.mem_addr : hazard_if.badaddr_e);  
 
 endmodule

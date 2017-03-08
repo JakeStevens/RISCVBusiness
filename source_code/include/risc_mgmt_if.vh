@@ -95,7 +95,7 @@ interface risc_mgmt_if ();
 
   modport ts_hazard (
     input decode_bubble, execute_stall, memory_stall,
-      active_insn, exception, ex_cause
+      active_insn, exception, ex_cause, mem_addr
   );
 
 endinterface

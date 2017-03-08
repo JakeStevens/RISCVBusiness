@@ -65,6 +65,10 @@ module prv_block (
   assign prv_intern_if.addr         = prv_pipe_if.addr;
   assign prv_intern_if.valid_write  = prv_pipe_if.valid_write;
   assign prv_intern_if.instr_retired= prv_pipe_if.wb_enable & prv_pipe_if.instr;
+
+  assign prv_intern_if.ex_rmgmt = prv_pipe_if.ex_rmgmt;
+  assign prv_intern_if.ex_rmgmt_cause = prv_pipe_if.ex_rmgmt_cause;
+
   // Assign outputs from internal signals to the outputs of the priv block
   assign prv_pipe_if.priv_pc     = prv_intern_if.priv_pc;
   assign prv_pipe_if.insert_pc   = prv_intern_if.insert_pc;

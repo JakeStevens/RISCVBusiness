@@ -86,6 +86,8 @@ module prv_control (
       ex_src = INSN_FAULT;
     else if (prv_intern_if.mal_insn)
       ex_src = INSN_MAL;
+    else if (prv_intern_if.ex_rmgmt)
+      ex_src = prv_intern_if.ex_rmgmt_cause;
     else 
       exception = 1'b0;
   end
@@ -118,7 +120,7 @@ module prv_control (
   assign prv_intern_if.mepc_next = prv_intern_if.epc;
 
   assign prv_intern_if.mbadaddr_rup = (prv_intern_if.mal_l | prv_intern_if.fault_l | prv_intern_if.mal_s | prv_intern_if.fault_s | 
-                                  prv_intern_if.illegal_insn | prv_intern_if.fault_insn | prv_intern_if.mal_insn) 
+                                  prv_intern_if.illegal_insn | prv_intern_if.fault_insn | prv_intern_if.mal_insn | prv_intern_if.ex_rmgmt) 
                                   & prv_intern_if.pipe_clear;
   assign prv_intern_if.mbadaddr_next = prv_intern_if.badaddr;
 

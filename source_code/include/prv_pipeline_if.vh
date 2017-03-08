@@ -28,6 +28,8 @@
 `ifndef PRV_PIPELINE_IF_VH
 `define PRV_PIPELINE_IF_VH
 
+`include "component_selection_defines.vh"
+
 interface prv_pipeline_if();
   import machine_mode_types_pkg::*;
   import rv32i_types_pkg::*;
@@ -53,11 +55,16 @@ interface prv_pipeline_if();
   // performance signals
   logic wb_enable, instr;
 
+  // RISC-MGMT 
+  logic ex_rmgmt;
+  logic [$clog2(`NUM_EXTENSIONS)-1:0] ex_rmgmt_cause;
+
   modport hazard (
     input priv_pc, insert_pc, intr,
     output pipe_clear, ret, epc, fault_insn, mal_insn, 
             illegal_insn, fault_l, mal_l, fault_s, mal_s,
-            breakpoint, env_m, badaddr, wb_enable
+            breakpoint, env_m, badaddr, wb_enable, 
+            ex_rmgmt, ex_rmgmt_cause
   );
 
   modport pipe (
@@ -71,6 +78,7 @@ interface prv_pipeline_if();
           illegal_insn, fault_l, mal_l, fault_s, mal_s,
           breakpoint, env_m, badaddr, swap, clr, set,
           wdata, addr, valid_write, wb_enable, instr,
+          ex_rmgmt, ex_rmgmt_cause,
     output priv_pc, insert_pc, intr, rdata, invalid_csr
   );
 
