@@ -50,6 +50,7 @@ interface risc_mgmt_if ();
   logic req_br_j;
   logic branch_jump;
   word_t br_j_addr;
+  word_t pc;
 
   // Memory signals
   logic req_mem;
@@ -73,7 +74,7 @@ interface risc_mgmt_if ();
       br_j_addr, req_mem, mem_addr, mem_store, mem_ren, 
       mem_wen, decode_bubble, execute_stall, memory_stall, 
       active_insn, exception, ex_cause, ex_token,
-    input rdata_s_0, rdata_s_1, mem_load, mem_busy, insn 
+    input rdata_s_0, rdata_s_1, mem_load, mem_busy, insn, pc
   );
 
   modport ts_pipe (
@@ -86,7 +87,7 @@ interface risc_mgmt_if ();
   );
 
   modport ts_execute (
-    output rdata_s_0, rdata_s_1, mem_load, mem_busy, insn,
+    output rdata_s_0, rdata_s_1, mem_load, mem_busy, insn, pc,
     input req_reg_r, req_reg_w, rsel_s_0, rsel_s_1,
       rsel_d, reg_w, reg_wdata, req_br_j, branch_jump,
       br_j_addr, req_mem, mem_addr, mem_store, mem_ren,

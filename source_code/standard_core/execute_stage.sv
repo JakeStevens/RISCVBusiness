@@ -184,23 +184,30 @@ module execute_stage(
   *** Branch Target Resolution and Associated Logic 
   *******************************************************/
 
-  //TODO: RISC-MGMT tie in to branch/jump logic
-
   word_t resolved_addr;
+  logic branch_taken;
+  word_t branch_addr;
+
   assign branch_if.rs1_data    = rf_if.rs1_data;
   assign branch_if.rs2_data    = rf_if.rs2_data;
   assign branch_if.pc          = fetch_ex_if.fetch_ex_reg.pc;
   assign branch_if.imm_sb      = cu_if.imm_SB;
   assign branch_if.branch_type = cu_if.branch_type;
 
+  // Mux resource based on if RISC-MGMT is trying to access it
+  assign branch_taken = rm_if.req_br_j ? rm_if.branch_jump : branch_if.branch_taken;
+  assign branch_addr  = rm_if.req_br_j ? rm_if.br_j_addr : branch_if.branch_addr;
+  assign rm_if.pc = fetch_ex_if.fetch_ex_reg.pc;
+
   assign resolved_addr = branch_if.branch_taken ?
-                          branch_if.branch_addr : fetch_ex_if.fetch_ex_reg.pc4;
+                          branch_addr : fetch_ex_if.fetch_ex_reg.pc4;
   
-  assign fetch_ex_if.brj_addr = (cu_if.ex_pc_sel == 1'b1) ?
+  assign fetch_ex_if.brj_addr = ((cu_if.ex_pc_sel == 1'b1) && ~rm_if.req_br_j) ?
                                 jump_addr : resolved_addr;
   
   assign hazard_if.mispredict =  fetch_ex_if.fetch_ex_reg.prediction ^
-                                branch_if.branch_taken;
+                                branch_taken;
+
   
   /*******************************************************
   *** Data Ram Interface Logic 

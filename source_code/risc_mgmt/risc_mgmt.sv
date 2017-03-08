@@ -58,6 +58,7 @@ module risc_mgmt (
   word_t  [N_EXTENSIONS-1:0]        e_rdata_s_0;
   word_t  [N_EXTENSIONS-1:0]        e_rdata_s_1;
   logic   [N_EXTENSIONS-1:0]        e_branch_jump;
+  word_t  [N_EXTENSIONS-1:0]        e_pc;
   word_t  [N_EXTENSIONS-1:0]        e_br_j_addr;
   word_t  [N_EXTENSIONS-1:0]        e_reg_wdata;
   logic   [N_EXTENSIONS-1:0]        e_reg_w;
@@ -148,7 +149,7 @@ module risc_mgmt (
   assign rm_if.req_br_j    = e_branch_jump[active_ext] && ext_is_active;
   assign rm_if.branch_jump = e_branch_jump[active_ext];
   assign rm_if.br_j_addr   = e_br_j_addr[active_ext];
-
+  assign e_pc              = {N_EXTENSIONS{rm_if.pc}};
 
   /*  Memory Access Control  */
 

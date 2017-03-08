@@ -67,6 +67,7 @@
   assign e_busy[EXT_ID]               = ``EXT_NAME``_exif.busy;                                                       \
   assign e_branch_jump[EXT_ID]        = ``EXT_NAME``_exif.branch_jump;                                                \
   assign e_br_j_addr[EXT_ID]          = ``EXT_NAME``_exif.br_j_addr;                                                  \
+  assign ``EXT_NAME``_exif.pc         = e_pc[EXT_ID];                                                                 \
   assign e_reg_wdata[EXT_ID]          = ``EXT_NAME``_exif.reg_wdata;                                                  \
   assign e_reg_w[EXT_ID]              = ``EXT_NAME``_exif.reg_w;                                                      \
   assign ``EXT_NAME``_exif.rdata_s_0  = e_rdata_s_0[EXT_ID];                                                          \
@@ -128,6 +129,7 @@
   assign e_busy[EXT_ID]               = ``EXT_NAME``_exif.busy;                                                       \
   assign e_branch_jump[EXT_ID]        = ``EXT_NAME``_exif.branch_jump;                                                \
   assign e_br_j_addr[EXT_ID]          = ``EXT_NAME``_exif.br_j_addr;                                                  \
+  assign ``EXT_NAME``_exif.pc         = e_pc[EXT_ID];                                                                 \
   assign e_reg_wdata[EXT_ID]          = ``EXT_NAME``_exif.reg_wdata;                                                  \
   assign e_reg_w[EXT_ID]              = ``EXT_NAME``_exif.reg_w;                                                      \
   assign ``EXT_NAME``_exif.rdata_s_0  = e_rdata_s_0[EXT_ID];                                                          \

@@ -35,14 +35,15 @@ interface risc_mgmt_execute_if ();
   //branch/jump signals
   logic branch_jump;
   word_t br_j_addr;
+  word_t pc;
 
   modport rmgmt (
     input exception, busy, reg_w, reg_wdata, branch_jump, br_j_addr,
-    output rdata_s_0, rdata_s_1
+    output rdata_s_0, rdata_s_1, pc
   );
 
   modport ext (    
-    input rdata_s_0, rdata_s_1, 
+    input rdata_s_0, rdata_s_1, pc,
     output exception, busy, reg_w, reg_wdata, branch_jump, br_j_addr
   );  
 
