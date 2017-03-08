@@ -87,7 +87,7 @@ module prv_control (
     else if (prv_intern_if.mal_insn)
       ex_src = INSN_MAL;
     else if (prv_intern_if.ex_rmgmt)
-      ex_src = prv_intern_if.ex_rmgmt_cause;
+      ex_src = ex_code_t'(prv_intern_if.ex_rmgmt_cause);
     else 
       exception = 1'b0;
   end
