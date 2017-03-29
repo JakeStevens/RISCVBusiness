@@ -31,25 +31,27 @@
 
 // Register to Register Type instruction
 
-#define INSN_INSERT_REG_TO_REG(OPCODE,FUNCT7,FUNCT3,RS0,RS1,RSD) \
+#define INSN_INSERT_R_TYPE(OPCODE,FUNCT7,FUNCT3,RS0,RS1,RSD) \
   INSN_INSERT(OPCODE, FUNCT7, RS1, RS0, FUNCT3, RSD)
 
-#define GENERATE_INT_CUSTOM_INSTRUCTION_REG_TO_REG(INSN_NAME,OPCODE,FUNCT7,FUNCT3)  \
-void INSN_NAME ## _AUTOGEN(int arga, int argb, int *result) {                       \
-  asm volatile (                                                                    \
-    "addi t0, a0, 0 \t\n                                                            \
-     addi t1, a1, 0 \t\n                                                            \
-  ");                                                                               \
-  INSN_INSERT_REG_TO_REG(OPCODE, FUNCT7, FUNCT3, REG_T1, REG_T0, REG_T2)            \
-  asm volatile ( "sw t2, 0(a2)");                                                   \
+#define GENERATE_CUSTOM_INSTRUCTION_R_TYPE(INSN_NAME,OPCODE,OFFSET,FUNCT7,FUNCT3) \
+void INSN_NAME ## _ ## OFFSET ##  _AUTOGEN(int arga, int argb, int *result) {     \
+  asm volatile (                                                                  \
+    "addi t0, a0, 0 \t\n                                                          \
+     addi t1, a1, 0 \t\n                                                          \
+  ");                                                                             \
+  INSN_INSERT_R_TYPE(OPCODE, FUNCT7, FUNCT3, REG_T1, REG_T0, REG_T2)              \
+  asm volatile ( "sw t2, 0(a2)");                                                 \
 }
 
 
 
 /* Macros for calling insn function calls */
 
-#define CALL_CUSTOM_INSTRUCTION(INSN_NAME, OPA, OPB, RESULT) \
-  INSN_NAME ## _AUTOGEN(OPA, OPB, &RESULT);
+// Register to Register Type instruction
+
+#define CALL_CUSTOM_INSTRUCTION_R_TYPE(INSN_NAME, OFFSET, OPA, OPB, RESULT) \
+  INSN_NAME ## _ ## OFFSET ## _AUTOGEN(OPA, OPB, &RESULT);
 
 
 /* Helper Macros and Defines */

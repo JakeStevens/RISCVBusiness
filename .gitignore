@@ -9,6 +9,7 @@ verification/asm-tests/RV32I/*.log
 verification/asm-tests/RV32I/*.hex
 # config files are auto-generated
 source_code/include/component_selection_defines.vh
+verification/c-firmware/custom_instruction_calls.h
 # proprietary files
 source_code/ram/altera_mf.v
 source_code/ram/altera_mf.sv
