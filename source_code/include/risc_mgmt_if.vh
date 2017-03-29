@@ -64,6 +64,7 @@ interface risc_mgmt_if ();
   logic memory_stall;
   logic active_insn; 
   logic ex_token;
+  logic if_ex_enable;
 
   // exception signals
   logic exception;
@@ -75,7 +76,7 @@ interface risc_mgmt_if ();
       br_j_addr, req_mem, mem_addr, mem_store, mem_ren, 
       mem_wen, mem_byte_en, decode_bubble, execute_stall, memory_stall, 
       active_insn, exception, ex_cause, ex_token,
-    input rdata_s_0, rdata_s_1, mem_load, mem_busy, insn, pc
+    input rdata_s_0, rdata_s_1, mem_load, mem_busy, insn, pc, if_ex_enable
   );
 
   modport ts_pipe (
@@ -97,7 +98,8 @@ interface risc_mgmt_if ();
 
   modport ts_hazard (
     input decode_bubble, execute_stall, memory_stall,
-      active_insn, exception, ex_cause, mem_addr
+      active_insn, exception, ex_cause, mem_addr,
+    output if_ex_enable
   );
 
 endinterface

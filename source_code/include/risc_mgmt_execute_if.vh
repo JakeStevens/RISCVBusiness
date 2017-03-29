@@ -29,7 +29,7 @@ interface risc_mgmt_execute_if ();
   import rv32i_types_pkg::*;
 
   //general execute stage signals
-  logic exception, busy, reg_w;
+  logic start, exception, busy, reg_w;
   word_t rdata_s_0, rdata_s_1, reg_wdata;
 
   //branch/jump signals
@@ -39,11 +39,11 @@ interface risc_mgmt_execute_if ();
 
   modport rmgmt (
     input exception, busy, reg_w, reg_wdata, branch_jump, br_j_addr,
-    output rdata_s_0, rdata_s_1, pc
+    output rdata_s_0, rdata_s_1, pc, start
   );
 
   modport ext (    
-    input rdata_s_0, rdata_s_1, pc,
+    input rdata_s_0, rdata_s_1, pc, start,
     output exception, busy, reg_w, reg_wdata, branch_jump, br_j_addr
   );  
 

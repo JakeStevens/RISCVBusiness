@@ -49,7 +49,8 @@ module hazard_unit
   logic intr;
 
   logic rmgmt_stall, rmgmt_bubble;
-  
+ 
+  assign rm_if.if_ex_enable = ~hazard_if.if_ex_stall; 
   assign rmgmt_bubble = rm_if.decode_bubble;
   assign rmgmt_stall = rm_if.memory_stall | rm_if.execute_stall;
 

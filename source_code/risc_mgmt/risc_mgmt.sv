@@ -53,6 +53,7 @@ module risc_mgmt (
   logic   [N_EXTENSIONS-1:0][4:0]   d_rsel_d;
 
   //Execute Stage Signals
+  logic   [N_EXTENSIONS-1:0]        e_start;
   logic   [N_EXTENSIONS-1:0]        e_exception;
   logic   [N_EXTENSIONS-1:0]        e_busy;
   word_t  [N_EXTENSIONS-1:0]        e_rdata_s_0;
@@ -126,6 +127,19 @@ module risc_mgmt (
   assign rm_if.execute_stall   = e_busy[active_ext] && ext_is_active;
   assign rm_if.memory_stall    = m_busy[active_ext] && ext_is_active; 
 
+  // start signal for multicycle execute stages
+  logic ex_start; 
+
+  always_ff @ (posedge CLK, negedge nRST) begin
+    if (~nRST) 
+      ex_start <= 1'b0;
+    else if (rm_if.if_ex_enable)
+      ex_start <= 1'b1;
+    else
+      ex_start <= 1'b0;
+  end
+
+  assign e_start = {N_EXTENSIONS{ex_start}} & tokens;
 
   /* Registerfile / Forwarding Logic
   *  Forwarding not present in 2 stage pipeline

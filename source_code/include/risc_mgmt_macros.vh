@@ -72,6 +72,7 @@
   assign e_reg_w[EXT_ID]              = ``EXT_NAME``_exif.reg_w;                                                      \
   assign ``EXT_NAME``_exif.rdata_s_0  = e_rdata_s_0[EXT_ID];                                                          \
   assign ``EXT_NAME``_exif.rdata_s_1  = e_rdata_s_1[EXT_ID];                                                          \
+  assign ``EXT_NAME``_exif.start      = e_start[EXT_ID];                                                              \
   // memory stage connections to RISC-MGMT  \
   assign m_exception[EXT_ID]          = ``EXT_NAME``_memif.exception;                                                 \
   assign m_busy[EXT_ID]               = ``EXT_NAME``_memif.busy;                                                      \
@@ -135,6 +136,7 @@
   assign e_reg_w[EXT_ID]              = ``EXT_NAME``_exif.reg_w;                                                      \
   assign ``EXT_NAME``_exif.rdata_s_0  = e_rdata_s_0[EXT_ID];                                                          \
   assign ``EXT_NAME``_exif.rdata_s_1  = e_rdata_s_1[EXT_ID];                                                          \
+  assign ``EXT_NAME``_exif.start      = e_start[EXT_ID];                                                              \
   // memory stage connections to RISC-MGMT  \
   assign m_exception[EXT_ID]          = ``EXT_NAME``_memif.exception;                                                 \
   assign m_busy[EXT_ID]               = ``EXT_NAME``_memif.busy;                                                      \
