@@ -160,6 +160,7 @@ def compile_c(file_name):
     cmd_arr = ['riscv64-unknown-elf-gcc', '-O0', '-m32', '-march=RV32IM', '-ffreestanding', '-nostdlib', '-o', output_name, 
               '-Wl,-Bstatic,-T,verification/c-firmware/link.ld,--strip-debug']
     cmd_arr += ['-lgcc', 'verification/c-firmware/trap.S']
+    cmd_arr += ['-Iverification/c-firmware/']
     cmd_arr += ['verification/c-firmware/trap.c', 'verification/c-firmware/print.c', file_name]
     failure = subprocess.call(cmd_arr)
     if failure:

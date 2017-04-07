@@ -51,13 +51,15 @@ void INSN_NAME ## _ ## OFFSET ##  _AUTOGEN(int arga, int argb, int *result) {   
 // Register to Register Type instruction
 
 #define CALL_CUSTOM_INSTRUCTION_R_TYPE(INSN_NAME, OFFSET, OPA, OPB, RESULT) \
-  INSN_NAME ## _ ## OFFSET ## _AUTOGEN(OPA, OPB, &RESULT);
+  CALL_CUSTOM_INSTRUCTION_R_TYPE2(INSN_NAME, OFFSET, OPA, OPB, RESULT)
 
+#define CALL_CUSTOM_INSTRUCTION_R_TYPE2(INSN_NAME, OFFSET, OPA, OPB, RESULT) \
+  INSN_NAME ## _ ## OFFSET ## _AUTOGEN(OPA, OPB, &RESULT);
 
 /* Helper Macros and Defines */
 
 #define INSN_INSERT(OPCODE, args...) \
-  asm volatile (".word "CI_TO_STR(BUILD_INSN(OPCODE, args)));
+  asm volatile (".word 0b"CI_TO_STR(BUILD_INSN(OPCODE, args)));
 
 #define CI_TO_STR(s) CI_TO_STR2(s)
 #define CI_TO_STR2(s) #s

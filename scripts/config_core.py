@@ -100,6 +100,8 @@ def create_include(config):
   c_header += 'MAY BE OVERWRITTEN. DO NOT VERSION CONTROL THIS FILE.\n*/\n'
   c_header += '#ifndef CUSTOM_INSTRUCTION_CALLS_H\n'
   c_header += '#define CUSTOM_INSTRUCTION_CALLS_H\n\n\n'
+  c_header += '#include "custom_instruction_macros.h"\n\n'
+  c_header += '// Custom Instruction Usage:\n// CALL_CUSTOM_INSTRUCTION_R_TYPE(<ext_name>, <insn_offset>, <operand_a>, <operand_b>, <result>)\n\n'
   c_file.write(c_header)
 
   # Handle localparam configurations

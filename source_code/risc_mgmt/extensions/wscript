@@ -7,8 +7,10 @@ def configure(cnf):
   cnf.recurse(template)
   cnf.recurse(test)
   cnf.recurse(rv32m)
+  cnf.recurse(crc32)
 
 def sim_source(cnf):
   cnf.recurse(template)
   cnf.recurse(test)
   cnf.recurse(rv32m)
+  cnf.recurse(crc32)
