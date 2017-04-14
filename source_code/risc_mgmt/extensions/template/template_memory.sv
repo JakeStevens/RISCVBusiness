@@ -16,10 +16,11 @@
 *
 *   Filename:     template_memory.sv
 *
-*   Created by:   John Skubic
-*   Email:        jskubic@purdue.edu
-*   Date Created: 02/07/2017
-*   Description:  <add description here>
+*   Created by:   <author>
+*   Email:        <author email>
+*   Date Created: <date> 
+*   Description:  This extension is the template for creating rytpe custom
+*                 instructions
 */
 
 `include "risc_mgmt_memory_if.vh"

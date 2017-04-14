@@ -16,10 +16,11 @@
 *
 *   Filename:     template_decode.sv
 *
-*   Created by:   John Skubic
-*   Email:        jskubic@purdue.edu
-*   Date Created: 02/07/2017
-*   Description:  <add description here>
+*   Created by:   <author> 
+*   Email:        <author email>
+*   Date Created: <date>
+*   Description:  This extension is the template for creating rytpe custom
+*                 instructions. 
 */
 
 `include "risc_mgmt_decode_if.vh"
@@ -32,11 +33,15 @@ module template_decode (
   output template_pkg::decode_execute_t idex
 );
 
+  import rv32i_types_pkg::*;
+
   parameter OPCODE = 7'b000_1011;
 
+  rtype_t insn_rtype;
+  logic [9:0] funct10;
+
   // prevent this extension from accessing core
-  assign dif.insn_claim = (dif.insn[6:0] == OPCODE);
-  assign dif.bubble_req = 1'b0;
-  
+  assign dif.insn_claim = 1'b0; // (dif.insn[6:0] == OPCODE);
+  assign funct10 = {insn_rtype.funct7, insn_rtype.funct3}; 
 
 endmodule
