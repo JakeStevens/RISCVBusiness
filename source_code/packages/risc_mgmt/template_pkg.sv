@@ -16,9 +16,9 @@
 *
 *   Filename:     template_pkg.sv
 *
-*   Created by:   John Skubic
-*   Email:        jskubic@purdue.edu
-*   Date Created: 02/07/2017
+*   Created by:   <author>
+*   Email:        <author email>
+*   Date Created: <date> 
 *   Description:  Template for a package containg the needed types for
 *                 a RISC-MGMT extension
 */

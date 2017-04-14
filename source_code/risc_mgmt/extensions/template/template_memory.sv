@@ -19,7 +19,7 @@
 *   Created by:   <author>
 *   Email:        <author email>
 *   Date Created: <date> 
-*   Description:  This extension is the template for creating rytpe custom
+*   Description:  This extension is the Template for creating rytpe custom
 *                 instructions
 */
 
