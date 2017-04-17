@@ -112,6 +112,7 @@ void exception_handler(int cause, int *regs, int *epc, int *badaddr) {
           else {
             if (numerator < 0 && denominator < 0) {
               asm_div(invert(numerator), invert(denominator), &quotient, &remainder);
+              remainder = invert(remainder);
             }
             else if (numerator < 0) {
               asm_div(invert(numerator), denominator, &quotient, &remainder);

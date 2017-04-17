@@ -19,8 +19,5 @@ microarch_params:
 # RISC-MGMT Extension Configuration
 risc_mgmt_params:
   standard_extensions:
-    - name : rv32m
   nonstandard_extensions:
-    - name      : crc32
-      encoding  : R_TYPE 
-      length    : 2
+

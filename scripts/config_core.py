@@ -145,22 +145,25 @@ def create_include(config):
   # Handling of RISC-MGMT Extensions
   rmgmt_extensions = []
   try:
-    rmgmt_params = config['risc_mgmt_params']
-    for rmgmt_param in rmgmt_params:
-      extensions = rmgmt_params[rmgmt_param]
-      for extension in extensions:
-        if rmgmt_param == "standard_extensions" and extension['name'] not in RISC_MGMT_PARAMS[rmgmt_param]['name']:
-          err = 'Unsupported extension: ' + extension['name']
-          sys.exit(err)
-        else:
-          rmgmt_extensions.append([extension, rmgmt_param])
+    if 'risc_mgmt_params' in config:
+      rmgmt_params = config['risc_mgmt_params']
+      if rmgmt_params != None:
+        for rmgmt_param in rmgmt_params:
+          extensions = rmgmt_params[rmgmt_param]
+          if extensions != None:
+            for extension in extensions:
+              if rmgmt_param == "standard_extensions" and extension['name'] not in RISC_MGMT_PARAMS[rmgmt_param]['name']:
+                err = 'Unsupported extension: ' + extension['name']
+                sys.exit(err)
+              else:
+                rmgmt_extensions.append([extension, rmgmt_param])
   except:
     err = "Error Parsing RISC-MGMT extension configuration."
     sys.exit(err) 
 
   # Need to at least have the nop extension
   if(len(rmgmt_extensions) == 0):
-    rmgmt_extensions.append([{'name':'template', 'encoding' : 'R_TYPE'}, 'nonstandard_extension'])
+    rmgmt_extensions.append([{'name':'template', 'encoding' : 'R_TYPE', 'length':1}, 'nonstandard_extension'])
 
   include_file.write('\n// RISC-MGMT Extensions:\n') 
   include_file.write('`define NUM_EXTENSIONS ' + str(len(rmgmt_extensions)) + '\n')
