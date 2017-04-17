@@ -48,10 +48,9 @@ module hazard_unit
   logic e_f_stage;
   logic intr;
 
-  logic rmgmt_stall, rmgmt_bubble;
+  logic rmgmt_stall;
  
   assign rm_if.if_ex_enable = ~hazard_if.if_ex_stall; 
-  assign rmgmt_bubble = rm_if.decode_bubble;
   assign rmgmt_stall = rm_if.memory_stall | rm_if.execute_stall;
 
   assign dmem_access = (hazard_if.dren || hazard_if.dwen);
@@ -62,7 +61,7 @@ module hazard_unit
   
   assign hazard_if.npc_sel = branch_jump;
   
-  assign hazard_if.pc_en = (~wait_for_dmem&~wait_for_imem&~hazard_if.halt&~ex_flush_hazard&~rmgmt_stall&~rmgmt_bubble) |
+  assign hazard_if.pc_en = (~wait_for_dmem&~wait_for_imem&~hazard_if.halt&~ex_flush_hazard&~rmgmt_stall) |
                             branch_jump | prv_pipe_if.insert_pc | prv_pipe_if.ret; 
 
   assign hazard_if.if_ex_flush = ex_flush_hazard | branch_jump |
@@ -72,7 +71,7 @@ module hazard_unit
   assign hazard_if.if_ex_stall = (wait_for_dmem ||
                                  (wait_for_imem & ~dmem_access) ||
                                  hazard_if.halt) & (~ex_flush_hazard | e_ex_stage) || 
-                                 rm_if.execute_stall || rm_if.decode_bubble;
+                                 rm_if.execute_stall;
 
   /* Hazards due to Interrupts/Exceptions */
   assign prv_pipe_if.ret = hazard_if.ret;

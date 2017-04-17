@@ -28,19 +28,19 @@
 interface risc_mgmt_decode_if ();
   import rv32i_types_pkg::*; 
  
-  logic insn_claim, bubble_req;
+  logic insn_claim;
   logic [4:0] rsel_s_0, rsel_s_1, rsel_d;
   word_t insn;
 
   modport rmgmt (
-    input insn_claim, bubble_req, 
+    input insn_claim, 
     rsel_s_0, rsel_s_1, rsel_d,
     output insn
   );
 
   modport ext (
     input insn,
-    output insn_claim, bubble_req, 
+    output insn_claim, 
     rsel_s_0, rsel_s_1, rsel_d
   );
 

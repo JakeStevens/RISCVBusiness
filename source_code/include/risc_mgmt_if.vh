@@ -59,7 +59,6 @@ interface risc_mgmt_if ();
   logic [3:0] mem_byte_en;
 
   // hazard signals
-  logic decode_bubble;
   logic execute_stall;
   logic memory_stall;
   logic active_insn; 
@@ -74,7 +73,7 @@ interface risc_mgmt_if ();
     output req_reg_r, req_reg_w, rsel_s_0, rsel_s_1, 
       rsel_d, reg_w, reg_wdata, req_br_j, branch_jump, 
       br_j_addr, req_mem, mem_addr, mem_store, mem_ren, 
-      mem_wen, mem_byte_en, decode_bubble, execute_stall, memory_stall, 
+      mem_wen, mem_byte_en, execute_stall, memory_stall, 
       active_insn, exception, ex_cause, ex_token,
     input rdata_s_0, rdata_s_1, mem_load, mem_busy, insn, pc, if_ex_enable
   );
@@ -84,7 +83,7 @@ interface risc_mgmt_if ();
     input req_reg_r, req_reg_w, rsel_s_0, rsel_s_1, 
       rsel_d, reg_w, reg_wdata, req_br_j, branch_jump, 
       br_j_addr, req_mem, mem_addr, mem_store, mem_ren, 
-      mem_wen, decode_bubble, execute_stall, memory_stall, 
+      mem_wen, execute_stall, memory_stall, 
       active_insn, exception, ex_cause
   );
 
@@ -97,7 +96,7 @@ interface risc_mgmt_if ();
   );
 
   modport ts_hazard (
-    input decode_bubble, execute_stall, memory_stall,
+    input execute_stall, memory_stall,
       active_insn, exception, ex_cause, mem_addr,
     output if_ex_enable
   );

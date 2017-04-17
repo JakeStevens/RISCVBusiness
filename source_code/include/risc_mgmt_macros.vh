@@ -58,7 +58,6 @@
   // decode stage connections to RISC-MGMT \
   assign ``EXT_NAME``_idif.insn       = d_insn[EXT_ID];                                                               \
   assign d_insn_claim[EXT_ID]         = ``EXT_NAME``_idif.insn_claim;                                                 \
-  assign d_bubble_req[EXT_ID]         = ``EXT_NAME``_idif.bubble_req;                                                 \
   assign d_rsel_s_0[EXT_ID]           = ``EXT_NAME``_idif.rsel_s_0;                                                   \
   assign d_rsel_s_1[EXT_ID]           = ``EXT_NAME``_idif.rsel_s_1;                                                   \
   assign d_rsel_d[EXT_ID]             = ``EXT_NAME``_idif.rsel_d;                                                     \
@@ -122,7 +121,6 @@
   // decode stage connections to RISC-MGMT \
   assign ``EXT_NAME``_idif.insn       = d_insn[EXT_ID];                                                               \
   assign d_insn_claim[EXT_ID]         = ``EXT_NAME``_idif.insn_claim;                                                 \
-  assign d_bubble_req[EXT_ID]         = ``EXT_NAME``_idif.bubble_req;                                                 \
   assign d_rsel_s_0[EXT_ID]           = ``EXT_NAME``_idif.rsel_s_0;                                                   \
   assign d_rsel_s_1[EXT_ID]           = ``EXT_NAME``_idif.rsel_s_1;                                                   \
   assign d_rsel_d[EXT_ID]             = ``EXT_NAME``_idif.rsel_d;                                                     \

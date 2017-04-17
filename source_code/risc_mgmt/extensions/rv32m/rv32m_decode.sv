@@ -44,7 +44,6 @@ module rv32m_decode (
   assign dif.rsel_s_0 = insn.rs1;
   assign dif.rsel_s_1 = insn.rs2;
   assign dif.rsel_d   = insn.rd;
-  assign dif.bubble_req = 1'b0; 
   
   // decode funct
   assign idex.start = dif.insn_claim;

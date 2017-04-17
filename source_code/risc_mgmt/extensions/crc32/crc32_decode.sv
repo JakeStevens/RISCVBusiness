@@ -41,7 +41,6 @@ module crc32_decode (
 
   // prevent this extension from accessing core
   assign dif.insn_claim = (dif.insn[6:0] == OPCODE);
-  assign dif.bubble_req = 0; //TODO:Remove this signal
 
   // Decoding rtype
   assign insn_rtype = rtype_t'(dif.insn);

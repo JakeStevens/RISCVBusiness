@@ -41,7 +41,6 @@ module test_decode (
   assign insn = dif.insn;
 
   assign dif.insn_claim = (OPCODE == insn.opcode); 
-  assign dif.bubble_req = 0;
   assign dif.rsel_s_0   = insn.rs_0;
   assign dif.rsel_s_1   = insn.rs_1;
   assign dif.rsel_d     = insn.rs_d;

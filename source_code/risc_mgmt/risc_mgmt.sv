@@ -47,7 +47,6 @@ module risc_mgmt (
   // Decode Stage Signals
   word_t  [N_EXTENSIONS-1:0]        d_insn;
   logic   [N_EXTENSIONS-1:0]        d_insn_claim;
-  logic   [N_EXTENSIONS-1:0]        d_bubble_req;  
   logic   [N_EXTENSIONS-1:0][4:0]   d_rsel_s_0;
   logic   [N_EXTENSIONS-1:0][4:0]   d_rsel_s_1;      
   logic   [N_EXTENSIONS-1:0][4:0]   d_rsel_d;
@@ -123,7 +122,6 @@ module risc_mgmt (
   *  All pipeline control is handled in standard core automatically
   *  Stalls will be forwarded to the standard core
   */
-  assign rm_if.decode_bubble   = d_bubble_req[active_ext] && ext_is_active;
   assign rm_if.execute_stall   = e_busy[active_ext] && ext_is_active;
   assign rm_if.memory_stall    = m_busy[active_ext] && ext_is_active; 
 
