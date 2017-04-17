@@ -19,7 +19,8 @@
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 02/08/2017
-*   Description:  <add description here>
+*   Description:  Interface between RISC-MGMT and the execute stage of an
+*                 extension. 
 */
 
 `ifndef RISC_MGMT_EXECUTE_IF_VH

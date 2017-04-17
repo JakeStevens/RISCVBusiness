@@ -19,7 +19,8 @@
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 04/06/2017
-*   Description:  <add description here>
+*   Description:  CRC32 calculator.  Takes one byte and keeps the running
+*                 crc32 calculation. 
 */
 
 module crc32 (

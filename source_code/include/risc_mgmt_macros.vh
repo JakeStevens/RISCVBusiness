@@ -19,7 +19,8 @@
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 02/07/2017
-*   Description:  <add description here>
+*   Description:  Macros used to automate the instantiation of RISC-MGMT
+*                 extensions. 
 */
 
 `ifndef RISC_MGMT_MACROS_VH

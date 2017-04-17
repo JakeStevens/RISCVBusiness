@@ -19,7 +19,8 @@
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 02/08/2017
-*   Description:   
+*   Description:  Interface between RISC-MGMT and the decode stage of an
+*                 extension. 
 */
 
 `ifndef RISC_MGMT_DECODE_IF_VH
