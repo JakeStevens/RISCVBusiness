@@ -24,6 +24,7 @@
 
 
 `include "prv_internal_if.vh"
+`include "component_selection_defines.vh"
 
 module csr_rfile (
   input CLK, nRST,
@@ -40,7 +41,10 @@ module csr_rfile (
 
   assign mcpuid.base          = BASE_RV32;
   assign mcpuid.zero          = '0;
-  assign mcpuid.extensions  = MCPUID_EXT_I;
+  assign mcpuid.extensions  = MCPUID_EXT_I `ifdef         RV32M_SUPPORTED |
+                              MCPUID_EXT_M `endif `ifdef  RV32C_SUPPORTED |
+                              MCPUID_EXT_C `endif `ifdef  RV32F_SUPPORTED | 
+                              MCPUID_EXT_F `endif ;
 
   assign mimpid           = '0; //TODO: Version Numbering Convention
 

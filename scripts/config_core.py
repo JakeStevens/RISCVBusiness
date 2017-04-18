@@ -189,6 +189,12 @@ def create_include(config):
     else:
       include_file.write('\n')
 
+  #set defines to indicate what ISA support is present
+  include_file.write('\n')
+  for extension in rmgmt_extensions:
+    if(extension[1] == 'standard_extensions'):
+      include_file.write('`define ' + extension[0]['name'].upper() + '_SUPPORTED\t1\n')
+
   # Write include footer to file
   footer = '\n`endif // COMPONENT_SELECTION_DEFINES_VH\n'
   include_file.write(footer)
