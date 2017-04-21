@@ -30,7 +30,7 @@ module RISCVBusiness (
   input logic CLK, nRST,
   output logic halt,
 
-  `ifdef BUS_INTERFACE_GENERIC
+  `ifdef BUS_INTERFACE_GENERIC_BUS
   generic_bus_if.cpu gen_bus_if
   `elsif BUS_INTERFACE_AHB
   ahb_if.ahb_m ahb_master
