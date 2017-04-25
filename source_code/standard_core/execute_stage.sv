@@ -118,7 +118,7 @@ module execute_stage(
   *******************************************************/
   word_t imm_I_ext, imm_S_ext, imm_UJ_ext;
   assign imm_I_ext  = {{20{cu_if.imm_I[11]}}, cu_if.imm_I};
-  assign imm_UJ_ext = {{20{cu_if.imm_UJ[11]}}, cu_if.imm_UJ};
+  assign imm_UJ_ext = {{11{cu_if.imm_UJ[20]}}, cu_if.imm_UJ};
   assign imm_S_ext  = {{20{cu_if.imm_S[11]}}, cu_if.imm_S};
 
   /*******************************************************
