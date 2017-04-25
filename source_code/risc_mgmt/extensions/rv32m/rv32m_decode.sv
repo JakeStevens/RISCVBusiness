@@ -37,6 +37,8 @@ module rv32m_decode (
   parameter OPCODE = RV32M_OPCODE;
 
   rv32m_insn_t insn;
+
+  assign dif.mem_to_reg = 1'b0;
   
   assign insn = rv32m_insn_t'(dif.insn);
 

@@ -41,6 +41,7 @@ module crc32_decode (
 
   // prevent this extension from accessing core
   assign dif.insn_claim = (dif.insn[6:0] == OPCODE);
+  assign dif.mem_to_reg = 1'b0;
 
   // Decoding rtype
   assign insn_rtype = rtype_t'(dif.insn);

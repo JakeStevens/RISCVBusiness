@@ -47,6 +47,7 @@ module risc_mgmt (
   // Decode Stage Signals
   word_t  [N_EXTENSIONS-1:0]        d_insn;
   logic   [N_EXTENSIONS-1:0]        d_insn_claim;
+  logic   [N_EXTENSIONS-1:0]        d_mem_to_reg; // ignored in two stage pipe rmgmt
   logic   [N_EXTENSIONS-1:0][4:0]   d_rsel_s_0;
   logic   [N_EXTENSIONS-1:0][4:0]   d_rsel_s_1;      
   logic   [N_EXTENSIONS-1:0][4:0]   d_rsel_d;

@@ -42,6 +42,7 @@ module template_decode (
 
   // prevent this extension from accessing core
   assign dif.insn_claim = 1'b0; // (dif.insn[6:0] == OPCODE);
-  assign funct10 = {insn_rtype.funct7, insn_rtype.funct3}; 
+  assign funct10 = {insn_rtype.funct7, insn_rtype.funct3};
+  assign dif.mem_to_reg = 1'b0; 
 
 endmodule
