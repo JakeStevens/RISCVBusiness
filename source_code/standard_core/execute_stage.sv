@@ -336,5 +336,19 @@ module execute_stage(
   assign predict_if.prediction = fetch_ex_if.fetch_ex_reg.prediction;
   assign predict_if.branch_result = branch_if.branch_taken;
   //predict_if.update_addr = ;
+  
+  /*********************************************************
+  *** Signals for Bind Tracking - Read-Only, These don't affect execution
+  *********************************************************/
+  logic wb_stall;
+  logic [2:0] funct3;
+  logic [11:0] funct12;
+  logic instr_30;
+
+  assign wb_stall = hazard_if.if_ex_stall & ~hazard_if.jump & ~hazard_if.branch;
+  assign funct3 = cu_if.instr[14:12];
+  assign funct12 = cu_if.instr[31:20];
+  assign instr_30 = cu_if.instr[30];
+
 endmodule
 

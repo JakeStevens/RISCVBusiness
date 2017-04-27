@@ -73,21 +73,21 @@ module tb_RISCVBusiness_self_test ();
 
   bind execute_stage cpu_tracker cpu_track1 (
     .CLK(CLK),
-    .wb_stall(hazard_if.if_ex_stall & ~hazard_if.jump & ~hazard_if.branch),
+    .wb_stall(wb_stall),
     .instr(fetch_ex_if.fetch_ex_reg.instr),
     .pc(fetch_ex_if.fetch_ex_reg.pc),
     .opcode(cu_if.opcode),
-    .funct3(cu_if.instr[14:12]),
-    .funct12(cu_if.instr[31:20]),
+    .funct3(funct3),
+    .funct12(funct12),
     .rs1(rf_if.rs1),
     .rs2(rf_if.rs2),
     .rd(rf_if.rd),
     .imm_S(cu_if.imm_S),
     .imm_I(cu_if.imm_I),
     .imm_U(cu_if.imm_U),
-    .imm_UJ({9'b0, cu_if.imm_UJ}),
+    .imm_UJ(imm_UJ_ext),
     .imm_SB(cu_if.imm_SB),
-    .instr_30(fetch_ex_if.fetch_ex_reg.instr[30])
+    .instr_30(instr_30)
     );
 
   bind branch_predictor branch_tracker branch_perf(
