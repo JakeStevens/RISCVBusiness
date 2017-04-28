@@ -25,12 +25,13 @@
 */
 
 `include "generic_bus_if.vh"
+`include "component_selection_defines.vh"
 
 module ram_wrapper (
   input logic CLK, nRST,
   generic_bus_if.generic_bus gen_bus_if
 );
 
-  ram #(.LAT(0)) v_lat_ram (.*);
+  ram_sim_model #(.LAT(0), .ENDIANNESS(BUS_ENDIANNESS)) v_lat_ram (.*);
 
 endmodule

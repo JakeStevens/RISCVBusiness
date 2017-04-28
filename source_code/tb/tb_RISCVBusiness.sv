@@ -23,6 +23,7 @@
 *                 A hexdump of memory will occur after the halt condition.
 */
 
+`timescale 1ns/100ps
 
 `include "generic_bus_if.vh"
 `include "component_selection_defines.vh"

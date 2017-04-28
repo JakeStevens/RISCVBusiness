@@ -24,6 +24,7 @@
 *                 the char representation of what is written.   
 */
 
+`timescale 1ns/100ps
 
 `include "generic_bus_if.vh"
 `include "component_selection_defines.vh"
