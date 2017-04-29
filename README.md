@@ -1,13 +1,14 @@
 # RISCVBusiness
 Design documents and project information for the RISC-V Business project can be found here:
 
-https://wiki.itap.purdue.edu/display/RISC/RISCV-Business
+[RISCV-Business Documentation](https://wiki.itap.purdue.edu/display/RISC/RISCV-Business)
 
 # Getting Started
 
 ## Generating RISC-V tool-chain
 
 Refer to the following link for instructions on installing the RISC-V software tools:
+
 [RISC-V Software Installation](https://riscv.org/software-tools/)
 
 Execute the following commands to download the correct version of the RISC-V toos:
