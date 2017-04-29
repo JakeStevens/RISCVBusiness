@@ -11,7 +11,7 @@ Refer to the following link for instructions on installing the RISC-V software t
 
 [RISC-V Software Installation](https://riscv.org/software-tools/)
 
-Execute the following commands to download the correct version of the RISC-V toos:
+Execute the following commands to download the correct version of the RISC-V tools:
 
 ~~~
 git clone https://github.com/riscv/riscv-tools.git
