@@ -152,6 +152,8 @@ module tb_RISCVBusiness ();
         $write("%c",gen_bus_if.wdata[31:24]);
     end
 
+    #(1);
+
     dump_stats();
     dump_ram();
 

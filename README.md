@@ -3,6 +3,9 @@ Design documents and project information for the RISC-V Business project can be 
 
 [RISCV-Business Documentation](https://wiki.itap.purdue.edu/display/RISC/RISCV-Business)
 
+**Current User-Level ISA Spec :** v2.1
+**Current Privileged ISA Spec :** v1.7
+
 # Getting Started
 
 ## Generating RISC-V tool-chain

@@ -151,6 +151,8 @@ module tb_RISCVBusiness_self_test ();
       end
     end
 
+    #(1);
+
     dump_stats();
     dump_ram();
 
@@ -167,10 +169,10 @@ module tb_RISCVBusiness_self_test ();
   end : CORE_RUN
 
   task dump_stats();
-    integer instret, cycles;
+    logic [63:0] instret, cycles;
     instret = DUT.pipeline.prv_block_i.csr_rfile_i.instretfull;
     cycles  = DUT.pipeline.prv_block_i.csr_rfile_i.cyclefull;
-    assert (cycles == clk_count) else $error("Cycles CSR != clk_count");
+    assert (cycles == clk_count) else $error("Cycles CSR (%0d) != clk_count (%0d)", cycles, clk_count);
     stats_ptr = $fopen(`STATS_FILE_NAME, "w");
     $fwrite(stats_ptr, "Instructions retired: %2d\n", instret);
     $fwrite(stats_ptr, "Cycles taken: %2d\n", cycles);

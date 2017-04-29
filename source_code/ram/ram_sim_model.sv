@@ -59,6 +59,7 @@ module ram_sim_model (
   logic input_diff;
   logic access;
   string line;
+  int res;
 
   // Load in meminit
   initial begin
@@ -68,12 +69,11 @@ module ram_sim_model (
         $info("Warning: Couldn't open memory init file %s", MEM_INIT_FILE);
       end else begin
         while (!$feof(fptr)) begin
-          $fgets(line, fptr);
-          $sscanf(line, ":%2h%4h%2h%8h%2h", t0, faddr, line_type, fdata, t1); 
+          res = $fgets(line, fptr);
+          res = $sscanf(line, ":%2h%4h%2h%8h%2h", t0, faddr, line_type, fdata, t1); 
           if (line_type == 8'h00) //data
             memory[faddr] = fdata;
         end
-        $info("CLOSING FILE");
         $fclose(fptr);
       end
     end
@@ -134,8 +134,8 @@ module ram_sim_model (
     end
   end
   
-  assign input_diff = (addr_r != addr) || (ren_r != ren) || 
-                      (wen_r != wen) || (wdata_r != wdata);
+  assign input_diff = (addr_r !== addr) || (ren_r !== ren) || 
+                      (wen_r !== wen) || (wdata_r !== wdata);
 
   // mux inputs to ram
   assign addr_ram   = input_diff ? addr : addr_r;
@@ -154,7 +154,7 @@ module ram_sim_model (
 
   assign access = (counter == LAT) && !input_diff;
 
-  assign rdata = memory.exists(addr_ram) ? memory[addr_ram] : MEM_DEFAULT;
+  assign rdata = (^addr_ram !== 1'bx) && memory.exists(addr_ram) ? memory[addr_ram] : MEM_DEFAULT;
   assign gen_bus_if.busy  = ~access;
 
 endmodule
