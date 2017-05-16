@@ -46,6 +46,8 @@ module RISCVBusiness (
   generic_bus_if dcache_mc_if();
   generic_bus_if pipeline_trans_if(); 
   risc_mgmt_if   rm_if();
+  predictor_pipeline_if predict_if();
+  prv_pipeline_if prv_pipe_if();
 
   // Module Instantiations
 
@@ -55,7 +57,21 @@ module RISCVBusiness (
     .halt(halt),
     .igen_bus_if(tspp_icache_gen_bus_if),
     .dgen_bus_if(tspp_dcache_gen_bus_if),
+    .prv_pipe_if(prv_pipe_if),
+    .predict_if(predict_if),
     .rm_if(rm_if)
+  );
+
+  branch_predictor branch_predictor_i (
+    .CLK(CLK),
+    .nRST(nRST),
+    .predict_if(predict_if)
+  );
+
+  prv_block prv_block_i (
+    .CLK(CLK),
+    .nRST(nRST),
+    .prv_pipe_if(prv_pipe_if)
   );
 
   risc_mgmt rmgmt (

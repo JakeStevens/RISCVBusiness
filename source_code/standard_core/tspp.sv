@@ -19,7 +19,7 @@
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 06/01/2016
-*   Description:  Two Stage Pipeline
+*   Description:  Two Stage In-Order Pipeline
 */
 
 `include "fetch_execute_if.vh"
@@ -34,19 +34,17 @@ module tspp (
   output logic halt,
   generic_bus_if.cpu igen_bus_if,
   generic_bus_if.cpu dgen_bus_if,
+  prv_pipeline_if prv_pipe_if,
+  predictor_pipeline_if predict_if,
   risc_mgmt_if rm_if
 );
   //interface instantiations
   fetch_execute_if      fetch_ex_if();
-  predictor_pipeline_if predict_if();
   hazard_unit_if        hazard_if();
-  prv_pipeline_if       prv_pipe_if();
 
   //module instantiations
   fetch_stage fetch_stage_i (.*);
   execute_stage execute_stage_i (.*);
-  branch_predictor branch_predictor_i (.*);
   hazard_unit hazard_unit_i (.*);
-  prv_block prv_block_i(.*);
 
 endmodule
