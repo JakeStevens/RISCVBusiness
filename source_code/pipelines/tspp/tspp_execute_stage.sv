@@ -14,7 +14,7 @@
 *   limitations under the License.
 *
 *
-*   Filename:     execute_stage.sv
+*   Filename:     tspp_execute_stage.sv
 *
 *   Created by:   Jacob R. Stevens
 *   Email:        steven69@purdue.edu
@@ -22,8 +22,8 @@
 *   Description:  Execute Stage for the Two Stage Pipeline 
 */
 
-`include "fetch_execute_if.vh"
-`include "hazard_unit_if.vh"
+`include "tspp_fetch_execute_if.vh"
+`include "tspp_hazard_unit_if.vh"
 `include "predictor_pipeline_if.vh"
 `include "control_unit_if.vh"
 `include "component_selection_defines.vh"
@@ -33,10 +33,10 @@
 `include "prv_pipeline_if.vh"
 `include "risc_mgmt_if.vh"
 
-module execute_stage(
+module tspp_execute_stage(
   input logic CLK, nRST,
-  fetch_execute_if.execute fetch_ex_if,
-  hazard_unit_if.execute hazard_if,
+  tspp_fetch_execute_if.execute fetch_ex_if,
+  tspp_hazard_unit_if.execute hazard_if,
   predictor_pipeline_if.update predict_if,
   generic_bus_if.cpu dgen_bus_if,
   prv_pipeline_if.pipe  prv_pipe_if,

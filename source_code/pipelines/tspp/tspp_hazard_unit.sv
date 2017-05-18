@@ -14,7 +14,7 @@
 *   limitations under the License.
 *
 *
-*   Filename:     hazard_unit.sv
+*   Filename:     tspp_hazard_unit.sv
 *
 *   Created by:   Jacob R. Stevens
 *   Email:        steven69@purdue.edu
@@ -23,13 +23,13 @@
 *                 the stages of the Two Stage Pipeline 
 */
 
-`include "hazard_unit_if.vh"
+`include "tspp_hazard_unit_if.vh"
 `include "prv_pipeline_if.vh"
 `include "risc_mgmt_if.vh"
 
-module hazard_unit
+module tspp_hazard_unit
 (
-  hazard_unit_if.hazard_unit hazard_if,
+  tspp_hazard_unit_if.hazard_unit hazard_if,
   prv_pipeline_if.hazard  prv_pipe_if,
   risc_mgmt_if.ts_hazard rm_if
 );

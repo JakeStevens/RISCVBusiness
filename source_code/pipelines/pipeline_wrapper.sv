@@ -14,32 +14,30 @@
 *   limitations under the License.
 *   
 *   
-*   Filename:     fetch_execute_if.vh
+*   Filename:     pipeline_wrapper.sv
 *   
-*   Created by:   Jacob R. Stevens	
-*   Email:        steven69@purdue.edu
-*   Date Created: 06/01/2016
-*   Description:  Interface between the fetch and execute pipeline stages
+*   Created by:   John Skubic
+*   Email:        jskubic@purdue.edu
+*   Date Created: 05/17/2017
+*   Description:  Wrapper for pipeline configurable component.
 */
 
-`ifndef FETCH_EXECUTE_IF_VH
-`define FETCH_EXECUTE_IF_VH
+`include "predictor_pipeline_if.vh"
+`include "generic_bus_if.vh"
+`include "prv_pipeline_if.vh"
+`include "risc_mgmt_if.vh"
+`include "component_selection_defines.vh"
 
-interface fetch_execute_if;
-  import rv32i_types_pkg::*;
+module pipeline_wrapper (
+  input logic CLK, nRST,
+  output logic halt,
+  generic_bus_if.cpu igen_bus_if,
+  generic_bus_if.cpu dgen_bus_if,
+  prv_pipeline_if prv_pipe_if,
+  predictor_pipeline_if predict_if,
+  risc_mgmt_if rm_if
+);
  
-  fetch_ex_pipeline_reg_t fetch_ex_reg;
-  word_t brj_addr;
+   tspp tspp_pipeline(.*);
 
-  modport fetch(
-    output fetch_ex_reg,
-    input brj_addr
-  );
-
-  modport execute(
-    input fetch_ex_reg, 
-    output brj_addr
-  );
-
-endinterface
-`endif
+endmodule

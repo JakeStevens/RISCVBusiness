@@ -22,8 +22,8 @@
 *   Description:  Two Stage In-Order Pipeline
 */
 
-`include "fetch_execute_if.vh"
-`include "hazard_unit_if.vh"
+`include "tspp_fetch_execute_if.vh"
+`include "tspp_hazard_unit_if.vh"
 `include "predictor_pipeline_if.vh"
 `include "generic_bus_if.vh"
 `include "prv_pipeline_if.vh"
@@ -39,12 +39,12 @@ module tspp (
   risc_mgmt_if rm_if
 );
   //interface instantiations
-  fetch_execute_if      fetch_ex_if();
-  hazard_unit_if        hazard_if();
+  tspp_fetch_execute_if      fetch_ex_if();
+  tspp_hazard_unit_if        hazard_if();
 
   //module instantiations
-  fetch_stage fetch_stage_i (.*);
-  execute_stage execute_stage_i (.*);
-  hazard_unit hazard_unit_i (.*);
+  tspp_fetch_stage fetch_stage_i (.*);
+  tspp_execute_stage execute_stage_i (.*);
+  tspp_hazard_unit hazard_unit_i (.*);
 
 endmodule

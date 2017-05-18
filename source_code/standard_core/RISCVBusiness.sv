@@ -51,7 +51,7 @@ module RISCVBusiness (
 
   // Module Instantiations
 
-  tspp pipeline (
+  pipeline_wrapper pipeline (
     .CLK(CLK),
     .nRST(nRST),
     .halt(halt),

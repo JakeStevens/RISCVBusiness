@@ -14,7 +14,7 @@
 *   limitations under the License.
 *
 *
-*   Filename:     hazard_unit_if.vh
+*   Filename:     tspp_hazard_unit_if.vh
 *
 *   Created by:   Jacob R. Stevens
 *   Email:        steven69@purdue.edu
@@ -22,9 +22,9 @@
 *   Description:  Interface for the hazard unit of the two stage pipeline 
 */
 
-`ifndef HAZARD_UNIT_IF_VH
-`define HAZARD_UNIT_IF_VH
-interface hazard_unit_if();
+`ifndef TSPP_HAZARD_UNIT_IF_VH
+`define TSPP_HAZARD_UNIT_IF_VH
+interface tspp_hazard_unit_if();
 
   import rv32i_types_pkg::word_t;
   logic pc_en, npc_sel, i_mem_busy, d_mem_busy, dren, dwen, iren,ret;

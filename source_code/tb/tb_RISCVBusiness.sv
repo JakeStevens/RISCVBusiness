@@ -71,7 +71,7 @@ module tb_RISCVBusiness ();
     assign data = data_temp;
   else ;//TODO:ERROR
 
-  bind execute_stage cpu_tracker cpu_track1 (
+  bind tspp_execute_stage cpu_tracker cpu_track1 (
     .CLK(CLK),
     .wb_stall(wb_stall),
     .instr(fetch_ex_if.fetch_ex_reg.instr),

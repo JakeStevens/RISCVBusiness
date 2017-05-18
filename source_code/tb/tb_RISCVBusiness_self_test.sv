@@ -72,7 +72,7 @@ module tb_RISCVBusiness_self_test ();
     assign data = data_temp;
   else ;//TODO:ERROR
 
-  bind execute_stage cpu_tracker cpu_track1 (
+  bind tspp_execute_stage cpu_tracker cpu_track1 (
     .CLK(CLK),
     .wb_stall(wb_stall),
     .instr(fetch_ex_if.fetch_ex_reg.instr),
@@ -159,9 +159,9 @@ module tb_RISCVBusiness_self_test ();
     // Check Register 28 to see if test passed or failed
     if (clk_count == `RVBSELF_CLK_TIMEOUT)
       $display("ERROR: Test timed out");
-    else if(DUT.pipeline.execute_stage_i.rf.registers[28] != 32'h1)
+    else if(DUT.pipeline.tspp_pipeline.execute_stage_i.rf.registers[28] != 32'h1)
       $display("ERROR: Test %0d did not pass",
-                (DUT.pipeline.execute_stage_i.rf.registers[28] - 1)/2);
+                (DUT.pipeline.tspp_pipeline.execute_stage_i.rf.registers[28] - 1)/2);
     else 
       $display("SUCCESS");
     $finish;

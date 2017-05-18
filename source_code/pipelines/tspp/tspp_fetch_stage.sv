@@ -14,7 +14,7 @@
 *   limitations under the License.
 *
 *
-*   Filename:     fetch_stage.sv
+*   Filename:     tspp_fetch_stage.sv
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
@@ -22,16 +22,16 @@
 *   Description:  Fetch stage for the two stage pipeline
 */
 
-`include "fetch_execute_if.vh"
-`include "hazard_unit_if.vh"
+`include "tspp_fetch_execute_if.vh"
+`include "tspp_hazard_unit_if.vh"
 `include "predictor_pipeline_if.vh"
 `include "generic_bus_if.vh"
 `include "component_selection_defines.vh"
 
-module fetch_stage (
+module tspp_fetch_stage (
   input logic CLK, nRST,
-  fetch_execute_if.fetch fetch_ex_if,
-  hazard_unit_if.fetch hazard_if,
+  tspp_fetch_execute_if.fetch fetch_ex_if,
+  tspp_hazard_unit_if.fetch hazard_if,
   predictor_pipeline_if.access predict_if,
   generic_bus_if.cpu igen_bus_if
 );
