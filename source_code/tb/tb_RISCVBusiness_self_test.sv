@@ -91,7 +91,7 @@ module tb_RISCVBusiness_self_test ();
     .instr_30(instr_30)
     );
 
-  bind branch_predictor branch_tracker branch_perf(
+  bind branch_predictor_wrapper branch_tracker branch_perf(
     .CLK(CLK),
     .nRST(nRST),
     .update_predictor(predict_if.update_predictor),

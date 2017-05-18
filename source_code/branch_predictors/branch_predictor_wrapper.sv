@@ -14,7 +14,7 @@
 *   limitations under the License.
 *
 *
-*   Filename:     branch_predictor.sv
+*   Filename:     branch_predictor_wrapper.sv
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
@@ -26,7 +26,7 @@
 `include "predictor_pipeline_if.vh"
 `include "component_selection_defines.vh"
 
-module branch_predictor (
+module branch_predictor_wrapper (
   input logic CLK, nRST,
   predictor_pipeline_if.predictor predict_if
 );

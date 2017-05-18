@@ -62,7 +62,7 @@ module RISCVBusiness (
     .rm_if(rm_if)
   );
 
-  branch_predictor branch_predictor_i (
+  branch_predictor_wrapper branch_predictor_i (
     .CLK(CLK),
     .nRST(nRST),
     .predict_if(predict_if)
