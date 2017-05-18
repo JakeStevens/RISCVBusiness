@@ -166,8 +166,8 @@ module tb_RISCVBusiness ();
 
   task dump_stats();
     integer instret, cycles;
-    instret = DUT.prv_block_i.csr_rfile_i.instretfull;
-    cycles  = DUT.prv_block_i.csr_rfile_i.cyclefull;
+    instret = DUT.priv_wrapper_i.priv_block_i.csr_rfile_i.instretfull;
+    cycles  = DUT.priv_wrapper_i.priv_block_i.csr_rfile_i.cyclefull;
     if (cycles != clk_count) $info("Cycles CSR != clk_count");
     stats_ptr = $fopen(`STATS_FILE_NAME, "w");
     $fwrite(stats_ptr, "Instructions retired: %2d\n", instret);

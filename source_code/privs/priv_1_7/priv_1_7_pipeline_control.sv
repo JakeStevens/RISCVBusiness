@@ -14,7 +14,7 @@
 *   limitations under the License.
 *
 *
-*   Filename:     pipeline_control.sv
+*   Filename:     priv_1_7_pipeline_control.sv
 *
 *   Created by:   Jacob R. Stevens
 *   Email:        steven69@purdue.edu
@@ -23,12 +23,12 @@
 *                 block 
 */
 
-`include "prv_pipeline_if.vh"
+`include "priv_1_7_internal_if.vh"
 
-module pipeline_control
+module priv_1_7_pipeline_control
 (
   input logic [1:0] prv_intr, prv_ret,
-  prv_internal_if.pipe_ctrl prv_intern_if
+  priv_1_7_internal_if.pipe_ctrl prv_intern_if
 );
   import rv32i_types_pkg::*;
   logic interrupt_pending;

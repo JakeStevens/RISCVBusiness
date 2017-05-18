@@ -1,5 +1,5 @@
 def configure(ctx):
-    rvb_srcs = ['caches', 'branch_predictors', 'bus_bridges', 'trackers', 'standard_core', 'ram', 'risc_mgmt', 'pipelines']
+    rvb_srcs = ['caches', 'branch_predictors', 'bus_bridges', 'trackers', 'standard_core', 'ram', 'risc_mgmt', 'pipelines', 'privs']
     ctx.SFFUnits.add('RISCVBusiness_packages',
       src_dir = ['packages']
     )

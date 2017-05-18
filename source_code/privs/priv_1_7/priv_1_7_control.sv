@@ -14,19 +14,19 @@
 *   limitations under the License.
 *
 *
-*   Filename:     prv_control.sv
+*   Filename:     priv_1_7_control.sv
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 08/17/2016
-*   Description:  Main control for the priv isa block 
+*   Description:  Main control for the priv isa block version 1.7
 */
 
-`include "prv_internal_if.vh"
+`include "priv_1_7_internal_if.vh"
 
-module prv_control (
+module priv_1_7_control (
   input CLK, nRST,
-  prv_internal_if.prv_control prv_intern_if
+  priv_1_7_internal_if.prv_control prv_intern_if
 );
   import rv32i_types_pkg::*;
   import machine_mode_types_pkg::*;

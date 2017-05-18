@@ -68,7 +68,7 @@ module RISCVBusiness (
     .predict_if(predict_if)
   );
 
-  prv_block prv_block_i (
+  priv_wrapper priv_wrapper_i (
     .CLK(CLK),
     .nRST(nRST),
     .prv_pipe_if(prv_pipe_if)

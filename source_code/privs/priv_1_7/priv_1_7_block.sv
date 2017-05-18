@@ -14,28 +14,28 @@
 *   limitations under the License.
 *
 *
-*   Filename:     prv_block.sv
+*   Filename:     priv_1_7_block.sv
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 08/24/2016
-*   Description:  Top level block for the priv logic. 
+*   Description:  Top level block for the priv logic version 1.7 
 */
 
 `include "prv_pipeline_if.vh"
-`include "prv_internal_if.vh"
+`include "priv_1_7_internal_if.vh"
 
-module prv_block (
+module priv_1_7_block (
   input logic CLK, nRST,
   prv_pipeline_if.priv_block prv_pipe_if
 );
-  prv_internal_if prv_intern_if();
+  priv_1_7_internal_if prv_intern_if();
 
   logic [1:0] prv_intr, prv_ret;
   
-  csr_rfile csr_rfile_i(.*, .prv_intern_if(prv_intern_if));
-  prv_control prv_control_i(.*, .prv_intern_if(prv_intern_if));
-  pipeline_control pipeline_control_i(.*, .prv_intern_if(prv_intern_if));
+  priv_1_7_csr_rfile csr_rfile_i(.*, .prv_intern_if(prv_intern_if));
+  priv_1_7_control prv_control_i(.*, .prv_intern_if(prv_intern_if));
+  priv_1_7_pipeline_control pipeline_control_i(.*, .prv_intern_if(prv_intern_if));
 
   //Machine Mode Only
   assign prv_intr = 2'b11;

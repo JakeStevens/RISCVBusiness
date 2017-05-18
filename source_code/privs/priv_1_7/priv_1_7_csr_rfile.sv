@@ -14,7 +14,7 @@
 *   limitations under the License.
 *
 *
-*   Filename:     csr_rfile.sv
+*   Filename:     priv_1_7_csr_rfile.sv
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
@@ -23,12 +23,12 @@
 */
 
 
-`include "prv_internal_if.vh"
+`include "priv_1_7_internal_if.vh"
 `include "component_selection_defines.vh"
 
-module csr_rfile (
+module priv_1_7_csr_rfile (
   input CLK, nRST,
-  prv_internal_if.csr prv_intern_if
+  priv_1_7_internal_if.csr prv_intern_if
 );
   import machine_mode_types_pkg::*;
   import rv32i_types_pkg::*;

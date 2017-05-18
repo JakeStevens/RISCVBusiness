@@ -14,7 +14,7 @@
 *   limitations under the License.
 *
 *
-*   Filename:     prv_internal_if.vh
+*   Filename:     priv_1_7_internal_if.vh
 *
 *   Created by:   Jacob R. Stevens
 *   Email:        steven69@purdue.edu
@@ -22,12 +22,12 @@
 *   Description:  Interface for components within the privilege block 
 */
 
-`ifndef PRV_INTERNAL_IF_VH
-`define PRV_INTERNAL_IF_VH
+`ifndef PRIV_1_7_INTERNAL_IF_VH
+`define PRIV_1_7_INTERNAL_IF_VH
 
 `include "component_selection_defines.vh"
 
-interface prv_internal_if;
+interface priv_1_7_internal_if;
   import machine_mode_types_pkg::*;
   import rv32i_types_pkg::*;
 
@@ -89,4 +89,4 @@ interface prv_internal_if;
   );
 
 endinterface
-`endif // PRV_INTERNAL_IF_VH
+`endif // PRIV_1_7_INTERNAL_IF_VH
