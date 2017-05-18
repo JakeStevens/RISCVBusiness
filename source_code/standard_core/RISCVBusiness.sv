@@ -74,7 +74,7 @@ module RISCVBusiness (
     .prv_pipe_if(prv_pipe_if)
   );
 
-  risc_mgmt rmgmt (
+  risc_mgmt_wrapper rmgmt (
     .CLK(CLK),
     .nRST(nRST),
     .rm_if(rm_if)

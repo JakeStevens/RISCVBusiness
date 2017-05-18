@@ -3,6 +3,8 @@
 
 def configure(cnf):
   cnf.recurse(extensions)
+  cnf.recurse(tspp)
 
 def sim_source(cnf):
   cnf.recurse(extensions)
+  cnf.recurse(tspp)

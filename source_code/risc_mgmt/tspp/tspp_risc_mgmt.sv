@@ -14,7 +14,7 @@
 *   limitations under the License.
 *
 *
-*   Filename:     risc_mgmt.sv
+*   Filename:     tspp_risc_mgmt.sv
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
@@ -31,7 +31,7 @@
 `include "component_selection_defines.vh"
 `include "risc_mgmt_if.vh"
 
-module risc_mgmt (
+module tspp_risc_mgmt (
   input logic CLK, nRST,
   risc_mgmt_if.ts_rmgmt rm_if 
 );
