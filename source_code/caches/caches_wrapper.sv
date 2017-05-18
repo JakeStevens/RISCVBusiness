@@ -14,7 +14,7 @@
 *   limitations under the License.
 *
 *
-*   Filename:     caches.sv
+*   Filename:     caches_wrapper.sv
 *
 *   Created by:   Jacob R. Stevens
 *   Email:        steven69@purdue.edu
@@ -24,7 +24,8 @@
 
 `include "generic_bus_if.vh"
 `include "component_selection_defines.vh"
-module caches(
+
+module caches_wrapper(
   input logic CLK, nRST,
   generic_bus_if.cpu icache_mem_gen_bus_if,
   generic_bus_if.cpu dcache_mem_gen_bus_if,

@@ -80,7 +80,7 @@ module RISCVBusiness (
     .rm_if(rm_if)
   );
 
-  caches caches (
+  caches_wrapper caches (
     .CLK(CLK),
     .nRST(nRST),
     .icache_proc_gen_bus_if(tspp_icache_gen_bus_if),
