@@ -31,7 +31,25 @@ module ram_wrapper (
   input logic CLK, nRST,
   generic_bus_if.generic_bus gen_bus_if
 );
+  import rv32i_types_pkg::*; 
+ 
+  logic [RAM_ADDR_SIZE-3:0] word_addr;
+  assign word_addr = gen_bus_if.addr[WORD_SIZE-1:2];
 
-  ram_sim_model #(.LAT(0), .ENDIANNESS(BUS_ENDIANNESS)) v_lat_ram (.*);
+  ram_sim_model #(
+    .LAT(0), 
+    .ENDIANNESS(BUS_ENDIANNESS),
+    .N_BYTES(4)
+  ) v_lat_ram (
+    .CLK(CLK),
+    .nRST(nRST),
+    .wdata_in(gen_bus_if.wdata),
+    .addr_in(word_addr),
+    .byte_en_in(gen_bus_if.byte_en),
+    .wen_in(gen_bus_if.wen),
+    .ren_in(gen_bus_if.ren),
+    .rdata_out(gen_bus_if.rdata),
+    .busy_out(gen_bus_if.busy)
+  );
 
 endmodule

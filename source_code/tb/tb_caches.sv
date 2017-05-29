@@ -33,11 +33,11 @@ module tb_caches ();
   
   import rv32i_types_pkg::*;
 
-  parameter NUM_TESTS = 100000;
+  parameter NUM_TESTS = 100;
   parameter NUM_ADDRS = 20;
   parameter PERIOD = 20; 
   parameter DELAY = 5;
-  parameter CACHE_SELECT = "pass_through";
+  parameter CACHE_SELECT = "direct_mapped_tpf";// "pass_through";
 
   parameter SEED = 10;
   parameter VERBOSE = 0;
@@ -77,6 +77,15 @@ module tb_caches ();
         .nRST(nRST),
         .proc_gen_bus_if(DUT_bus_if),
         .mem_gen_bus_if(cache_2_ram_if)
+      );
+    end else if (CACHE_SELECT == "direct_mapped_tpf") begin
+      direct_mapped_tpf_cache DUT (
+        .CLK(CLK),
+        .nRST(nRST),
+        .proc_gen_bus_if(DUT_bus_if),
+        .mem_gen_bus_if(cache_2_ram_if),
+        .clear(DUT_clear),
+        .flush(DUT_flush)
       );
     end
   endgenerate
@@ -223,9 +232,9 @@ module tb_caches ();
     // Generate the addresses and fill mem with random values
     for (i = 0; i < NUM_ADDRS; i++) begin
       j = $urandom;
-      tb_addr_array[i] = j;
+      tb_addr_array[i] = j & 32'hffff_fffc;
       tb_wdata = $urandom;
-      write_mem(j , tb_wdata, 4'hf);
+      write_mem(tb_addr_array[i] , tb_wdata, 4'hf);
     end
 
     for (i = 0; i < NUM_TESTS; i++) begin

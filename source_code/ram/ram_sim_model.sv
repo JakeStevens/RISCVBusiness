@@ -23,24 +23,29 @@
 *                 project to run independent of tools in simulation. 
 */
 
-`include "generic_bus_if.vh"
-
-module ram_sim_model (
+module ram_sim_model #(
+  parameter LAT = 0, // ram latency
+  parameter ENDIANNESS = "little",
+  parameter N_BYTES = 4,
+  parameter DEPTH = 8192,
+  parameter MEM_INIT_FILE  = "meminit.hex",
+  parameter MEM_DEFAULT = 32'h0000_0000,
+  parameter ADDR_BITS = $clog2(DEPTH),
+  parameter COUNT_BITS = $clog2(LAT) + 1,
+  parameter N_BITS = N_BYTES*8
+) (
   input logic CLK, nRST,
-  generic_bus_if.generic_bus gen_bus_if
+  input logic [N_BITS-1:0] wdata_in,
+  input logic [ADDR_BITS-1:0] addr_in,
+  input logic [N_BYTES-1:0] byte_en_in,
+  input logic wen_in, ren_in,
+  output logic [N_BITS-1:0] rdata_out,
+  output logic busy_out 
 );
-  parameter LAT = 0; // ram latency
-  parameter ENDIANNESS = "little";
-  parameter WIDTH = 32;
-  parameter DEPTH = 8192;
-  parameter MEM_INIT_FILE  = "meminit.hex";
-  parameter MEM_DEFAULT = 32'h0000_0000;
-    
-  localparam ADDR_BITS = $clog2(DEPTH);
-  localparam COUNT_BITS = $clog2(LAT) + 1;
+
 
   // Memory as associative array to try and save space at runtime
-  logic [WIDTH-1:0] memory [*];
+  logic [N_BITS-1:0] memory [*];
   
   // Variables for file IO
   integer fptr;
@@ -54,12 +59,14 @@ module ram_sim_model (
   logic [ADDR_BITS-1:0] addr, addr_r, addr_ram;
   logic ren, ren_r, ren_ram;
   logic wen, wen_r, wen_ram;
-  logic [(WIDTH/8)-1:0] byte_en;
-  logic [WIDTH-1:0] rdata, wdata, wdata_r, wdata_ram, mask;
+  logic [N_BYTES-1:0] byte_en;
+  logic [N_BITS-1:0] rdata, wdata, wdata_r, wdata_ram, mask;
   logic input_diff;
   logic access;
   string line;
   int res;
+
+  genvar i;
 
   // Load in meminit
   initial begin
@@ -71,8 +78,10 @@ module ram_sim_model (
         while (!$feof(fptr)) begin
           res = $fgets(line, fptr);
           res = $sscanf(line, ":%2h%4h%2h%8h%2h", t0, faddr, line_type, fdata, t1); 
-          if (line_type == 8'h00) //data
+          if (line_type == 8'h00) begin //data
             memory[faddr] = fdata;
+            $info("Loading %0h into addr %0h", fdata, faddr);
+          end
         end
         $fclose(fptr);
       end
@@ -88,21 +97,27 @@ module ram_sim_model (
   // Changes for bus endianness
   generate
     if (ENDIANNESS == "big") begin
-      endian_swapper write_swap(.word_in(gen_bus_if.wdata), .word_out(wdata));
-      endian_swapper read_swap(.word_in(rdata), .word_out(gen_bus_if.rdata));
-      // TODO: byte enable swap should be based off parameters
-      assign byte_en = {gen_bus_if.byte_en[0], gen_bus_if.byte_en[1],
-                        gen_bus_if.byte_en[2], gen_bus_if.byte_en[3]};
+      // swap endianness
+      endian_swapper # (.N_BYTES(N_BYTES)) write_swap(.word_in(wdata_in), .word_out(wdata));
+      endian_swapper # (.N_BYTES(N_BYTES)) read_swap(.word_in(rdata), .word_out(rdata_out));
+
+      // swap byte enables
+      for (i=0; i < N_BYTES/2; i++) begin
+        assign byte_en[N_BYTES-1-i] = byte_en_in[i];
+        assign byte_en[i]           = byte_en_in[N_BYTES-1-i];
+      end
+      if (N_BYTES%2)
+        assign byte_en[N_BYTES/2] = byte_en_in[N_BYTES/2];
+
     end else if (ENDIANNESS == "little") begin
-      assign wdata = gen_bus_if.wdata;
-      assign byte_en = gen_bus_if.byte_en;
-      assign gen_bus_if.rdata = rdata;
+      assign wdata = wdata_in;
+      assign byte_en = byte_en_in;
+      assign rdata_out = rdata;
     end
   endgenerate
 
-  genvar i;
   generate 
-    for(i=0; i < WIDTH/8; i++) 
+    for(i=0; i < N_BYTES; i++) 
       assign mask[i*8+:8] = {8{byte_en[i]}};
   endgenerate
   
@@ -116,9 +131,9 @@ module ram_sim_model (
     end
   end
 
-  assign addr = gen_bus_if.addr[ADDR_BITS+1:2]; //shift to be word addressed
-  assign ren  = gen_bus_if.ren;
-  assign wen  = gen_bus_if.wen;
+  assign addr = addr_in[ADDR_BITS-1:0];
+  assign ren  = ren_in;
+  assign wen  = wen_in;
 
   always_ff @ (posedge CLK, negedge nRST) begin
     if (~nRST) begin
@@ -155,6 +170,6 @@ module ram_sim_model (
   assign access = (counter == LAT) && !input_diff;
 
   assign rdata = (^addr_ram !== 1'bx) && memory.exists(addr_ram) ? memory[addr_ram] : MEM_DEFAULT;
-  assign gen_bus_if.busy  = ~access;
+  assign busy_out  = ~access;
 
 endmodule

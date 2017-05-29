@@ -14,7 +14,7 @@
 *   limitations under the License.
 *
 *
-*   Filename:     src/endian_swapper.sv
+*   Filename:     endian_swapper.sv
 *
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
@@ -23,15 +23,18 @@
 */
 
 import rv32i_types_pkg::*;
-module endian_swapper (
-  input word_t word_in,
-  output word_t word_out
+module endian_swapper # (
+  parameter N_BYTES = WORD_SIZE/8,
+  parameter N_BITS = N_BYTES*8
+) (
+  input [N_BITS-1:0] word_in,
+  output [N_BITS-1:0] word_out
 );
 
   generate
     genvar i;
-    for(i=0; i < (WORD_SIZE / 8); i++) begin : word_assign
-      assign word_out[WORD_SIZE - (8*i) - 1 : WORD_SIZE - (8 * (i+1))] = word_in[((i+1)*8)-1:(i*8)];
+    for(i=0; i < N_BYTES; i++) begin : word_assign
+      assign word_out[N_BITS - (8*i) - 1 : N_BITS - (8 * (i+1))] = word_in[((i+1)*8)-1:(i*8)];
     end : word_assign
   endgenerate
 
