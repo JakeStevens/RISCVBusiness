@@ -30,7 +30,6 @@
 module config_ram_wrapper #(
   parameter N_BYTES     = 4,
   parameter DEPTH       = 256,
-  parameter ENDIANNESS  = "big",
   parameter LAT         = 0,
   parameter ADDR_BITS  = $clog2(DEPTH),
   parameter N_BITS    = N_BYTES*8 
@@ -45,9 +44,9 @@ module config_ram_wrapper #(
 );
 
   ram_sim_model #(.LAT(0), 
-                  .ENDIANNESS(ENDIANNESS),
-                  .WIDTH(N_BITS),
-                  .DEPTH(DEPTH)
+    .ENDIANNESS("little"),
+    .N_BYTES(N_BYTES),
+    .DEPTH(DEPTH)
   ) v_lat_ram (
     .CLK(CLK),
     .nRST(nRST),

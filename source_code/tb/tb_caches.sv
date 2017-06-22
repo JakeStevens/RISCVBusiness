@@ -33,19 +33,21 @@ module tb_caches ();
   
   import rv32i_types_pkg::*;
 
-  parameter NUM_TESTS = 100;
+  parameter NUM_TESTS = 1000;
   parameter NUM_ADDRS = 20;
   parameter PERIOD = 20; 
   parameter DELAY = 5;
   parameter CACHE_SELECT = "direct_mapped_tpf";// "pass_through";
 
-  parameter SEED = 10;
+  parameter SEED = 11;
   parameter VERBOSE = 0;
 
   parameter CACHE_CONTROL = 1'b1;
   parameter TB_CONTROL    = 1'b0;
 
   parameter DATA_1 = 32'h12ab_89ef;
+  /* TAG_BIT needed because memory doesn't use full 32 bit addr space*/
+  parameter TAG_BIT = 14;
 
   // -- TB Variables -- //
 
@@ -138,7 +140,9 @@ module tb_caches ();
   initial begin : MAIN
      
     //-- Initial reset --// 
-    nRST = 0; 
+    nRST = 0;
+    DUT_flush = 0;
+    DUT_clear = 0; 
     set_mem_ctrl(CACHE_CONTROL);
     set_ren(1'b0);
     set_wen(1'b0);
@@ -208,7 +212,7 @@ module tb_caches ();
     // Write to different address to force replacements
     tb_addr = 0;
     for (i = 0; i < 9; i++) begin // iterate through all the ways
-      tb_addr[RAM_ADDR_SIZE-1 -: 4] = i; // set bits in the tag
+      tb_addr[TAG_BIT-1 -: 4] = i; // set bits in the tag
       for (j = 0; j < 8; j++) begin // iterate through blocks and write to each word
         tb_addr[4:2] = j;
         tb_wdata = $urandom;
@@ -218,7 +222,7 @@ module tb_caches ();
     // Read from the previously written addresses
     tb_addr = 0;
     for (i = 0; i < 9; i++) begin // iterate through all the ways
-      tb_addr[RAM_ADDR_SIZE-1 -: 4] = i; // set bits in the tag
+      tb_addr[TAG_BIT-1 -: 4] = i; // set bits in the tag
       for (j = 0; j < 8; j++) begin // iterate through blocks and write to each word
         tb_addr[4:2] = j;
         read_cache_check(tb_addr);
@@ -266,7 +270,7 @@ module tb_caches ();
         read_cache_check(tb_addr);
       end
     end
-
+    
     // -- Cache Clear -- //
     
     $info("---------- Beginning Cache Clear Testing ----------");
@@ -285,7 +289,7 @@ module tb_caches ();
     // fill cache contents
     tb_addr = 0;
     for (i = 0; i < 9; i++) begin // iterate through all the ways
-      tb_addr[RAM_ADDR_SIZE-1 -: 4] = i; // set bits in the tag
+      tb_addr[TAG_BIT-1 -: 4] = i; // set bits in the tag
       for (j = 0; j < 8; j++) begin // iterate through blocks and write to each word
         tb_addr[4:2] = j;
         read_cache_check(tb_addr);
@@ -294,11 +298,15 @@ module tb_caches ();
 
     // flush cache
     flush_cache();
-  
+ 
+    // Read to dummy addr to ensure flushing is completed 
+    tb_addr = '1;
+    read_cache_check(tb_addr);
+
     // write directly to mem
     tb_addr = 0;
     for (i = 0; i < 9; i++) begin // iterate through all the ways
-      tb_addr[RAM_ADDR_SIZE-1 -: 4] = i; // set bits in the tag
+      tb_addr[TAG_BIT-1 -: 4] = i; // set bits in the tag
       for (j = 0; j < 8; j++) begin // iterate through blocks and write to each word
         tb_addr[4:2] = j;
         tb_wdata = $urandom;
@@ -309,7 +317,7 @@ module tb_caches ();
     // re-read memory to ensure up to date data is received
     tb_addr = 0;
     for (i = 0; i < 9; i++) begin // iterate through all the ways
-      tb_addr[RAM_ADDR_SIZE-1 -: 4] = i; // set bits in the tag
+      tb_addr[TAG_BIT-1 -: 4] = i; // set bits in the tag
       for (j = 0; j < 8; j++) begin // iterate through blocks and write to each word
         tb_addr[4:2] = j;
         read_cache_check(tb_addr);
@@ -317,7 +325,7 @@ module tb_caches ();
     end
     
 
-    $info("\n---------- Testing Completed ---------\nNumber of Errors: %0d", error_cnt);
+    $info("\n---------- Testing Completed Successfully---------\n", error_cnt);
 
     $finish;
   end : MAIN
@@ -358,10 +366,12 @@ module tb_caches ();
 
     read_cache(read_addr, DUT_rdata, gold_rdata);
 
-    if (DUT_rdata != gold_rdata) begin
-      $error("\nData Mismatch for starting seed %0d.\nAddr: 0x%0h\nExpected: 0x%0h\nReceived: 0x%0h\n", 
-        SEED, read_addr, DUT_rdata, gold_rdata); 
+    if (DUT_rdata !== gold_rdata) begin
+      $info("\nData Mismatch \nAddr: 0x%0h\nExpected: 0x%0h\nReceived: 0x%0h\n", 
+        read_addr, gold_rdata, DUT_rdata); 
       error_cnt = error_cnt + 1;
+      #(DELAY);
+      $finish;
     end
 
   endtask
