@@ -40,6 +40,14 @@ module separate_caches (
                           .mem_gen_bus_if(dcache_mem_gen_bus_if),
                           .proc_gen_bus_if(dcache_proc_gen_bus_if)
                         );
+      "direct_mapped_tpf" : direct_mapped_tpf_cache dcache(
+                          .CLK(CLK),
+                          .nRST(nRST),
+                          .mem_gen_bus_if(dcache_mem_gen_bus_if),
+                          .proc_gen_bus_if(dcache_proc_gen_bus_if),
+                          .flush(1'b0),
+                          .clear(1'b0)
+                        );
     endcase
   endgenerate
 
@@ -50,6 +58,14 @@ module separate_caches (
                           .nRST(nRST),
                           .mem_gen_bus_if(icache_mem_gen_bus_if),
                           .proc_gen_bus_if(icache_proc_gen_bus_if)
+                        );
+      "direct_mapped_tpf" : direct_mapped_tpf_cache icache(
+                          .CLK(CLK),
+                          .nRST(nRST),
+                          .mem_gen_bus_if(icache_mem_gen_bus_if),
+                          .proc_gen_bus_if(icache_proc_gen_bus_if),
+                          .flush(1'b0),
+                          .clear(1'b0)
                         );
     endcase
   endgenerate
