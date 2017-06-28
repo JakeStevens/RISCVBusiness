@@ -116,7 +116,7 @@ module priv_1_7_control (
   end
 
   // Update EPC as soon as interrupt or exception is found 
-  assign prv_intern_if.mepc_rup = exception | (interrupt_reg & prv_intern_if.pipe_clear);
+  assign prv_intern_if.mepc_rup = exception | interrupt_fired;
   assign prv_intern_if.mepc_next = prv_intern_if.epc;
 
   assign prv_intern_if.mbadaddr_rup = (prv_intern_if.mal_l | prv_intern_if.fault_l | prv_intern_if.mal_s | prv_intern_if.fault_s | 

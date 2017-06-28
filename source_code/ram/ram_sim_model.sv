@@ -80,7 +80,7 @@ module ram_sim_model #(
           res = $sscanf(line, ":%2h%4h%2h%8h%2h", t0, faddr, line_type, fdata, t1); 
           if (line_type == 8'h00) begin //data
             memory[faddr] = fdata;
-            $info("Loading %0h into addr %0h", fdata, faddr);
+            //$info("Loading %0h into addr %0h", fdata, faddr);
           end
         end
         $fclose(fptr);
