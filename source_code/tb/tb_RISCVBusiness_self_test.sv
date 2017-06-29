@@ -31,7 +31,7 @@
 
 `define OUTPUT_FILE_NAME "cpu.hex"
 `define STATS_FILE_NAME "stats.txt"
-`define RVBSELF_CLK_TIMEOUT 1000000
+`define RVBSELF_CLK_TIMEOUT 5000000
 
 module tb_RISCVBusiness_self_test ();
    
