@@ -32,6 +32,7 @@
 `include "alu_if.vh"
 `include "prv_pipeline_if.vh"
 `include "risc_mgmt_if.vh"
+`include "cache_control_if.vh"
 
 module tspp_execute_stage(
   input logic CLK, nRST,
@@ -41,7 +42,8 @@ module tspp_execute_stage(
   generic_bus_if.cpu dgen_bus_if,
   prv_pipeline_if.pipe  prv_pipe_if,
   output halt,
-  risc_mgmt_if.ts_execute rm_if
+  risc_mgmt_if.ts_execute rm_if,
+  cache_control_if.pipeline cc_if
 );
 
   import rv32i_types_pkg::*;
@@ -215,7 +217,7 @@ module tspp_execute_stage(
 
   logic [1:0] byte_offset;
 
-  // RISC-MGMT connections
+  // RISC-MGMT connection
   assign rm_if.mem_load = dgen_bus_if.rdata;
 
   assign dgen_bus_if.ren        = rm_if.req_mem ? rm_if.mem_ren : cu_if.dren & ~mal_addr;
@@ -281,6 +283,49 @@ module tspp_execute_stage(
       default :     byte_en_standard = 4'b0000;
     endcase
   end
+
+  // Fence instructions
+
+  // posedge detector for ifence
+  // subsequent ifences will have same effect as a single fence
+  logic ifence_reg;
+  logic ifence_pulse;
+
+  always_ff @ (posedge CLK, negedge nRST) begin
+    if (~nRST)
+      ifence_reg <= 1'b0;
+    else
+      ifence_reg <= cu_if.ifence;
+  end
+  
+  assign ifence_pulse = cu_if.ifence && ~ifence_reg;
+  assign cc_if.icache_flush = ifence_pulse;
+  assign cc_if.icache_clear = 1'b0;
+  assign cc_if.dcache_flush = ifence_pulse;
+  assign cc_if.dcache_clear = 1'b0;
+
+  //regs to detect flush completion
+  logic dflushed, iflushed;
+
+  always_ff @ (posedge CLK, negedge nRST) begin
+    if (~nRST)
+      iflushed <= 1'b1;
+    else if (ifence_pulse)
+      iflushed <= 1'b0;
+    else if (cc_if.iflush_done)
+      iflushed <= 1'b1;
+  end
+
+  always_ff @ (posedge CLK, negedge nRST) begin
+    if (~nRST)
+      dflushed <= 1'b1;
+    else if (ifence_pulse)
+      dflushed <= 1'b0;
+    else if (cc_if.dflush_done)
+      dflushed <= 1'b1;
+  end
+
+  assign hazard_if.fence_stall = cu_if.ifence && (~dflushed || ~iflushed);
 
   /*******************************************************
   *** Hazard Unit Interface Logic 

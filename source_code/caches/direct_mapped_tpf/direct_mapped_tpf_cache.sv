@@ -31,6 +31,7 @@
 module direct_mapped_tpf_cache (
   input logic CLK, nRST,
   input logic clear, flush,
+  output logic clear_done, flush_done,
   generic_bus_if.cpu mem_gen_bus_if,
   generic_bus_if.generic_bus proc_gen_bus_if
 );
@@ -154,7 +155,11 @@ module direct_mapped_tpf_cache (
   assign flush_flag = flush | init_flag | flush_reg;
   assign clear_flag = clear | clear_reg;
   assign request = (proc_gen_bus_if.wen | proc_gen_bus_if.ren) && ~direct_mem_req;
-
+ 
+  // clear and flush response
+  assign clear_done = clear_clear;
+  assign flush_done = flush_clear;
+ 
   //hits given out in EVAL and FETCH
   assign tag_match = (req_addr.tag == frame_buffer.tag) && frame_buffer.v;
   always_comb begin
@@ -253,11 +258,9 @@ module direct_mapped_tpf_cache (
         if (clear_flag) begin
           curr_addr_next = req_addr;
           flush_cnt_next = N_INDICES-1; 
-          clear_clear = 1'b1;
         end else if (flush_flag) begin
           curr_addr_next = 0;
           flush_cnt_next = 0;
-          flush_clear = 1'b1;
         end else if (request) begin
           cache_addr = req_addr.idx;
           cache_ren = 1'b1;
@@ -419,8 +422,13 @@ module direct_mapped_tpf_cache (
         if (~cache_busy) begin
           flush_cnt_next = flush_cnt + 1;
           curr_addr_next.idx = curr_addr.idx + 1;
-          if (flush_cnt == N_INDICES-1)
+          if (flush_cnt == N_INDICES-1) begin
             init_complete = 1'b1;
+            if (flush_reg)
+              flush_clear = 1'b1;
+            else if (clear_reg)
+              clear_clear = 1'b1;
+          end
         end 
       end
     endcase
@@ -504,14 +512,14 @@ module direct_mapped_tpf_cache (
         end
       end
       CLEAR_WB : begin
-        if (~sm_bus_if.busy && (access_cnt == BLOCK_SIZE))
+        if (~sm_bus_if.busy && (access_cnt == (BLOCK_SIZE-1)))
           next_state = CLEAR_UPDATE;
       end
       CLEAR_UPDATE : begin
         if (~cache_busy) begin 
           if (flush_cnt != N_INDICES-1)
             next_state = CLEAR_PREP;
-          else 
+          else
             next_state = IDLE;
         end 
       end

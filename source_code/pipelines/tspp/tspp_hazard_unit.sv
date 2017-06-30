@@ -61,7 +61,7 @@ module tspp_hazard_unit
   
   assign hazard_if.npc_sel = branch_jump;
   
-  assign hazard_if.pc_en = (~wait_for_dmem&~wait_for_imem&~hazard_if.halt&~ex_flush_hazard&~rmgmt_stall) |
+  assign hazard_if.pc_en = (~wait_for_dmem&~wait_for_imem&~hazard_if.halt&~ex_flush_hazard&~rmgmt_stall&~hazard_if.fence_stall) |
                             branch_jump | prv_pipe_if.insert_pc | prv_pipe_if.ret; 
 
   assign hazard_if.if_ex_flush = ex_flush_hazard | branch_jump |
@@ -71,6 +71,7 @@ module tspp_hazard_unit
   assign hazard_if.if_ex_stall = (wait_for_dmem ||
                                  (wait_for_imem & ~dmem_access) ||
                                  hazard_if.halt) & (~ex_flush_hazard | e_ex_stage) || 
+                                 hazard_if.fence_stall ||
                                  rm_if.execute_stall;
 
   /* Hazards due to Interrupts/Exceptions */
