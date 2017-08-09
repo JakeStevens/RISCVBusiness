@@ -77,6 +77,7 @@ module control_unit
   // Assign memory read/write enables
   assign cu_if.dwen = (cu_if.opcode == STORE);
   assign cu_if.dren = (cu_if.opcode == LOAD);
+  assign cu_if.ifence = (cu_if.opcode == MISCMEM) && (rv32i_miscmem_t'(instr_r.funct3) == FENCEI);
 
   // Assign control flow signals
   assign cu_if.branch     = (cu_if.opcode == BRANCH);

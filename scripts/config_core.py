@@ -40,8 +40,8 @@ UARCH_PARAMS = \
     'br_predictor_type' : ['not_taken'],
     # Cache Configurations
     'cache_config' : ['separate'],
-    'dcache_type' : ['pass_through'],
-    'icache_type' : ['pass_through'],
+    'dcache_type' : ['pass_through', 'direct_mapped_tpf'],
+    'icache_type' : ['pass_through', 'direct_mapped_tpf'],
     # Bus Configurations
     'bus_endianness' : ['big', 'little'],
     'bus_interface_type' : ['ahb_if', 'generic_bus_if']

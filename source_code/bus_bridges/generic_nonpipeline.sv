@@ -45,7 +45,7 @@ module generic_nonpipeline (
     end 
     else 
     begin 
-      if ( out_gen_bus_if.busy == 0 ) 
+      if ((out_gen_bus_if.busy == 0) || (~out_gen_bus_if.ren && ~out_gen_bus_if.wen)) 
       begin 
         out_gen_bus_if.wen <= pipeline_trans_if.wen; 
         out_gen_bus_if.ren <= pipeline_trans_if.ren; 

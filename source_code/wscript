@@ -67,3 +67,12 @@ def configure(ctx):
       tb = 'tb_shift_test_restore_divider',
       tb_includes = ['include']
     )
+    ctx.SFFUnits.add('caches',
+      includes = ['include'],
+      src_dir = ['ram', 'bus_bridges', 'standard_core', 'caches'],
+      use = ['RISCVBusiness_packages'],
+      tb_use = ['RISCVBusiness_packages'],
+      tb = 'tb_caches',
+      tb_includes = ['include']
+    )
+

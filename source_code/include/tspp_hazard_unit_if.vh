@@ -28,7 +28,7 @@ interface tspp_hazard_unit_if();
 
   import rv32i_types_pkg::word_t;
   logic pc_en, npc_sel, i_mem_busy, d_mem_busy, dren, dwen, iren,ret;
-  logic branch_taken, prediction, jump, branch, if_ex_stall;
+  logic branch_taken, prediction, jump, branch, if_ex_stall, fence_stall;
   logic if_ex_flush, mispredict, halt;
   word_t pc; 
 
@@ -49,7 +49,7 @@ interface tspp_hazard_unit_if();
           branch, mispredict, halt, pc,fault_insn, mal_insn, 
           illegal_insn, fault_l, 
           mal_l, fault_s, mal_s, breakpoint, env_m, ret,
-          epc_f, epc_e, badaddr_f, badaddr_e, token_ex,
+          epc_f, epc_e, badaddr_f, badaddr_e, token_ex, fence_stall,
     output pc_en, npc_sel, if_ex_stall, if_ex_flush, priv_pc, insert_priv_pc, iren
   );
 
@@ -62,7 +62,7 @@ interface tspp_hazard_unit_if();
     input if_ex_stall, npc_sel,
     output d_mem_busy, dren, dwen, jump, branch, mispredict, halt,
     illegal_insn, fault_l, mal_l, fault_s, mal_s, breakpoint, env_m, ret, epc_e,
-    badaddr_e, token_ex
+    badaddr_e, token_ex, fence_stall
   );
  
 endinterface

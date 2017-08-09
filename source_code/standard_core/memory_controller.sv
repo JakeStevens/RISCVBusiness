@@ -38,6 +38,7 @@ module memory_controller (
   typedef enum { 
                     IDLE, 
                     INSTR_REQ ,
+                    INSTR_DATA_REQ,
                     INSTR_WAIT, 
                     DATA_REQ ,
                     DATA_INSTR_REQ ,
@@ -71,18 +72,24 @@ module memory_controller (
       end 
 
       INSTR_REQ: begin 
-        if( (d_gen_bus_if.ren || d_gen_bus_if.wen) && !out_gen_bus_if.busy) 
-          next_state = DATA_WAIT;
-        else if ( !out_gen_bus_if.busy ) 
-        begin 
-          next_state = IDLE; 
-        end 
+        if(d_gen_bus_if.ren || d_gen_bus_if.wen) 
+          next_state = INSTR_DATA_REQ;
         else 
           next_state = INSTR_WAIT; 
       end
 
-      DATA_REQ: begin 
-        next_state = DATA_INSTR_REQ; 
+      INSTR_DATA_REQ : begin
+        if (out_gen_bus_if.busy == 1'b0)
+          next_state = DATA_WAIT;
+        else
+          next_state = INSTR_DATA_REQ;
+      end
+
+      DATA_REQ: begin
+        if (i_gen_bus_if.ren)
+          next_state = DATA_INSTR_REQ;
+        else 
+          next_state = DATA_WAIT; 
       end
 
       DATA_INSTR_REQ: begin 
@@ -93,17 +100,27 @@ module memory_controller (
       end 
 
       INSTR_WAIT: begin 
-        if ( out_gen_bus_if.busy == 1'b0 ) 
+        if ( out_gen_bus_if.busy == 1'b0 ) begin
+          if (d_gen_bus_if.ren || d_gen_bus_if.wen)
+            next_state = DATA_REQ;
+          else
             next_state = IDLE; 
-        else 
-            next_state = INSTR_WAIT; 
+        end else if (d_gen_bus_if.ren || d_gen_bus_if.wen) 
+          next_state = INSTR_DATA_REQ; 
+        else
+          next_state = INSTR_WAIT;
       end 
 
       DATA_WAIT: begin 
-        if ( out_gen_bus_if.busy == 1'b0 ) 
+        if ( out_gen_bus_if.busy == 1'b0 ) begin
+          if (i_gen_bus_if.ren)
+            next_state = INSTR_REQ;
+          else 
             next_state = IDLE; 
-        else 
-            next_state = INSTR_WAIT; 
+        end else if (i_gen_bus_if.ren)
+          next_state = DATA_INSTR_REQ;
+        else
+          next_state = DATA_WAIT;
       end 
 
       default: next_state = IDLE; 
@@ -130,7 +147,15 @@ module memory_controller (
         out_gen_bus_if.addr     = i_gen_bus_if.addr;
         out_gen_bus_if.byte_en  = i_gen_bus_if.byte_en;
         d_gen_bus_if.busy       = 1'b1;
+        i_gen_bus_if.busy       = 1'b1;
+      end
+      INSTR_DATA_REQ: begin
+        out_gen_bus_if.wen      = d_gen_bus_if.wen;
+        out_gen_bus_if.ren      = d_gen_bus_if.ren;
+        out_gen_bus_if.addr     = d_gen_bus_if.addr;
+        out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
         i_gen_bus_if.busy       = out_gen_bus_if.busy;
+        d_gen_bus_if.busy       = 1'b1;
       end 
       INSTR_WAIT: begin 
         out_gen_bus_if.wen      = 0;  
@@ -147,7 +172,7 @@ module memory_controller (
         out_gen_bus_if.ren      = d_gen_bus_if.ren;
         out_gen_bus_if.addr     = d_gen_bus_if.addr;
         out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
-        d_gen_bus_if.busy       = out_gen_bus_if.busy;
+        d_gen_bus_if.busy       = 1'b1;
         i_gen_bus_if.busy       = 1'b1;
       end 
       DATA_INSTR_REQ: begin 
@@ -163,8 +188,8 @@ module memory_controller (
         out_gen_bus_if.ren      = d_gen_bus_if.ren;
         out_gen_bus_if.addr     = d_gen_bus_if.addr;
         out_gen_bus_if.byte_en  = d_gen_bus_if.byte_en;
-        d_gen_bus_if.busy       = 1'b1;
-        i_gen_bus_if.busy       = out_gen_bus_if.busy;
+        i_gen_bus_if.busy       = 1'b1;
+        d_gen_bus_if.busy       = out_gen_bus_if.busy;
       end 
     endcase 
   end

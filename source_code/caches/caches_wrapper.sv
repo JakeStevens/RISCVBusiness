@@ -23,6 +23,7 @@
 */
 
 `include "generic_bus_if.vh"
+`include "cache_control_if.vh"
 `include "component_selection_defines.vh"
 
 module caches_wrapper(
@@ -30,7 +31,8 @@ module caches_wrapper(
   generic_bus_if.cpu icache_mem_gen_bus_if,
   generic_bus_if.cpu dcache_mem_gen_bus_if,
   generic_bus_if.generic_bus icache_proc_gen_bus_if,
-  generic_bus_if.generic_bus dcache_proc_gen_bus_if
+  generic_bus_if.generic_bus dcache_proc_gen_bus_if,
+  cache_control_if cc_if
 );
   generate
     case (CACHE_CONFIG)

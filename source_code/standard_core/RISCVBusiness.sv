@@ -26,6 +26,7 @@
 `include "ahb_if.vh"
 `include "component_selection_defines.vh"
 `include "risc_mgmt_if.vh"
+`include "cache_control_if.vh"
 
 module RISCVBusiness (
   input logic CLK, nRST,
@@ -48,6 +49,7 @@ module RISCVBusiness (
   risc_mgmt_if   rm_if();
   predictor_pipeline_if predict_if();
   prv_pipeline_if prv_pipe_if();
+  cache_control_if cc_if();
 
   // Module Instantiations
 
@@ -59,7 +61,8 @@ module RISCVBusiness (
     .dgen_bus_if(tspp_dcache_gen_bus_if),
     .prv_pipe_if(prv_pipe_if),
     .predict_if(predict_if),
-    .rm_if(rm_if)
+    .rm_if(rm_if),
+    .cc_if(cc_if)
   );
 
   branch_predictor_wrapper branch_predictor_i (
@@ -86,7 +89,8 @@ module RISCVBusiness (
     .icache_proc_gen_bus_if(tspp_icache_gen_bus_if),
     .icache_mem_gen_bus_if(icache_mc_if),
     .dcache_proc_gen_bus_if(tspp_dcache_gen_bus_if),
-    .dcache_mem_gen_bus_if(dcache_mc_if)
+    .dcache_mem_gen_bus_if(dcache_mc_if),
+    .cc_if(cc_if)
   );
 
   memory_controller mc (
