@@ -8,6 +8,8 @@ Design documents and project information for the RISC-V Business project can be 
 
 # Getting Started
 
+Getting started with RISCV Business consists of three steps: setting up the RISCV tool-chain, setting up the WAF build system, and finally interacting with the RISCV Business project itself. 
+
 ## Generating RISC-V tool-chain
 
 Refer to the following link for instructions on installing the RISC-V software tools:
@@ -42,12 +44,24 @@ RISCVBusiness uses SoCFoundationFlow, built off of the waf build system.  The fo
 
 Refer to SoCFoundationFlow for installation instructions.
 
-## Verifying your setup
+## Setup and Run RISCV Business
+
+First, clone the repository
+
+~~~
+git clone git@github.com:JakeStevens/RISCVBusiness.git
+~~~
+
+Once the directory is cloned, the configuration for a core must be generated before the project can be simulated/synthesized. This can be done using the example.yml configuration provided, or using a modification of that file.
+
+~~~
+./scripts/config_core.py example.yml
+~~~
 
 Run the following command to run the regression test on RISCV-Business.  All tests should pass:
 
 ~~~
-./run_test.py
+./run_tests.py
 ~~~
 
 Refer to the LICENSE file for licensing information.
