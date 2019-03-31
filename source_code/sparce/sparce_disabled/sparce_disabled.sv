@@ -14,30 +14,27 @@
 *   limitations under the License.
 *
 *
-*   Filename:     sparce_wrapper.sv
+*   Filename:     sparce_disabled.sv
 *
 *   Created by:   Vadim V. Nikiforov 
 *   Email:        vnikifor@purdue.edu
-*   Date Created: 04/17/2019
-*   Description:  The top level wrapper file for implementations of 
-*                 sparisity optimiations based on the SparCE paper
+*   Date Created: 04/29/2019
+*   Description:  The top level file for a CPU without sparsity optimizations
+*                 enabled 
 */
 
 `include "sparce_pipeline_if.vh"
-`include "component_selection_defines.vh"
 
-module sparce_wrapper(
+module sparce_disabled(
   input logic CLK, nRST,
   sparce_pipeline_if.sparce sparce_if
 );
 
-  // Sparsity blocks used based on the SPARCE_ENABLED definition 
-  generate
-    case (SPARCE_ENABLED) 
-      "disabled" : sparce_disabled sparce(.*);
-      "enabled"  : sparce_enabled  sparce(.*);
-    endcase
-  endgenerate
+  // when disabled, sparce should never force the pipeline to skip
+
+  // all inputs are to be ignored
+  assign sparce_if.skipping = 1'b0;
+  assign sparce_if.sparce_target = '0;
+
 
 endmodule
-

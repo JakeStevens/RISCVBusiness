@@ -38,7 +38,12 @@ interface sparce_pipeline_if;
   logic skipping;
 
   modport pipeline (
-    output sparce_target,
+    input sparce_target, skipping,
+    output pc, wb_data, wb_en, sasa_data, sasa_addr, sasa_wen, is_sparse
+  );
+
+  modport sparce (
+    output sparce_target, skipping,
     input pc, wb_data, wb_en, sasa_data, sasa_addr, sasa_wen, is_sparse
   );
 

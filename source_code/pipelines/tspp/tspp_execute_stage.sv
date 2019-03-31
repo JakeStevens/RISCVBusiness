@@ -34,6 +34,7 @@
 `include "risc_mgmt_if.vh"
 `include "cache_control_if.vh"
 
+
 module tspp_execute_stage(
   input logic CLK, nRST,
   tspp_fetch_execute_if.execute fetch_ex_if,
@@ -43,7 +44,8 @@ module tspp_execute_stage(
   prv_pipeline_if.pipe  prv_pipe_if,
   output halt,
   risc_mgmt_if.ts_execute rm_if,
-  cache_control_if.pipeline cc_if
+  cache_control_if.pipeline cc_if,
+  sparce_pipeline_if.pipeline sparce_if
 );
 
   import rv32i_types_pkg::*;
