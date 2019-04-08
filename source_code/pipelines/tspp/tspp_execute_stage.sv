@@ -383,6 +383,16 @@ module tspp_execute_stage(
   assign predict_if.prediction = fetch_ex_if.fetch_ex_reg.prediction;
   assign predict_if.branch_result = branch_if.branch_taken;
   //predict_if.update_addr = ;
+
+  /*********************************************************
+  *** SparCE Module Logic
+  *********************************************************/
+  assign sparce_if.wb_data    = rf_if.w_data;
+  assign sparce_if.wb_en      = rf_if.wen;
+  assign sparce_if.sasa_data  = rf_if.rs2_data;
+  assign sparce_if.sasa_addr  = alu_if.port_out;
+  assign sparce_if.sasa_wen   = cu_if.dwen;
+  assign sparce_if.rd         = rf_if.rd;
   
   /*********************************************************
   *** Signals for Bind Tracking - Read-Only, These don't affect execution

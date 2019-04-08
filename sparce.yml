@@ -17,7 +17,7 @@ microarch_params:
   bus_interface_type  : "generic_bus_if"
 
   # Sparisty Optimizations
-  sparce_enabled : "disabled"
+  sparce_enabled : "enabled"
 
 # RISC-MGMT Extension Configuration
 risc_mgmt_params:

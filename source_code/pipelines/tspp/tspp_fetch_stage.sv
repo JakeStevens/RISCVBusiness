@@ -55,8 +55,8 @@ module tspp_fetch_stage (
 
   assign pc4 = pc + 4;
   assign predict_if.current_pc = pc;
-  assign npc = hazard_if.insert_priv_pc ? hazard_if.priv_pc : (hazard_if.npc_sel ? fetch_ex_if.brj_addr : 
-                (predict_if.predict_taken ? predict_if.target_addr : pc4));
+  assign npc = hazard_if.insert_priv_pc ? hazard_if.priv_pc : ( sparce_if.skipping ? sparce_if.sparce_target : (hazard_if.npc_sel ? fetch_ex_if.brj_addr : 
+                (predict_if.predict_taken ? predict_if.target_addr : pc4)));
 
   //Instruction Access logic
   assign hazard_if.i_mem_busy  = igen_bus_if.busy;
@@ -96,6 +96,12 @@ module tspp_fetch_stage (
     else if (BUS_ENDIANNESS == "little")
       endian_swapper ltb_endian(igen_bus_if.rdata, instr);
   endgenerate
+
+  /*********************************************************
+  *** SparCE Module Logic
+  *********************************************************/
+
+  assign sparce_if.pc = pc;
 
 endmodule
 

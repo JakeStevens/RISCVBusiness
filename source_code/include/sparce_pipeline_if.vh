@@ -32,19 +32,20 @@ interface sparce_pipeline_if;
   import rv32i_types_pkg::*;
 
   word_t pc, wb_data,  sasa_data, sasa_addr;
-  logic wb_en, sasa_wen,  is_sparse;
+  logic wb_en, sasa_wen;
+  logic [4:0] rd;
   
   word_t sparce_target; 
   logic skipping;
 
   modport pipeline (
     input sparce_target, skipping,
-    output pc, wb_data, wb_en, sasa_data, sasa_addr, sasa_wen, is_sparse
+    output pc, wb_data, wb_en, sasa_data, sasa_addr, sasa_wen, rd
   );
 
   modport sparce (
     output sparce_target, skipping,
-    input pc, wb_data, wb_en, sasa_data, sasa_addr, sasa_wen, is_sparse
+    input pc, wb_data, wb_en, sasa_data, sasa_addr, sasa_wen, rd
   );
 
 

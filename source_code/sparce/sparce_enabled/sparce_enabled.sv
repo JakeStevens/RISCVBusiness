@@ -23,15 +23,27 @@
 */
 
 `include "sparce_pipeline_if.vh"
+`include "sparce_internal_if.vh"
 
 module sparce_enabled(
   input logic CLK, nRST,
   sparce_pipeline_if.sparce sparce_if
 );
 
-  // all inputs are to be ignored
-  assign sparce_if.skipping = 1'b0;
-  assign sparce_if.sparce_target = '1;
+  sparce_internal_if internal_if();
 
+  assign sparce_if.skipping = 0; //internal_if.skipping;
+  assign sparce_if.sparce_target = '1; //internal_if.sparce_target;
+
+  assign internal_if.pc = sparce_if.pc;
+  assign internal_if.wb_data = sparce_if.wb_data;
+  assign internal_if.wb_en = sparce_if.wb_en;
+  assign internal_if.sasa_data = sparce_if.sasa_data;
+  assign internal_if.sasa_addr = sparce_if.sasa_addr;
+  assign internal_if.sasa_wen = sparce_if.sasa_wen;
+  assign internal_if.rd = sparce_if.rd;
+  
+
+  sparce_svc sparce_svc_i(internal_if.svc);
 
 endmodule
