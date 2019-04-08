@@ -14,12 +14,12 @@
 *   limitations under the License.
 *
 *
-*   Filename:     rtype.S
+*   Filename:     sparce.S
 *
-*   Created by:   John Skubic
-*   Email:        jskubic@purdue.edu
-*   Date Created: 07/01/2016
-*   Description:  Tests rtype instructions 
+*   Created by:   Wengyan Chan
+*   Email:        cwengyan@purdue.edu
+*   Date Created: 04/07/2019
+*   Description:  Preliminary test for sparcity
 */
 
 #include "riscv_test.h"
