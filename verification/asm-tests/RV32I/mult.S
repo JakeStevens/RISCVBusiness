@@ -18,7 +18,7 @@
 *
 *   Created by:   Wengyan Chan
 *   Email:        cwengyan@purdue.edu
-*   Date Created: 04/07/2019
+*   Date Created: 04/17/2019
 *   Description:  Function that multiplies 2 numbers
 */
 
@@ -38,6 +38,7 @@ RVTEST_INTVEC_MACH_BEGIN
 RVTEST_CODE_BEGIN
 
 main:
+  la  x5, tdat0
   ori x1, x0, 0x03       // numbers to multiply
   ori x2, x0, 0x06       
 
@@ -50,8 +51,13 @@ shift:
   slli x1, x1, 1
   srli x2, x2, 1
   bne  x2, x0, mult
+  sw   x4, 0(x5)
 
 RVTEST_CODE_END
+
+.data
+#test data goes here
+tdat0:  .word 0xdeadcafe
 
 RVTEST_DATA_DUMP_END
 
