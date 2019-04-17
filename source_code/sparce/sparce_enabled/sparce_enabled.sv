@@ -31,10 +31,8 @@ module sparce_enabled(
 );
 
   sparce_internal_if internal_if();
-
-  assign sparce_if.skipping = 0; //internal_if.skipping;
-  assign sparce_if.sparce_target = '1; //internal_if.sparce_target;
-
+  
+  // assign inputs to the internal modules
   assign internal_if.pc = sparce_if.pc;
   assign internal_if.wb_data = sparce_if.wb_data;
   assign internal_if.wb_en = sparce_if.wb_en;
@@ -42,8 +40,16 @@ module sparce_enabled(
   assign internal_if.sasa_addr = sparce_if.sasa_addr;
   assign internal_if.sasa_wen = sparce_if.sasa_wen;
   assign internal_if.rd = sparce_if.rd;
+  assign internal_if.sasa_enable = sparce_if.if_ex_enable;
   
-
-  sparce_svc sparce_svc_i(internal_if.svc);
+  // assign to sparce module outputs 
+  assign sparce_if.skipping = internal_if.skipping;
+  assign sparce_if.sparce_target = internal_if.sparce_target;
+  
+  // instantiate internal modules
+  sparce_svc         sparce_svc_i(internal_if.svc);
+  sparce_sprf        sparce_sprf_i(CLK, nRST, internal_if.sprf);
+  sparce_sasa_table  sparce_sasa_table_i(CLK, nRST, internal_if.sasa_table);
+  sparce_psru        sparce_psru_i(internal_if.psru);
 
 endmodule
