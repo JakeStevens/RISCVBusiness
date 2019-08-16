@@ -38,7 +38,8 @@ START_RED = "\033[31m"
 FILE_NAME = None
 ARCH = "RV32I"
 SUPPORTED_ARCHS = []
-SUPPORTED_TEST_TYPES = ['asm', 'c', 'selfasm', ""]
+SUPPORTED_TEST_TYPES = ['asm', 'c', 'selfasm', "sparce", ""]
+SPARCE_MODULES = ['sparce_svc']
 TEST_TYPE = ""
 # Change this variable to the filename (minus extension)
 # of the top level file for your project. This should
@@ -77,6 +78,8 @@ def parse_arguments():
         if ARCH not in SUPPORTED_ARCHS:
            print "ERROR: No " + test_type + " tests exist for " + ARCH
            sys.exit(1)
+      elif TEST_TYPE == 'sparce':
+        pass
       else:
          if TEST_TYPE == 'selfasm':
             test_file_dir = 'self-tests/'
@@ -501,6 +504,43 @@ def run_asm():
        failures += compare_results(f)
    return failures
 
+def run_sparce():
+   failures = 0
+   print "starting sparce module tests..."
+   for module in SPARCE_MODULES:
+      
+      pass_msg = '{0:<40}{1:>20}'.format(module,START_GREEN + '[PASSED]' + END_COLOR)
+      fail_msg = '{0:<40}{1:>20}'.format(module,START_RED + '[FAILED]' + END_COLOR)
+
+      output_dir = './sim_out/sparce/' + module + '/'
+      if not os.path.exists(output_dir):
+         try:
+            os.makedirs(output_dir)
+         except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+               raise
+      cmd_arr = ['waf', 'configure', '--top_level=' + module]
+      failure = subprocess.call(cmd_arr, stdout=FNULL)
+      if failure:
+         print "Error configuring test for " + module
+         failures += 1
+      else:
+         cmd_arr = ['waf', 'verify_source']
+         log = open(output_dir + 'waf_output.log', 'w')
+         log.write('Now running ' + module)
+         failure = subprocess.call(cmd_arr, stdout=log)
+         if failure:
+            log.close()
+            log = open(output_dir + 'waf_output.log', 'r')
+            for line in log:
+                print line
+            failures += 1
+            print fail_msg
+         else:
+            print pass_msg
+
+   return failures
+
 def run_selfasm():
    failures = 0
    if FILE_NAME is None:
@@ -567,6 +607,9 @@ if __name__ == '__main__':
     # self tests
     elif TEST_TYPE == "selfasm":
       failures = run_selfasm()
+    # sparce tests
+    elif TEST_TYPE == "sparce":
+      failures = run_sparce()
     elif TEST_TYPE == "":
       failures += run_asm()
       failures += run_selfasm()

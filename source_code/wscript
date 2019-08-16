@@ -75,4 +75,12 @@ def configure(ctx):
       tb = 'tb_caches',
       tb_includes = ['include']
     )
+    ctx.SFFUnits.add('sparce_svc',
+      includes = ['include'],
+      src_dir = ['sparce'], 
+      use = ['RISCVBusiness_packages'],
+      tb_use = ['RISCVBusiness_packages'],
+      tb = 'tb_sparce_svc',
+      tb_includes = ['include']
+    )
 
