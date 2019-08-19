@@ -25,7 +25,6 @@
 `include "sparce_internal_if.vh"
   import rv32i_types_pkg::*;
 
-parameter PERIOD = 20;
 
 typedef struct packed
 {
@@ -35,6 +34,8 @@ typedef struct packed
 
 module tb_sparce_svc ();
 
+  parameter PERIOD = 20;
+
   sparce_internal_if sparce_if();
   sparce_svc DUT(sparce_if);
 
@@ -42,12 +43,12 @@ module tb_sparce_svc ();
   integer i;
   sparce_svc_testvec_t testvec[2:0];
 
-assign testvec =
-{
-  {32'b0, 1'b1},
-  {32'b1, 1'b0},
-  {'1, 1'b0}
-};
+  assign testvec =
+  {
+    {32'b0, 1'b1},
+    {32'b1, 1'b0},
+    {'1, 1'b0}
+  };
 
 
 
