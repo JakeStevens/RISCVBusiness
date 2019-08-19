@@ -53,12 +53,16 @@ module sparce_sprf(input logic CLK, nRST, sparce_internal_if.sprf sprf_if);
 
   // register output logic
   always_comb begin
-    if (sprf_if.sasa_rs1 == sprf_if.rd && sprf_if.wb_en) begin
+    if (sprf_if.sasa_rs1 == '0) begin
+      sprf_if.rs1_sparsity = 1'b1;
+    end else if (sprf_if.sasa_rs1 == sprf_if.rd && sprf_if.wb_en) begin
       sprf_if.rs1_sparsity = sprf_if.is_sparse;
     end else begin
       sprf_if.rs1_sparsity = sparsity_out[sprf_if.sasa_rs1];
     end
-    if (sprf_if.sasa_rs2 == sprf_if.rd && sprf_if.wb_en) begin
+    if (sprf_if.sasa_rs2 == '0) begin
+      sprf_if.rs2_sparsity = 1'b1;
+    end else if (sprf_if.sasa_rs2 == sprf_if.rd && sprf_if.wb_en) begin
       sprf_if.rs2_sparsity = sprf_if.is_sparse;
     end else begin
       sprf_if.rs2_sparsity = sparsity_out[sprf_if.sasa_rs2];
