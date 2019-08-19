@@ -83,4 +83,12 @@ def configure(ctx):
       tb = 'tb_sparce_svc',
       tb_includes = ['include']
     )
+    ctx.SFFUnits.add('sparce_sprf',
+      includes = ['include'],
+      src_dir = ['sparce'], 
+      use = ['RISCVBusiness_packages'],
+      tb_use = ['RISCVBusiness_packages'],
+      tb = 'tb_sparce_sprf',
+      tb_includes = ['include']
+    )
 

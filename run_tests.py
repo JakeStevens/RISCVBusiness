@@ -39,7 +39,7 @@ FILE_NAME = None
 ARCH = "RV32I"
 SUPPORTED_ARCHS = []
 SUPPORTED_TEST_TYPES = ['asm', 'c', 'selfasm', "sparce", ""]
-SPARCE_MODULES = ['sparce_svc']
+SPARCE_MODULES = ['sparce_svc', 'sparce_sprf']
 TEST_TYPE = ""
 # Change this variable to the filename (minus extension)
 # of the top level file for your project. This should
@@ -76,8 +76,9 @@ def parse_arguments():
         SUPPORTED_ARCHS = glob.glob('./verification/' + test_file_dir + '*')
         SUPPORTED_ARCHS = [a.split('/'+test_file_dir)[1] for a in SUPPORTED_ARCHS]
         if ARCH not in SUPPORTED_ARCHS:
-           print "ERROR: No " + test_type + " tests exist for " + ARCH
-           sys.exit(1)
+           if test_type != 'sparce':
+              print "ERROR: No " + test_type + " tests exist for " + ARCH
+              sys.exit(1)
       elif TEST_TYPE == 'sparce':
         pass
       else:
@@ -614,6 +615,7 @@ if __name__ == '__main__':
       failures += run_asm()
       failures += run_selfasm()
       failures += run_c()
+      failures += run_sparce()
     else:
         print "To be implemented"
     sys.exit(failures)
