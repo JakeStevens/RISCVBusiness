@@ -15,7 +15,7 @@
 *   limitations under the License.
 *
 *
-*   Filename:     sparce_sasa_table.sv
+*   Filename:     sparce_psru_table.sv
 *
 *   Created by:   Vadim V. Nikiforov 
 *   Email:        vnikifor@purdue.edu
