@@ -62,22 +62,24 @@ module tb_sparce_sasa_table ();
   end
 
   task test_default_values(integer size_idx, integer set_idx);
+    initialize(size_idx, set_idx);
   
   endtask
 
   task initialize(integer size_idx, integer set_idx);
-    integer idx = get_index(size_idx, set_idx);
-    @(negedge tb_clk);
-    tb_nRST = 0;
-    sparce_if[idx].pc = '0;
-    sparce_if[idx].sasa_addr = '0;
-    sparce_if[idx].sasa_data = '0;
-    sparce_if[idx].sasa_wen = '0;
-    sparce_if[idx].sasa_enable = '0;
-    @(negedge tb_clk);
-    @(negedge tb_clk);
-    tb_nRST = 1;
-    @(negedge tb_clk);
+    // logic [32:0] idx;
+    // idx = get_index(size_idx, set_idx);
+    // @(negedge tb_clk);
+    // tb_nRST = 0;
+    // sparce_if[idx].pc = '0;
+    // sparce_if[idx].sasa_addr = '0;
+    // sparce_if[idx].sasa_data = '0;
+    // sparce_if[idx].sasa_wen = '0;
+    // sparce_if[idx].sasa_enable = '0;
+    // @(negedge tb_clk);
+    // @(negedge tb_clk);
+    // tb_nRST = 1;
+    // @(negedge tb_clk);
 
   endtask
 
