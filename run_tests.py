@@ -39,7 +39,7 @@ FILE_NAME = None
 ARCH = "RV32I"
 SUPPORTED_ARCHS = []
 SUPPORTED_TEST_TYPES = ['asm', 'c', 'selfasm', "sparce", ""]
-SPARCE_MODULES = ['sparce_svc', 'sparce_sprf']
+SPARCE_MODULES = ['sparce_svc', 'sparce_sprf', 'sparce_sasa_table']
 TEST_TYPE = ""
 # Change this variable to the filename (minus extension)
 # of the top level file for your project. This should
