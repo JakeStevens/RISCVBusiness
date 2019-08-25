@@ -24,9 +24,6 @@
 
 `include "sparce_internal_if.vh"
 
-parameter SASA_ENTRIES = 16;
-parameter SASA_SETS = 4;
-parameter SASA_ADDR = 'h1000;
 
 //  modport sasa_table (
 //    output sasa_rs1, sasa_rs2, insts_to_skip, preceding_pc, condition, valid,
@@ -54,7 +51,7 @@ typedef struct packed {
 } sasa_input_t;
 
 
-module sparce_sasa_table(input logic CLK, nRST, sparce_internal_if.sasa_table sasa_if);
+module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 4, parameter SASA_ADDR = 'h1000) (input logic CLK, nRST, sparce_internal_if.sasa_table sasa_if);
 
   sasa_entry_t [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0] sasa_entries;
   sasa_input_t input_data;
@@ -133,13 +130,6 @@ module sparce_sasa_table(input logic CLK, nRST, sparce_internal_if.sasa_table sa
     sasa_if.condition = SASA_COND_OR;
     sasa_if.valid = 1'b0;
     sasa_hits = '0;
-    //sasa_if.sasa_rs1 = sasa_entries[0][0].rs1;
-    //sasa_if.sasa_rs2 = sasa_entries[0][0].rs2;
-    //sasa_if.insts_to_skip = sasa_entries[0][0].insts_to_skip;
-    //sasa_if.valid = 1'b0;
-    //sasa_if.preciding_pc = sasa_if.pc;
-    //sasa_if.condition = sasa_entries[0][0].sasa_cond;
-    //sasa_hits = '0;
     for (int i = 0; i < SASA_SETS; i++) begin
       if (sasa_entries[i][pc_idx].valid && (sasa_entries[i][pc_idx].tag == pc_tag)) begin
         sasa_hits             = 1'b1;
