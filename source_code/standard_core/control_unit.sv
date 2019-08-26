@@ -184,8 +184,9 @@ module control_unit
       cu_if.alu_op = ALU_ADD;
   end
 
-  // HALT HACK. TODO: FIX ME WHEN IMPLEMENTING INTERRUPTS
-  assign cu_if.halt = (cu_if.instr == 32'h7800d073) || (cu_if.instr == 32'h780e1073);
+  // HALT HACK. Just looking for j + 0x0 (infinite loop)
+  // TODO: FIX ME WHEN IMPLEMENTING INTERRUPTS
+  assign cu_if.halt = (cu_if.instr == 32'h0000006f);
   // Privilege Control Signals
   assign cu_if.fault_insn = 'b0;
  
@@ -208,7 +209,7 @@ module control_unit
 
     if (cu_if.opcode == SYSTEM) begin
       if (rv32i_system_t'(instr_i.funct3) == PRIV) begin
-        if (priv_insn_t'(instr_i.imm11_00) == ERET)
+        if (priv_insn_t'(instr_i.imm11_00) == MRET)
           cu_if.ret_insn = 1'b1;
         if (priv_insn_t'(instr_i.imm11_00) == EBREAK)
           cu_if.breakpoint = 1'b1;
@@ -229,7 +230,8 @@ module control_unit
     if (cu_if.opcode == SYSTEM) begin
       if (rv32i_system_t'(instr_r.funct3) == CSRRW) begin
         cu_if.csr_swap  = 1'b1;
-      end else if (rv32i_system_t'(instr_r.funct3) == CSRRS) begin
+      end  else
+      if (rv32i_system_t'(instr_r.funct3) == CSRRS) begin
         cu_if.csr_set   = 1'b1;
         cu_if.not_zero       = !rf_if.rs1;
       end else if (rv32i_system_t'(instr_r.funct3) == CSRRC) begin 
@@ -248,7 +250,7 @@ module control_unit
         cu_if.csr_imm   = 1'b1; 
         cu_if.not_zero       = !cu_if.zimm;  
       end
-    end   
+    end
   end
 
   assign cu_if.csr_rw_valid = (cu_if.csr_swap | cu_if.csr_set | cu_if.csr_clr);

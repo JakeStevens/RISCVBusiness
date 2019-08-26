@@ -187,7 +187,7 @@ module tb_RISCVBusiness ();
 
     fptr = $fopen(`OUTPUT_FILE_NAME, "w");
 
-    for(addr = 32'h100; addr < 32'h8000; addr+=4) begin
+    for(addr = 32'h80000000; addr < 32'h80007000; addr+=4) begin
       read_ram(addr, data_temp);
       #(PERIOD/4);
       hexdump_temp = {8'h04, addr[15:0]>>2, 8'h00, data};

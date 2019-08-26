@@ -25,3 +25,5 @@ source_code/fpga/output_files
 *.orig
 # Ignore waf lock
 *.lock-waf*
+# Ignore files for commands for moving stuff around
+*.cmd

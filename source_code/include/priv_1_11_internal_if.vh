@@ -14,25 +14,25 @@
 *   limitations under the License.
 *
 *
-*   Filename:     priv_1_7_internal_if.vh
+*   Filename:     priv_1_11_internal_if.vh
 *
 *   Created by:   Jacob R. Stevens
 *   Email:        steven69@purdue.edu
-*   Date Created: 09/20/2016
+*   Date Created: 08/13/2019
 *   Description:  Interface for components within the privilege block 
 */
 
-`ifndef PRIV_1_7_INTERNAL_IF_VH
-`define PRIV_1_7_INTERNAL_IF_VH
+`ifndef PRIV_1_11_INTERNAL_IF_VH
+`define PRIV_1_11_INTERNAL_IF_VH
 
 `include "component_selection_defines.vh"
 
-interface priv_1_7_internal_if;
-  import machine_mode_types_1_7_pkg::*;
+interface priv_1_11_internal_if;
+  import machine_mode_types_1_11_pkg::*;
   import rv32i_types_pkg::*;
 
   logic mip_rup;
-  logic mbadaddr_rup;
+  logic mtval_rup;
   logic mcause_rup;
   logic mepc_rup;
   logic mstatus_rup;
@@ -51,12 +51,12 @@ interface priv_1_7_internal_if;
   logic ex_rmgmt;
   logic [$clog2(`NUM_EXTENSIONS)-1:0] ex_rmgmt_cause;
 
-  word_t epc, badaddr, priv_pc;
+  word_t epc, mtval, priv_pc;
   word_t [3:0] xtvec, xepc_r;
   word_t wdata, rdata;
 
   mip_t       mip, mip_next;
-  mbadaddr_t  mbadaddr_next;
+  mtval_t     mtval_next;
   mcause_t    mcause, mcause_next;
   mepc_t      mepc, mepc_next;
   mstatus_t   mstatus, mstatus_next;
@@ -67,19 +67,19 @@ interface priv_1_7_internal_if;
   csr_addr_t addr;
 
   modport csr (
-    input mip_rup, mbadaddr_rup, mcause_rup, mepc_rup, mstatus_rup,
-      mip_next, mbadaddr_next, mcause_next, mepc_next, mstatus_next,
+    input mip_rup, mtval_rup, mcause_rup, mepc_rup, mstatus_rup,
+      mip_next, mtval_next, mcause_next, mepc_next, mstatus_next,
       swap, clr, set, wdata, addr, valid_write, instr_retired, 
     output mtvec, mepc, mie, timer_int, mip, mcause, mstatus, clear_timer_int,
       rdata, invalid_csr, xtvec, xepc_r
   );
 
   modport prv_control (
-    output mip_rup, mbadaddr_rup, mcause_rup, mepc_rup, mstatus_rup,
-      mip_next, mcause_next, mepc_next, mstatus_next, mbadaddr_next, intr, 
+    output mip_rup, mtval_rup, mcause_rup, mepc_rup, mstatus_rup,
+      mip_next, mcause_next, mepc_next, mstatus_next, mtval_next, intr, 
     input mepc, mie, mip, mcause, mstatus, clear_timer_int, pipe_clear, ret,
       epc, fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s,
-      breakpoint, env_m, timer_int, soft_int, ext_int, badaddr, ex_rmgmt, 
+      breakpoint, env_m, timer_int, soft_int, ext_int, mtval, ex_rmgmt, 
       ex_rmgmt_cause
   );
 
@@ -89,4 +89,4 @@ interface priv_1_7_internal_if;
   );
 
 endinterface
-`endif // PRIV_1_7_INTERNAL_IF_VH
+`endif // PRIV_1_11_INTERNAL_IF_VH

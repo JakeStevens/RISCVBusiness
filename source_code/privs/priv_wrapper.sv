@@ -29,6 +29,7 @@ module priv_wrapper (
   prv_pipeline_if.priv_block prv_pipe_if
 );
 
-  priv_1_7_block priv_block_i(.*);
+  //TODO: Select different priv blocks for backwards compatibility
+  priv_1_11_block priv_block_i(.*);
 
 endmodule

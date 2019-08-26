@@ -14,39 +14,45 @@
 *   limitations under the License.
 *
 *
-*   Filename:     priv_1_7_csr_rfile.sv
+*   Filename:     priv_1_11_csr_rfile.sv
 *
-*   Created by:   John Skubic
-*   Email:        jskubic@purdue.edu
-*   Date Created: 07/08/2016
+*   Created by:   Jacob R. Stevens
+*   Email:        steven69@purdue.edu
+*   Date Created: 08/13/2019
 *   Description:  CSR Registers for Machine Mode Implementation RV32
 */
 
 
-`include "priv_1_7_internal_if.vh"
+`include "priv_1_11_internal_if.vh"
 `include "component_selection_defines.vh"
 
-module priv_1_7_csr_rfile (
+module priv_1_11_csr_rfile (
   input CLK, nRST,
-  priv_1_7_internal_if.csr prv_intern_if
+  priv_1_11_internal_if.csr prv_intern_if
 );
-  import machine_mode_types_1_7_pkg::*;
+  import machine_mode_types_pkg::*;
   import rv32i_types_pkg::*;
  
   /* Machine Information Registers */
-  
-  mcpuid_t      mcpuid;
+
+  mvendorid_t   mvendorid;
+  marchid_t     marchid;
   mimpid_t      mimpid;
   mhartid_t     mhartid;
+  misaid_t      misaid;
 
-  assign mcpuid.base          = BASE_RV32;
-  assign mcpuid.zero          = '0;
-  assign mcpuid.extensions  = MCPUID_EXT_I `ifdef         RV32M_SUPPORTED |
-                              MCPUID_EXT_M `endif `ifdef  RV32C_SUPPORTED |
-                              MCPUID_EXT_C `endif `ifdef  RV32F_SUPPORTED | 
-                              MCPUID_EXT_F `endif ;
+  assign misaid.base          = BASE_RV32;
+  assign misaid.zero          = '0;
+  assign misaid.extensions  = MISAID_EXT_I `ifdef         RV32M_SUPPORTED |
+                              MISAID_EXT_M `endif `ifdef  RV32C_SUPPORTED |
+                              MISAID_EXT_C `endif `ifdef  RV32F_SUPPORTED | 
+                              MISAID_EXT_F `endif `ifdef  CUSTOM_SUPPORTED |
+                              MISAID_EXT_X `endif;
 
-  assign mimpid           = '0; //TODO: Version Numbering Convention
+  //TODO: Version Numbering Convention
+  assign mvendorid        = '0;
+  assign marchid          = '0;
+  assign mimpid           = '0;
 
   assign mhartid          = '0; 
 
@@ -54,9 +60,10 @@ module priv_1_7_csr_rfile (
   /* Machine Trap Setup Registers */
 
   mstatus_t mstatus, mstatus_next;
-  mtdeleg_t mtdeleg;
+  medeleg_t medeleg;
+  mideleg_t mideleg;
   mie_t     mie, mie_next;
-  mtvec_t   mtvec;
+  mtvec_t   mtvec, mtvec_next;
 
   assign mstatus.zero = '0;
 
@@ -78,10 +85,9 @@ module priv_1_7_csr_rfile (
   assign mstatus.fs     = FS_OFF;
   assign mstatus.sd     = 1'b0;
 
-  assign mtvec = MTVEC_MEMORY_ADDR;
-
-  // Deleg Register Zero in Machine Mode Only
-  assign mtdeleg = '0;
+  // Deleg Register Zero in Machine Mode Only (Should be removed)
+  assign medeleg = '0;
+  assign mideleg = '0;
 
   assign mie.zero_0 = '0;
   assign mie.zero_1 = '0;
@@ -96,7 +102,7 @@ module priv_1_7_csr_rfile (
   mscratch_t  mscratch, mscratch_next;
   mepc_t      mepc, mepc_next;
   mcause_t    mcause, mcause_next;
-  mbadaddr_t  mbadaddr, mbadaddr_next;
+  mtval_t     mtval, mtval_next;
   mip_t       mip, mip_next;
  
   assign mip.zero_0 = '0;
@@ -157,9 +163,10 @@ module priv_1_7_csr_rfile (
       mie.msie    <= 1'b0;
       mip.msip    <= 1'b0;
       mip.mtip    <= 1'b0;
+      mtvec       <= '0;
       mcause      <= '0;
       mepc        <= '0;
-      mbadaddr    <= '0;
+      mtval       <= '0;
       mscratch    <= '0;
       mtohost     <= '0;
       mfromhost   <= '0;
@@ -175,9 +182,10 @@ module priv_1_7_csr_rfile (
       mie.msie    <= mie_next.msie;
       mip.msip    <= mip_next.msip; // interrupt
       mip.mtip    <= mip_next.mtip; // interrupt
+      mtvec       <= mtvec_next;
       mcause      <= mcause_next;
       mepc        <= mepc_next;
-      mbadaddr    <= mbadaddr_next;
+      mtval       <= mtval_next;
       mscratch    <= mscratch_next;
       mtohost     <= mtohost_next;
       mfromhost   <= mfromhost_next;
@@ -193,9 +201,10 @@ module priv_1_7_csr_rfile (
       mie.msie    <= mie_next.msie;
       mip.msip    <= mip_next.msip; // interrupt
       mip.mtip    <= mip_next.mtip; // interrupt
+      mtvec       <= mtvec_next;
       mcause      <= mcause_next;
       mepc        <= mepc_next;
-      mbadaddr    <= mbadaddr_next;
+      mtval       <= mtval_next;
       mscratch    <= mscratch_next;
       mtohost     <= mtohost_next;
       mfromhost   <= mfromhost_next;
@@ -211,9 +220,10 @@ module priv_1_7_csr_rfile (
       mie.msie    <= mie_next.msie;
       mip.msip    <= mip_next.msip; // interrupt
       mip.mtip    <= mip_next.mtip; // interrupt
+      mtvec       <= mtvec_next;
       mcause      <= mcause_next;
       mepc        <= mepc_next;
-      mbadaddr    <= mbadaddr_next;
+      mtval       <= mtval_next;
       mscratch    <= mscratch_next;
       mtohost     <= mtohost_next;
       mfromhost   <= mfromhost_next;
@@ -243,10 +253,11 @@ module priv_1_7_csr_rfile (
 
   // Readonly by pipeline, rw by prv
   assign mip_next       = prv_intern_if.mip_rup ? prv_intern_if.mip_next : mip;
-  assign mbadaddr_next  = prv_intern_if.mbadaddr_rup ? prv_intern_if.mbadaddr_next : mbadaddr;
+  assign mtval_next     = prv_intern_if.mtval_rup ? prv_intern_if.mtval_next : mtval;
   assign mcause_next    = prv_intern_if.mcause_rup ? prv_intern_if.mcause_next : mcause;
 
   // Read and write by pipeline and prv
+  //TODO: Waveforms for this look wrong, potential bug
   assign mstatus_next   = (prv_intern_if.addr == MSTATUS_ADDR) ? mstatus_t'(rup_data) : (
                             prv_intern_if.mstatus_rup ? prv_intern_if.mstatus_next :
                             mstatus
@@ -259,6 +270,7 @@ module priv_1_7_csr_rfile (
 
   // Read and write by pipeline
   assign mie_next       = (prv_intern_if.addr == MIE_ADDR) ? mie_t'(rup_data) : mie;
+  assign mtvec_next     = (prv_intern_if.addr == MTVEC_ADDR) ? mtvec_t'(rup_data) : mtvec;
   assign mscratch_next  = (prv_intern_if.addr == MSCRATCH_ADDR) ? mscratch_t'(rup_data) : mscratch;
   assign mtohost_next   = (prv_intern_if.addr == MTOHOST_ADDR) ? mtohost_t'(rup_data) : mtohost;
   assign mtime_next     = (prv_intern_if.addr == MTIME_ADDR) ? mtime_t'(rup_data) : mtime;
@@ -268,19 +280,22 @@ module priv_1_7_csr_rfile (
   always_comb begin
     valid_csr_addr = 1'b1;
     casez (prv_intern_if.addr)
-      MCPUID_ADDR     : prv_intern_if.rdata = mcpuid; 
+      MVENDORID_ADDR  : prv_intern_if.rdata = mvendorid;
+      MARCHID_ADDR    : prv_intern_if.rdata = marchid;
       MIMPID_ADDR     : prv_intern_if.rdata = mimpid;
       MHARTID_ADDR    : prv_intern_if.rdata = mhartid;
+      MISA_ADDR       : prv_intern_if.rdata = misaid; 
       
       MSTATUS_ADDR    : prv_intern_if.rdata = mstatus;
       MTVEC_ADDR      : prv_intern_if.rdata = mtvec;
-      MTDELEG_ADDR    : prv_intern_if.rdata = mtdeleg; 
+      MEDELEG_ADDR    : prv_intern_if.rdata = medeleg; 
+      MIDELEG_ADDR    : prv_intern_if.rdata = mideleg; 
       MIE_ADDR        : prv_intern_if.rdata = mie;
       
       MSCRATCH_ADDR   : prv_intern_if.rdata = mscratch;
       MEPC_ADDR       : prv_intern_if.rdata = mepc;
       MCAUSE_ADDR     : prv_intern_if.rdata = mcause;
-      MBADADDR_ADDR   : prv_intern_if.rdata = mbadaddr;
+      MTVAL_ADDR      : prv_intern_if.rdata = mtval;
       MIP_ADDR        : prv_intern_if.rdata = mip; 
      
       //machine protection and translation not present 
@@ -304,13 +319,13 @@ module priv_1_7_csr_rfile (
       MTOHOST_ADDR    : prv_intern_if.rdata = mtohost;
       MFROMHOST_ADDR  : prv_intern_if.rdata = mfromhost;
 
-      // User level performance counters
-      CYCLE_ADDR      : prv_intern_if.rdata = cycle;
-      TIME_ADDR       : prv_intern_if.rdata = _time;
-      INSTRET_ADDR    : prv_intern_if.rdata = instret;
-      CYCLEH_ADDR     : prv_intern_if.rdata = cycleh;
-      TIMEH_ADDR      : prv_intern_if.rdata = timeh;
-      INSTRETH_ADDR   : prv_intern_if.rdata = instreth;
+      // Performance counters
+      MCYCLE_ADDR      : prv_intern_if.rdata = cycle;
+      MTIME_ADDR       : prv_intern_if.rdata = _time;
+      MINSTRET_ADDR    : prv_intern_if.rdata = instret;
+      MCYCLEH_ADDR     : prv_intern_if.rdata = cycleh;
+      MTIMEH_ADDR      : prv_intern_if.rdata = timeh;
+      MINSTRETH_ADDR   : prv_intern_if.rdata = instreth;
  
       default : begin
         valid_csr_addr = 1'b0;
