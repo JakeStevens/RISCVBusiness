@@ -96,10 +96,14 @@ def compile_asm(file_name):
     output_dir = './sim_out/' + ARCH + '/' + short_name + '/'
     output_name = output_dir + short_name + '.elf'
 
+    # Added 64-bit support
+    xlen = 'rv64g' if '64' in ARCH else 'rv32g'
+    abi = 'lp64' if '64' in ARCH else 'ilp32'
+
     if not os.path.exists(os.path.dirname(output_name)):
         os.makedirs(os.path.dirname(output_name))
 
-    cmd_arr = ['riscv64-unknown-elf-gcc', '-m32', '-march=RV32IM', '-static',
+    cmd_arr = ['riscv64-unknown-elf-gcc', '-march=' + xlen, '-mabi=' + abi, '-static',
                 '-mcmodel=medany', '-fvisibility=hidden', '-nostdlib',
                 '-nostartfiles', '-T./verification/asm-env/link.ld',
                 '-I./verification/asm-env/asm', file_name, '-o', output_name]
@@ -108,7 +112,7 @@ def compile_asm(file_name):
         return -1
 
     # create an meminit.hex file from the elf file produced above
-    cmd_arr = ['elf2hex', '8', '65536', output_name]
+    cmd_arr = ['elf2hex', '8', '65536', output_name, '2147483648']
     hex_file_loc = output_dir + 'meminit.hex'
     with open(hex_file_loc, 'w') as hex_file:
         failure = subprocess.call(cmd_arr, stdout=hex_file)
@@ -120,6 +124,7 @@ def compile_asm(file_name):
 # compile_asm_for_self is identical to compile_asm but has different
 # settings specifically for compiling self tests
 def compile_asm_for_self(file_name):
+    # compile all of the files
     short_name = file_name.split(ARCH+'/')[1][:-2]
     output_dir = './sim_out/' + ARCH + '/' + short_name + '/'
     output_name = output_dir + short_name + '.elf'
@@ -127,17 +132,22 @@ def compile_asm_for_self(file_name):
     if not os.path.exists(os.path.dirname(output_name)):
         os.makedirs(os.path.dirname(output_name))
 
-    cmd_arr = ['riscv64-unknown-elf-gcc', '-m32', '-march=RV32IM', '-static',
-                '-mcmodel=medany', '-fvisibility=hidden', '-nostdlib',
-                '-nostartfiles', '-T./verification/asm-env/link.ld',
+    xlen = 'rv64g' if '64' in ARCH else 'rv32g'
+    abi = 'lp64' if '64' in ARCH else 'ilp32'
+
+
+    cmd_arr = ['riscv64-unknown-elf-gcc', '-march=' + xlen, '-mabi=' + abi,
+                '-static', '-mcmodel=medany', '-fvisibility=hidden',
+                '-nostdlib', '-nostartfiles', 
+                '-T./verification/asm-env/link.ld',
                 '-I./verification/asm-env/selfasm', file_name, '-o',
                 output_name]
     failure = subprocess.call(cmd_arr)
     if failure:
         return -1
-    
+
     # create an meminit.hex file from the elf file produced above
-    cmd_arr = ['elf2hex', '8', '65536', output_name]
+    cmd_arr = ['elf2hex', '8', '65536', output_name, '2147483648']
     hex_file_loc = output_dir + 'meminit.hex'
     with open(hex_file_loc, 'w') as hex_file:
         failure = subprocess.call(cmd_arr, stdout=hex_file)
@@ -155,7 +165,12 @@ def compile_c(file_name):
     if not os.path.exists(os.path.dirname(output_name)):
         os.makedirs(os.path.dirname(output_name))
 
-    cmd_arr = ['riscv64-unknown-elf-gcc', '-O0', '-m32', '-march=RV32IM', '-ffreestanding', '-nostdlib', '-o', output_name, 
+    xlen = 'rv64g' if '64' in ARCH else 'rv32g'
+    abi = 'lp64' if '64' in ARCH else 'ilp32'
+
+    cmd_arr = ['riscv64-unknown-elf-gcc', '-O0', '-march='+xlen, '-mabi='+abi]
+    cmd_arr += ['-ffunction-sections', '-Wno-comments']
+    cmd_arr += ['-ffreestanding', '-nostdlib', '-o', output_name, 
               '-Wl,-Bstatic,-T,verification/c-firmware/link.ld,--strip-debug']
     cmd_arr += ['-lgcc', 'verification/c-firmware/trap.S']
     cmd_arr += ['-Iverification/c-firmware/']
@@ -165,7 +180,7 @@ def compile_c(file_name):
         return -1
 
     # create an meminit.hex file from the elf file produced above
-    cmd_arr = ['elf2hex', '8', '65536', output_name]
+    cmd_arr = ['elf2hex', '8', '524288', output_name, '2147483648']
     hex_file_loc = output_dir + 'meminit.hex'
     with open(hex_file_loc, 'w') as hex_file:
         failure = subprocess.call(cmd_arr, stdout=hex_file)
