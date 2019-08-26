@@ -25,7 +25,7 @@
 
 #include "../../c-firmware/c_self_test.h"
  
-int main(void) { 
+int main(void) {
   int a=6;
   int b=3; 
   int c, d;

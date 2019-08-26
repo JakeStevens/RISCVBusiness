@@ -72,4 +72,5 @@ int main(void)
     if (primes[i] != golden_primes[i])
       TEST_FINISH_FAIL(1)
   TEST_FINISH_SUCCESS
+  //DEFINE_HOST
 }

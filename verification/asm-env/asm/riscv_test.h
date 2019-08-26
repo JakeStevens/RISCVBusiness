@@ -31,39 +31,46 @@
 #include "../encoding.h"
 
 //-----------------------------------------------------------------------
-// Data Dump Section Macro
-//-----------------------------------------------------------------------
-
-#define RVTEST_DATA_DUMP_BEGIN .align 4; .global begin_signature; begin_signature:
-
-#define RVTEST_DATA_DUMP_END  .align 4; .global end_signature; end_signature:
-
-//-----------------------------------------------------------------------
 // Text Section Macro
 //-----------------------------------------------------------------------
 
-#define RVTEST_INTVEC_USER_BEGIN \
-  .text;                    \
-  .align 6;                 
- 
-#define RVTEST_INTVEC_SUPER_BEGIN \
-  .align 6;            
-
-#define RVTEST_INTVEC_HYPER_BEGIN \
-  .align 6;           
-
-#define RVTEST_INTVEC_MACH_BEGIN \
-  .align 6;           
 
 #define RVTEST_CODE_BEGIN   \
+  .text;                    \
   .align  6; \
   .globl _start;          \
 _start:
   
 
 #define RVTEST_CODE_END \
-  csrw mtohost, 1; \
+  la x1, tohost; \
+  li x2, 1; \
+  sw x2, 0(x1); \
   1:  \
   j 1b
+
+#define RVTEST_INTVEC_USER_BEGIN \
+  .align ;                 
+ 
+#define RVTEST_INTVEC_SUPER_BEGIN \
+  .align ;            
+
+#define RVTEST_INTVEC_HYPER_BEGIN \
+  .align ;           
+
+#define RVTEST_INTVEC_MACH_BEGIN \
+  .align ;           
+//-----------------------------------------------------------------------
+// Data Dump Section Macro
+//-----------------------------------------------------------------------
+
+
+#define RVTEST_DATA_DUMP_BEGIN .align 4; .global begin_signature; begin_signature:
+
+#define RVTEST_DATA_DUMP_END  .align 4; .global end_signature; end_signature: \
+  .section .statuses; \
+  .global tohost; tohost: .word 0; \
+  .global fromhost; fromhost: .word 0;
+
 
 #endif

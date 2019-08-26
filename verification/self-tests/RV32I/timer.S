@@ -33,13 +33,19 @@ RVTEST_CODE_BEGIN
 
 
 main:
+  # Define trap vector address
+  la t0, mtvec_handler
+  csrw mtvec, t0
+
   addi x6, x0, 0xFF
   addi x7, x0, 0xFF
   addi x3, x0, 0x1
   csrw mstatus, x3
-  csrr x2, mtime
+  la x1, mtime
+  lw x2, 0(x1)
   addi x2, x2, 50 
-  csrw mtimecmp, x2
+  la x1, mtimecmp
+  sw x2, 0(x1)
   ori x3, x0, 0x80
   csrw mie, x3
 idle_loop:
@@ -55,7 +61,7 @@ mtvec_handler:
   # Change sigil to show interrupt was entered
   ori x6, x0, 0x0F
   # Return
-  eret
+  mret
 
 RVTEST_CODE_END
 

@@ -23,24 +23,9 @@
 #
 
   .section .text
-  .global irq_handler
-  .global exception_handler
-
-  .balign 0x40
-  nop
-  .balign 0x40
-  nop
-  .balign 0x40
-  nop
-  .balign 0x40
-  addi sp, sp, -4
-  sw ra, 0(sp)
-  jal ra, trap
-  lw ra, 0(sp)
-  addi sp, sp, 4
-  eret
-
-  .balign 0x40
+  # Set handler
+  la t0, mvec
+  csrw mtvec, t0
   #set stack pointer (0x3fff_fffc)
   ori sp, zero, 0x0
   addi sp, sp, -4
@@ -53,6 +38,18 @@
   #load address of main (jump does not return)
   la t0, main
   jr t0
+
+  .global irq_handler
+  .global exception_handler
+
+mvec:
+  addi sp, sp, -4
+  sw ra, 0(sp)
+  jal ra, trap
+  lw ra, 0(sp)
+  addi sp, sp, 4
+  mret
+
 
 trap:
   #store return address
@@ -145,5 +142,4 @@ trap_ret:
   #restore return address, update epc and return
   lw ra, 0(sp)
   addi sp, sp, 4
-  ret
-  
+  mret

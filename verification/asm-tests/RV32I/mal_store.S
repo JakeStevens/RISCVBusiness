@@ -26,23 +26,14 @@
 
 RVTEST_DATA_DUMP_BEGIN
 
-RVTEST_INTVEC_USER_BEGIN
-  nop
-RVTEST_INTVEC_SUPER_BEGIN
-  nop
-RVTEST_INTVEC_HYPER_BEGIN
-  nop
-RVTEST_INTVEC_MACH_BEGIN
-  ori x9, x0, 1
-  la  x8, tdat2
-  sw  x9, 0(x8)
-  csrr x10, mepc
-  addi x10,x10, 4
-  csrw mepc, x10
-  eret
 RVTEST_CODE_BEGIN
 
 main:
+
+  # Enable M mode
+  la t0, mvec
+  csrw mtvec, t0;
+
   ori x2, x0, 0x678
   ori x4, x0, 1
   la  x3, tdat4
@@ -52,6 +43,17 @@ main:
   
 
 RVTEST_CODE_END
+
+mvec:
+RVTEST_INTVEC_MACH_BEGIN
+  ori x9, x0, 1
+  la  x8, tdat2
+  sw  x9, 0(x8)
+  csrr x10, mepc
+  addi x10,x10, 4
+  csrw mepc, x10
+  mret
+
 
 .data
 #test data goes here

@@ -26,15 +26,6 @@
 
 RVTEST_DATA_DUMP_BEGIN
 
-RVTEST_INTVEC_USER_BEGIN
-  nop
-RVTEST_INTVEC_SUPER_BEGIN
-  nop
-RVTEST_INTVEC_HYPER_BEGIN
-  nop
-RVTEST_INTVEC_MACH_BEGIN
-  nop
-
 RVTEST_CODE_BEGIN
 
 main:
@@ -80,6 +71,7 @@ bgeu_target:
 end_target:
     ori x0, x0, 0x00
 
+
 RVTEST_CODE_END
 
 .data
@@ -92,6 +84,3 @@ tdat4:  .word 0x00000005
 tdat5:  .word 0x00000006
 
 RVTEST_DATA_DUMP_END
-
-
-

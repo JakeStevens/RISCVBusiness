@@ -67,6 +67,3 @@ tdat2:  .word 0x00000003
 tdat3:  .word 0x00000004
 
 RVTEST_DATA_DUMP_END
-
-
-
