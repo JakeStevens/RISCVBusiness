@@ -476,13 +476,13 @@ def run_asm():
     print "Starting asm tests..."
     for f in files:
         if 'asicfab' in os.environ['HOSTNAME']:
-            # Need to do the work on EE256   
+            # Need to do the work on EE256
             test_name = f.split('/')[-1][:-2]
             output_dir = './sim_out/' + ARCH + '/' + test_name + '/'
             elf_name = output_dir + test_name + '.elf'
             log_name = output_dir + test_name + '_spike.hex'
             ee256_cmd = '#!/bin/sh\nexport RISCV=~/riscv-toolchain\nexport PATH='
-            ee256_cmd += '~/riscv-toolchain/bin:$PATH\ncd jakestevens_RISCV/'
+            ee256_cmd += '~/riscv-toolchain/bin:$PATH\ncd '
             ee256_cmd += 'RISCVBusiness \npython compile_asm.py ' + f + '\n'
             ee256_cmd += 'spike -l --isa=RV32IM +signature=' + log_name + ' '
             ee256_cmd += elf_name + ' &>> ' + output_dir + test_name + '_spike.trace'
@@ -500,7 +500,7 @@ def run_asm():
             # Now bring the Spike trace and hex files over to asicfab
             if not os.path.exists('./sim_out/' + ARCH + '/' + test_name):
                 os.makedirs('./sim_out/' + ARCH + '/' + test_name)
-            scp_cmd = 'scp -q socetlnx03@128.46.75.147:~/jakestevens_RISCV/'
+            scp_cmd = 'scp -q socetlnx03@128.46.75.147:~/'
             scp_cmd += 'RISCVBusiness/sim_out/' + ARCH + '/' + test_name
             scp_cmd += '/* ./sim_out/' + ARCH + '/' + test_name
             ret = subprocess.call(scp_cmd.split())
@@ -551,7 +551,7 @@ def run_selfasm():
             # Do work remotely
             test_name = f.split('/')[-1][:-2]
             ee256_cmd = '#!/bin/sh\nexport RISCV=~/riscv-toolchain\nexport PATH='
-            ee256_cmd += '~/riscv-toolchain/bin:$PATH\ncd jakestevens_RISCV/'
+            ee256_cmd += '~/riscv-toolchain/bin:$PATH\ncd '
             ee256_cmd += 'RISCVBusiness \npython compile_asm_for_self.py ' + f
 
             with open('compile256.cmd', 'w') as cmd_f:
@@ -571,7 +571,7 @@ def run_selfasm():
             # Now bring the hex file over to asicfab
             if not os.path.exists('./sim_out/' + ARCH + '/' + test_name):
                 os.makedirs('./sim_out/' + ARCH + '/' + test_name)
-            scp_cmd = 'scp -q socetlnx03@128.46.75.147:~/jakestevens_RISCV/'
+            scp_cmd = 'scp -q socetlnx03@128.46.75.147:~/'
             scp_cmd += 'RISCVBusiness/sim_out/' + ARCH + '/' + test_name
             scp_cmd += '/* ./sim_out/' + ARCH + '/' + test_name
             ret = subprocess.call(scp_cmd.split())
@@ -614,7 +614,7 @@ def run_c():
             elf_name = output_dir + test_name + '.elf'
             log_name = output_dir + test_name + '_spike.hex'
             ee256_cmd = '#!/bin/sh\nexport RISCV=~/riscv-toolchain\nexport PATH='
-            ee256_cmd += '~/riscv-toolchain/bin:$PATH\ncd jakestevens_RISCV/'
+            ee256_cmd += '~/riscv-toolchain/bin:$PATH\ncd '
             ee256_cmd += 'RISCVBusiness \npython compile_c.py ' + f + '\n'
 
             with open('compile256.cmd', 'w') as cmd_f:
@@ -630,7 +630,7 @@ def run_c():
             # Now bring the hex files over to asicfab
             if not os.path.exists('./sim_out/' + ARCH + '/' + test_name):
                 os.makedirs('./sim_out/' + ARCH + '/' + test_name)
-            scp_cmd = 'scp -q socetlnx03@128.46.75.147:~/jakestevens_RISCV/'
+            scp_cmd = 'scp -q socetlnx03@128.46.75.147:~/'
             scp_cmd += 'RISCVBusiness/sim_out/' + ARCH + '/' + test_name
             scp_cmd += '/* ./sim_out/' + ARCH + '/' + test_name
             ret = subprocess.call(scp_cmd.split())
