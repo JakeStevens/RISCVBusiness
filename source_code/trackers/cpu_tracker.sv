@@ -168,7 +168,11 @@ module cpu_tracker(
             case(priv_insn_t'(funct12))
               ECALL:  instr_mnemonic = "ecall";
               EBREAK: instr_mnemonic = "ebreak";
-              ERET:   instr_mnemonic = "eret";
+              MRET:   instr_mnemonic = "mret";
+              default: begin 
+                         instr_mnemonic = "errr";
+                         $display("%b", priv_insn_t'(funct12));
+                       end
             endcase
           end
           default:  instr_mnemonic = "unknown system op";
@@ -224,24 +228,30 @@ module cpu_tracker(
 
   function string csrRegisterAssign(input logic [11:0] csr_register);
     case (csr_addr_t'(csr_register))
-      MCPUID_ADDR     : csrRegisterAssign = "mcpuid"; 
+      MVENDORID_ADDR  : csrRegisterAssign = "mvendorid"; 
+      MARCHID_ADDR    : csrRegisterAssign = "marchid"; 
       MIMPID_ADDR     : csrRegisterAssign = "mimpid"; 
       MHARTID_ADDR    : csrRegisterAssign = "mhartid"; 
-      MSTATUS_ADDR    : csrRegisterAssign = "mstatus"; 
+      MSTATUS_ADDR    : csrRegisterAssign = "mstatus";
+      MISA_ADDR       : csrRegisterAssign = "misa";
+      MEDELEG_ADDR    : csrRegisterAssign = "medeleg"; 
+      MIDELEG_ADDR    : csrRegisterAssign = "mideleg"; 
       MTVEC_ADDR      : csrRegisterAssign = "mtvec"; 
-      MTDELEG_ADDR    : csrRegisterAssign = "mtdeleg"; 
       MIE_ADDR        : csrRegisterAssign = "mie"; 
       MSCRATCH_ADDR   : csrRegisterAssign = "mscratch"; 
       MEPC_ADDR       : csrRegisterAssign = "mepc"; 
       MCAUSE_ADDR     : csrRegisterAssign = "mcause"; 
-      MBADADDR_ADDR   : csrRegisterAssign = "mbadaddr"; 
+      MTVAL_ADDR      : csrRegisterAssign = "mtval"; 
       MIP_ADDR        : csrRegisterAssign = "mip"; 
+      // TODO: MAY BE ABLE TO REMOVE BELOW
       MBASE_ADDR      : csrRegisterAssign = "mbase"; 
       MBOUND_ADDR     : csrRegisterAssign = "mbound"; 
       MIBASE_ADDR     : csrRegisterAssign = "mibase"; 
       MIBOUND_ADDR    : csrRegisterAssign = "mibound"; 
       MDBASE_ADDR     : csrRegisterAssign = "mdbase"; 
       MDBOUND_ADDR    : csrRegisterAssign = "mdbound"; 
+      // TODO: MAY BE ABLE TO REMOVE ABOVE
+      // TODO: BELOW MUST BE REMOVED
       HTIMEW_ADDR     : csrRegisterAssign = "htimew"; 
       HTIMEHW_ADDR    : csrRegisterAssign = "htimehw"; 
       MTIMECMP_ADDR   : csrRegisterAssign = "mtimecmp"; 
@@ -249,6 +259,7 @@ module cpu_tracker(
       MTIMEH_ADDR     : csrRegisterAssign = "mtimeh"; 
       MTOHOST_ADDR    : csrRegisterAssign = "mtohost"; 
       MFROMHOST_ADDR  : csrRegisterAssign = "mfromhost"; 
+      // TODO: ABOVE MUST BE REMOVED
       default         : csrRegisterAssign = "csr register not tracked";
     endcase
   endfunction

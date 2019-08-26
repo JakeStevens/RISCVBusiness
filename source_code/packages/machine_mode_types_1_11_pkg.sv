@@ -14,7 +14,7 @@
 *   limitations under the License.
 *
 *
-*   Filename:     machine_mode_types_pkg.sv
+*   Filename:     machine_mode_types_1_11_pkg.sv
 *
 *   Created by:   Jacob R. Stevens
 *   Email:        steven69@purdue.edu
@@ -22,12 +22,10 @@
 *   Description:  Types needed to implement machine mode priv. isa 1.11
 */
 
-`ifndef MACHINE_MODE_TYPES_PKG_SV
-`define MACHINE_MODE_TYPES_PKG_SV
+`ifndef MACHINE_MODE_TYPES_1_11_PKG_SV
+`define MACHINE_MODE_TYPES_1_11_PKG_SV
 
-//TODO: Have this be selectable between 1.7 and 1.11
-
-package machine_mode_types_pkg;
+package machine_mode_types_1_11_pkg;
 
   typedef enum logic [11:0] {
     /* Machine Mode Addresses */
@@ -255,4 +253,4 @@ package machine_mode_types_pkg;
   
 endpackage
 
-`endif //MACHINE_MODE_TYPES_PKG_SV
+`endif //MACHINE_MODE_TYPES_1_11_PKG_SV

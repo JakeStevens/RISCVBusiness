@@ -14,66 +14,61 @@
 *   limitations under the License.
 *
 *
-*   Filename:     machine_mode_types_pkg.sv
+*   Filename:     machine_mode_types_1_7_pkg.sv
 *
-*   Created by:   Jacob R. Stevens
-*   Email:        steven69@purdue.edu
-*   Date Created: 08/13/2019
-*   Description:  Types needed to implement machine mode priv. isa 1.11
+*   Created by:   John Skubic
+*   Email:        jskubic@purdue.edu
+*   Date Created: 07/05/2016
+*   Description:  Types needed to implement machine mode priv. isa 1.7
 */
 
-`ifndef MACHINE_MODE_TYPES_PKG_SV
-`define MACHINE_MODE_TYPES_PKG_SV
+`ifndef MACHINE_MODE_TYPES_1_7_PKG_SV
+`define MACHINE_MODE_TYPES_1_7_PKG_SV
 
-//TODO: Have this be selectable between 1.7 and 1.11
-
-package machine_mode_types_pkg;
+package machine_mode_types_1_7_pkg;
 
   typedef enum logic [11:0] {
     /* Machine Mode Addresses */
-    MVENDORID_ADDR  = 12'hF11,
-    MARCHID_ADDR    = 12'hF12,
-    MIMPID_ADDR     = 12'hF13,
-    MHARTID_ADDR    = 12'hF14,
-
+    MCPUID_ADDR     = 12'hF00,
+    MIMPID_ADDR     = 12'hF01,
+    MHARTID_ADDR    = 12'hF10,
+ 
     MSTATUS_ADDR    = 12'h300,
-    MISA_ADDR       = 12'h301,
-    MEDELEG_ADDR    = 12'h302,
-    MIDELEG_ADDR    = 12'h303,
+    MTVEC_ADDR      = 12'h301,
+    MTDELEG_ADDR    = 12'h302,
     MIE_ADDR        = 12'h304,
-    MTVEC_ADDR      = 12'h305,
-    //TODO: MCOUNTEREN AND ASSOCIATED REGS/CONTGROL (e.g. cycle/time)
-    MCOUNTEREN_ADDR = 12'h306,
  
     MSCRATCH_ADDR   = 12'h340,
     MEPC_ADDR       = 12'h341,
     MCAUSE_ADDR     = 12'h342,
-    MTVAL_ADDR      = 12'h343,
+    MBADADDR_ADDR   = 12'h343,
     MIP_ADDR        = 12'h344,
 
-    // TODO: MAY BE ABLE TO REMOVE BELOW
     MBASE_ADDR      = 12'h380,
     MBOUND_ADDR     = 12'h381,
     MIBASE_ADDR     = 12'h382,
     MIBOUND_ADDR    = 12'h383,
     MDBASE_ADDR     = 12'h384,
     MDBOUND_ADDR    = 12'h385,
-    // TODO: MAY BE ABLE TO REMOVE ABOVE
-    // TODO: BELOW MUST BE REMOVED
-    MTOHOST_ADDR    = 12'h780,
-    MFROMHOST_ADDR  = 12'h781,
+
     HTIMEW_ADDR     = 12'hB01,
     HTIMEHW_ADDR    = 12'hB81,
+
     MTIMECMP_ADDR   = 12'h321,
     MTIME_ADDR      = 12'h701,
     MTIMEH_ADDR     = 12'h741,
-    // TODO: ABOVE MUST BE REMOVED
 
-    MCYCLE_ADDR      = 12'hB00,
-    MINSTRET_ADDR    = 12'hB02,
-    MCYCLEH_ADDR     = 12'hB80,
-    MINSTRETH_ADDR   = 12'hB82
+    MTOHOST_ADDR    = 12'h780,
+    MFROMHOST_ADDR  = 12'h781,
+    /* User Mode Addresses */
+    CYCLE_ADDR      = 12'hC00,
+    TIME_ADDR       = 12'hC01,
+    INSTRET_ADDR    = 12'hC02,
+    CYCLEH_ADDR     = 12'hC80,
+    TIMEH_ADDR      = 12'hC81,
+    INSTRETH_ADDR   = 12'hC82
   } csr_addr_t;
+
 
   /* Priv Levels */
   typedef enum logic [1:0] {
@@ -85,46 +80,47 @@ package machine_mode_types_pkg;
   
   /* Machine Mode Register Types */
 
-  /* misaid types */
+  /* mcpuid types */
 
   typedef enum logic [1:0] {
     BASE_RV32   = 2'h1,
     BASE_RV64   = 2'h2,
     BASE_RV128  = 2'h3
-  } misaid_base_t;
+  } mcpuid_base_t;
 
   typedef struct packed {
-    misaid_base_t base;
+    mcpuid_base_t base;
     logic [3:0] zero;
     logic [25:0] extensions;
-  } misaid_t;
+  } mcpuid_t;
 
-  parameter MISAID_EXT_A   = 26'h1 << 0;
-  parameter MISAID_EXT_B   = 26'h1 << 1;
-  parameter MISAID_EXT_C   = 26'h1 << 2;
-  parameter MISAID_EXT_D   = 26'h1 << 3;
-  parameter MISAID_EXT_E   = 26'h1 << 4;
-  parameter MISAID_EXT_F   = 26'h1 << 5;
-  parameter MISAID_EXT_G   = 26'h1 << 6;
-  parameter MISAID_EXT_H   = 26'h1 << 7;
-  parameter MISAID_EXT_I   = 26'h1 << 8;
-  parameter MISAID_EXT_J   = 26'h1 << 9;
-  parameter MISAID_EXT_K   = 26'h1 << 10;
-  parameter MISAID_EXT_L   = 26'h1 << 11;
-  parameter MISAID_EXT_M   = 26'h1 << 12;
-  parameter MISAID_EXT_N   = 26'h1 << 13;
-  parameter MISAID_EXT_O   = 26'h1 << 14;
-  parameter MISAID_EXT_P   = 26'h1 << 15;
-  parameter MISAID_EXT_Q   = 26'h1 << 16;
-  parameter MISAID_EXT_R   = 26'h1 << 17;
-  parameter MISAID_EXT_S   = 26'h1 << 18;
-  parameter MISAID_EXT_T   = 26'h1 << 19;
-  parameter MISAID_EXT_U   = 26'h1 << 20;
-  parameter MISAID_EXT_V   = 26'h1 << 21;
-  parameter MISAID_EXT_W   = 26'h1 << 22;
-  parameter MISAID_EXT_X   = 26'h1 << 23;
-  parameter MISAID_EXT_Y   = 26'h1 << 24;
-  parameter MISAID_EXT_Z   = 26'h1 << 25;
+  parameter MCPUID_EXT_A   = 26'h1 << 0;
+  parameter MCPUID_EXT_B   = 26'h1 << 1;
+  parameter MCPUID_EXT_C   = 26'h1 << 2;
+  parameter MCPUID_EXT_D   = 26'h1 << 3;
+  parameter MCPUID_EXT_E   = 26'h1 << 4;
+  parameter MCPUID_EXT_F   = 26'h1 << 5;
+  parameter MCPUID_EXT_G   = 26'h1 << 6;
+  parameter MCPUID_EXT_H   = 26'h1 << 7;
+  parameter MCPUID_EXT_I   = 26'h1 << 8;
+  parameter MCPUID_EXT_J   = 26'h1 << 9;
+  parameter MCPUID_EXT_K   = 26'h1 << 10;
+  parameter MCPUID_EXT_L   = 26'h1 << 11;
+  parameter MCPUID_EXT_M   = 26'h1 << 12;
+  parameter MCPUID_EXT_N   = 26'h1 << 13;
+  parameter MCPUID_EXT_O   = 26'h1 << 14;
+  parameter MCPUID_EXT_P   = 26'h1 << 15;
+  parameter MCPUID_EXT_Q   = 26'h1 << 16;
+  parameter MCPUID_EXT_R   = 26'h1 << 17;
+  parameter MCPUID_EXT_S   = 26'h1 << 18;
+  parameter MCPUID_EXT_T   = 26'h1 << 19;
+  parameter MCPUID_EXT_U   = 26'h1 << 20;
+  parameter MCPUID_EXT_V   = 26'h1 << 21;
+  parameter MCPUID_EXT_W   = 26'h1 << 22;
+  parameter MCPUID_EXT_X   = 26'h1 << 23;
+  parameter MCPUID_EXT_Y   = 26'h1 << 24;
+  parameter MCPUID_EXT_Z   = 26'h1 << 25;
+  parameter MTVEC_MEMORY_ADDR = 32'h1c0;
 
   /* mstatus types */
 
@@ -231,13 +227,10 @@ package machine_mode_types_pkg;
   typedef logic [63:0] mcycle_t;
   typedef logic [63:0] minstret_t;
   typedef logic [31:0] mscratch_t;
-  typedef logic [31:0] mtval_t;
-  typedef logic [31:0] mvendorid_t;
-  typedef logic [31:0] marchid_t;
+  typedef logic [31:0] mbadaddr_t;
   typedef logic [31:0] mimpid_t;
   typedef logic [31:0] mhartid_t;
-  typedef logic [31:0] medeleg_t;
-  typedef logic [31:0] mideleg_t;
+  typedef logic [31:0] mtdeleg_t;
   typedef logic [31:0] mtvec_t;
   typedef logic [31:0] mepc_t;
   typedef logic [31:0] mtime_t;
@@ -255,4 +248,4 @@ package machine_mode_types_pkg;
   
 endpackage
 
-`endif //MACHINE_MODE_TYPES_PKG_SV
+`endif //MACHINE_MODE_TYPES_1_7_PKG_SV

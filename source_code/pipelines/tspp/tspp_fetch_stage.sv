@@ -37,7 +37,8 @@ module tspp_fetch_stage (
 );
   import rv32i_types_pkg::*;
 
-  parameter RESET_PC = 32'h200;
+  //parameter RESET_PC = 32'h200;
+  parameter RESET_PC = 32'h80000000;
 
   word_t  pc, pc4, npc, instr;
 
@@ -74,7 +75,7 @@ module tspp_fetch_stage (
       fetch_ex_if.fetch_ex_reg.token       <= 1'b1;
       fetch_ex_if.fetch_ex_reg.pc          <= pc;
       fetch_ex_if.fetch_ex_reg.pc4         <= pc4;
-      fetch_ex_if.fetch_ex_reg.instr       <= igen_bus_if.rdata;//instr;
+      fetch_ex_if.fetch_ex_reg.instr       <= igen_bus_if.rdata;
       fetch_ex_if.fetch_ex_reg.prediction  <= predict_if.predict_taken;
     end
   end

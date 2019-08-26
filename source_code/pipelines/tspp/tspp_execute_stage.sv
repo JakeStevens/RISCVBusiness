@@ -41,7 +41,7 @@ module tspp_execute_stage(
   predictor_pipeline_if.update predict_if,
   generic_bus_if.cpu dgen_bus_if,
   prv_pipeline_if.pipe  prv_pipe_if,
-  output halt,
+  output logic halt,
   risc_mgmt_if.ts_execute rm_if,
   cache_control_if.pipeline cc_if
 );
@@ -335,8 +335,13 @@ module tspp_execute_stage(
   assign hazard_if.jump    = cu_if.jump;
   assign hazard_if.branch  = cu_if.branch;
   assign hazard_if.halt    = halt;
-  
-  assign halt = cu_if.halt;
+
+  always_ff @ (posedge CLK, negedge nRST) begin
+      if (~nRST)
+          halt <= 1'b0;
+      else if (cu_if.halt)
+          halt <= cu_if.halt;
+  end 
 
   /*******************************************************
   *** CSR / Priv Interface Logic 
@@ -364,12 +369,12 @@ module tspp_execute_stage(
   assign hazard_if.illegal_insn = (cu_if.illegal_insn & ~rm_if.ex_token) | prv_pipe_if.invalid_csr;
   assign hazard_if.fault_l      = 1'b0; 
   assign hazard_if.mal_l        = cu_if.dren & mal_addr;
-  assign hazard_if.fault_s      = 1'b0;
-  assign hazard_if.mal_s        = cu_if.dwen & mal_addr;
-  assign hazard_if.breakpoint   = cu_if.breakpoint;
-  assign hazard_if.env_m        = cu_if.ecall_insn;
-  assign hazard_if.ret          = cu_if.ret_insn;
-  assign hazard_if.badaddr_e    = dgen_bus_if.addr;
+  assign hazard_if.fault_s      =  1'b0;
+  assign hazard_if.mal_s        =  cu_if.dwen & mal_addr;
+  assign hazard_if.breakpoint   =  cu_if.breakpoint;
+  assign hazard_if.env_m        =  cu_if.ecall_insn;
+  assign hazard_if.ret          =  cu_if.ret_insn;
+  assign hazard_if.badaddr_e    =  dgen_bus_if.addr;
 
   assign hazard_if.epc_e = fetch_ex_if.fetch_ex_reg.pc;
   assign hazard_if.token_ex = fetch_ex_if.fetch_ex_reg.token;
