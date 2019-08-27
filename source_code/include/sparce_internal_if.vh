@@ -72,7 +72,7 @@ interface sparce_internal_if;
 
   modport psru (
     output skipping, sparce_target,
-    input valid, insts_to_skip, preceding_pc, condition, rs1_sparsity, rs2_sparsity, is_sparse, 
+    input valid, insts_to_skip, preceding_pc, condition, rs1_sparsity, rs2_sparsity
   );
 
 endinterface
