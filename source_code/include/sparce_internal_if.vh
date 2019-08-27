@@ -48,7 +48,7 @@ interface sparce_internal_if;
   word_t pc, sasa_addr, sasa_data, preceding_pc;
   logic sasa_wen, valid, sasa_enable;
   logic [4:0] sasa_rs1, sasa_rs2, rd;
-  logic [1:0] condition;
+  sasa_cond_t condition;
   logic [15:0] insts_to_skip;
 
   // PSRU
