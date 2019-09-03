@@ -24,22 +24,22 @@
 
 `include "sparce_internal_if.vh"
 
+// defined because $clog2 is not universally supported
+`define CLOG2(x) \
+   (x <= 1) ? 0 : \
+   (x <= 2) ? 1 : \
+   (x <= 4) ? 2 : \
+   (x <= 8) ? 3 : \
+   (x <= 16) ? 4 : \
+   (x <= 32) ? 5 : \
+   (x <= 64) ? 6 : \
+   -1
 
 //  modport sasa_table (
 //    output sasa_rs1, sasa_rs2, insts_to_skip, preceding_pc, condition, valid,
 //    input  pc, sasa_addr, sasa_data, sasa_wen
 //  );
 
-// struct for each entry in the SASA table
-typedef struct packed {
-  logic [1:0]  usage;
-  logic        valid;
-  logic [13:0] tag;
-  logic [4:0]  rs1;
-  logic [4:0]  rs2;
-  sasa_cond_t  sasa_cond;
-  logic [4:0]  insts_to_skip;
-} sasa_entry_t;
 
 // struct for the data read from memory
 typedef struct packed {
@@ -53,12 +53,23 @@ typedef struct packed {
 
 module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 4, parameter SASA_ADDR = 'h1000) (input logic CLK, nRST, sparce_internal_if.sasa_table sasa_if);
 
+  // struct for each entry in the SASA table
+  typedef struct packed {
+    logic [1:0]  usage;
+    logic        valid;
+    logic [15:0] tag;
+    logic [4:0]  rs1;
+    logic [4:0]  rs2;
+    sasa_cond_t  sasa_cond;
+    logic [4:0]  insts_to_skip;
+  } sasa_entry_t;
+
   sasa_entry_t [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0] sasa_entries;
   sasa_input_t input_data;
 
-  logic [1:0] input_idx;
-  logic [1:0] pc_idx;
-  logic [13:0] pc_tag;
+  logic [`CLOG2(SASA_SETS)-1:0] input_idx;
+  logic [`CLOG2(SASA_SETS)-1:0] pc_idx;
+  logic [15-`CLOG2(SASA_SETS):0] pc_tag;
   logic sasa_match;
 
   logic [SASA_SETS-1:0] sasa_hits;
@@ -84,7 +95,7 @@ module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 4,
       for(int i = 0; i < SASA_SETS; i++) begin
         for(int j = 0; j < SASA_ENTRIES/SASA_SETS; j++) begin
           // set default usage values to 0, 1, 2, 3 for LRU
-          sasa_entries[i][j].usage <= 3-i;
+          sasa_entries[i][j].usage <= (SASA_SETS-1)-i;
           sasa_entries[i][j].valid <= 1'b0;
           sasa_entries[i][j].tag <= '0;
           sasa_entries[i][j].rs1 <= '0;
@@ -95,9 +106,18 @@ module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 4,
       end
     end else begin
       sasa_entries <= sasa_entries;
+      // If the PC matches in the SASA table, update the LRU usage
+      if (sasa_hits != 0) begin
+        for (int i = 0; i < SASA_SETS; i++) begin
+          if(sasa_entries[i][pc_idx].usage < sasa_entries[sasa_hits][pc_idx].usage) begin
+            sasa_entries[i][pc_idx].usage <= sasa_entries[i][pc_idx].usage + 1;
+          end else if (i == sasa_hits) begin
+            sasa_entries[i][pc_idx].usage <= '0;
+          end
+        end
       // If the software is attempting to write to the SASA table, write in
       // the data and then update the LRU usage
-      if(sasa_match) begin
+      end else if(sasa_match) begin
         for (int i = 0; i < SASA_SETS; i++) begin
           if (sasa_entries[i][input_idx].usage == '1) begin
             sasa_entries[i][input_idx].valid <= 1;
@@ -108,15 +128,6 @@ module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 4,
             sasa_entries[i][input_idx].insts_to_skip <= input_data.insts_to_skip;
           end
           sasa_entries[i][input_idx].usage <= sasa_entries[i][input_idx].usage + 1;
-        end
-      // If the PC matches in the SASA table, update the LRU usage
-      end else if (sasa_hits != 0) begin
-        for (int i = 0; i < SASA_SETS; i++) begin
-          if(sasa_entries[i][pc_idx].usage < sasa_entries[sasa_hits][pc_idx].usage) begin
-            sasa_entries[i][pc_idx].usage <= sasa_entries[i][pc_idx].usage + 1;
-          end else if (i == sasa_hits) begin
-            sasa_entries[i][pc_idx].usage <= '0;
-          end
         end
       end
     end
