@@ -25,9 +25,16 @@
 `include "sparce_internal_if.vh"
   import rv32i_types_pkg::*;
 
+// macro for getting the index of the sasa table out of all the generated
+// tables. i is the index representing the number of table sizes and
+// j is the index representing the number of sets
 `define GET_IDX(i,j)\
   ((i)*NUM_SETS + (j))
 
+// macro to generate the data entry to load into the sasa table. Note that the
+// pc is only shifted by 14 bits instead of 16 bits because the datapath PC is
+// byte addressed while the sasa table expects word addressed data to save
+// space
 `define SASA_DATA(pc, rs1, rs2, cond, insts_to_skip)\
   (((pc) << 14) + (((rs1) & 'h1F) << 11) + (((rs2) & 'h1F) << 6) + (((cond) & 'h1) << 5) + ((insts_to_skip) & 'h1F))
 
@@ -95,14 +102,13 @@ module tb_sparce_sasa_table ();
     tb_nRST = 1;
     for (tb_i=0; tb_i < NUM_TABLE_SIZES ; tb_i++) begin
       for (tb_j=0; tb_j < NUM_SETS; tb_j++) begin
-        // test that the table is initialized correctly
         $display("Testing size %d table with %d sets", 2**(tb_i+2),2**tb_j);
+        // test that the table is initialized correctly
         test_default_values(tb_i,tb_j);
+        // test that the table can be loaded correctly
         load_sasa_table(tb_i,tb_j);
       end
     end
-    //test_default_values(1,2);
-    //load_sasa_table(1,2);
     $finish;
   end
 
@@ -113,6 +119,8 @@ module tb_sparce_sasa_table ();
     integer idx;
     initialize(size_idx, set_idx);
     idx = `GET_IDX(size_idx, set_idx);
+    // loop through the sasa table and try to fetch data from each index. 
+    // The table should always output its data as invalid
     for (ii = 0; ii < (2**(size_idx+2)); ii++) begin
       @(negedge tb_clk);
       sasa_port_arr[idx].sasa_data = `SASA_DATA(ii << 2, ii, ii, ii, ii);
@@ -122,6 +130,8 @@ module tb_sparce_sasa_table ();
     end
   endtask
 
+  // ensure that basic loading of the sasa table functions correctly (and
+  // consequently that reading loaded values functions properly as well)
   task load_sasa_table(integer size_idx, integer set_idx);
     integer ii;
     integer idx;
@@ -130,12 +140,17 @@ module tb_sparce_sasa_table ();
 
     @(negedge tb_clk);
 
+    // loop through every possible entry in the sasa table. Because these are
+    // consecutive tests, there should be no collisions, and every value
+    // should be readable immediately after writes
     for (ii = 0; ii < (2**(size_idx+2)); ii++) begin
       sasa_port_arr[idx].pc = ii << 2;
       write_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii, ii));
       read_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii,ii), 1);
     end
 
+    // after all writes have been completed, ensure that all entries can still
+    // be read
     sasa_port_arr[idx].sasa_wen = '0;
     sasa_port_arr[idx].sasa_data = '1;
     sasa_port_arr[idx].sasa_addr = '1;
