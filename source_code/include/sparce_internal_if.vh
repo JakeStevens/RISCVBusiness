@@ -49,7 +49,7 @@ interface sparce_internal_if;
   logic sasa_wen, valid, sasa_enable;
   logic [4:0] sasa_rs1, sasa_rs2, rd;
   sasa_cond_t condition;
-  logic [15:0] insts_to_skip;
+  logic [4:0] insts_to_skip;
 
   // PSRU
   word_t sparce_target;
