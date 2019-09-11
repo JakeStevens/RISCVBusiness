@@ -108,6 +108,7 @@ module tb_sparce_sasa_table ();
         // test that the table can be loaded correctly
         load_sasa_table(tb_i,tb_j);
         test_associativity(tb_i,tb_j);
+        test_lru(tb_i,tb_j);
       end
     end
     $finish;
@@ -170,6 +171,8 @@ module tb_sparce_sasa_table ();
     word_t pc;
     initialize(size_idx, set_idx);
     idx = `GET_IDX(size_idx, set_idx);
+    // Write to all entries, and then keep writing after capacity has been
+    // reached, forcing the original entries out
     for (ii = 0; ii < (2**(size_idx+2)) + ((2**(size_idx+2)) / (2**set_idx)); ii++) begin
       sasa_port_arr[idx].pc = ii << 2;
       write_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii, ii));
@@ -179,11 +182,61 @@ module tb_sparce_sasa_table ();
     sasa_port_arr[idx].sasa_data = '1;
     sasa_port_arr[idx].sasa_addr = '1;
     sasa_port_arr[idx].sasa_enable = '0;
+    // Read the initial entries written in each set, and ensure that they are
+    // no longer valid (due to being replaced)
     for (ii = 0; ii < (2**(size_idx+2)) / (2**set_idx); ii++) begin
       @(negedge tb_clk);
       sasa_port_arr[idx].pc = ii << 2;
       @(posedge tb_clk);
       read_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii, ii), 0);
+    end
+  endtask
+
+  task test_lru(integer size_idx, integer set_idx);
+    integer ii;
+    integer idx;
+    word_t pc;
+    idx = `GET_IDX(size_idx, set_idx);
+
+    initialize(size_idx, set_idx);
+
+    // write data to every entry in the SASA table
+    for (ii = 0; ii < (2**(size_idx+2)); ii++) begin
+      sasa_port_arr[idx].pc = ii << 2;
+      write_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii, ii));
+    end
+    @(negedge tb_clk);
+    sasa_port_arr[idx].sasa_wen = '0;
+    sasa_port_arr[idx].sasa_data = '1;
+    sasa_port_arr[idx].sasa_addr = '1;
+    sasa_port_arr[idx].sasa_enable = '0;
+    // read all data from the first set to reset the LRU
+    for (ii = 0; ii < (2**(size_idx+2)) / (2**set_idx); ii++) begin
+      @(negedge tb_clk);
+      sasa_port_arr[idx].pc = ii << 2;
+      @(posedge tb_clk);
+      read_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii, ii), 1);
+    end
+    // write a set of data to the SASA table
+    for (ii = (2**(size_idx+2)); ii < (2**(size_idx+2)) + ((2**(size_idx+2)) / (2**set_idx)); ii++) begin
+      sasa_port_arr[idx].pc = ii << 2;
+      write_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii, ii));
+    end
+    @(negedge tb_clk);
+    sasa_port_arr[idx].sasa_wen = '0;
+    sasa_port_arr[idx].sasa_data = '1;
+    sasa_port_arr[idx].sasa_addr = '1;
+    sasa_port_arr[idx].sasa_enable = '0;
+    // verify that the data in the first set is still present from the
+    // original write.
+    // Note, don't expect valid data from direct-mapped cache configurations
+    for (ii = 0; ii < (2**(size_idx+2)) / (2**set_idx); ii++) begin
+      @(negedge tb_clk);
+      sasa_port_arr[idx].pc = ii << 2;
+      @(posedge tb_clk);
+      // set_idx != 0 to avoid expecting data to be present for direct-mapped
+      // caches
+      read_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii, ii), set_idx != 0);
     end
   endtask
 
