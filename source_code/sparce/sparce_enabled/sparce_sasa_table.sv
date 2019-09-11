@@ -26,14 +26,14 @@
 
 // defined because $clog2 is not universally supported
 `define CLOG2(x) \
-   (x <= 1) ? 0 : \
-   (x <= 2) ? 1 : \
-   (x <= 4) ? 2 : \
-   (x <= 8) ? 3 : \
-   (x <= 16) ? 4 : \
-   (x <= 32) ? 5 : \
-   (x <= 64) ? 6 : \
-   -1
+   (((x) <= 1) ? 0 : \
+   ((x) <= 2) ? 1 : \
+   ((x) <= 4) ? 2 : \
+   ((x) <= 8) ? 3 : \
+   ((x) <= 16) ? 4 : \
+   ((x) <= 32) ? 5 : \
+   ((x) <= 64) ? 6 : \
+   -1)
 
 //  modport sasa_table (
 //    output sasa_rs1, sasa_rs2, insts_to_skip, preceding_pc, condition, valid,
@@ -64,20 +64,26 @@ module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 4,
     logic [4:0]  insts_to_skip;
   } sasa_entry_t;
 
-  sasa_entry_t [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0] sasa_entries;
+  logic [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0][`CLOG2(SASA_SETS)-1:0] usage;
+  logic [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0]     valid;
+  logic [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0][15-`CLOG2(SASA_SETS):0] tag;
+  logic [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0][4:0] rs1;
+  logic [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0][4:0] rs2;
+  sasa_cond_t [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0] sasa_cond;
+  logic [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0][4:0] insts_to_skip;
   sasa_input_t input_data;
 
-  logic [`CLOG2(SASA_SETS)-1:0] input_idx;
-  logic [`CLOG2(SASA_SETS)-1:0] pc_idx;
-  logic [15-`CLOG2(SASA_SETS):0] pc_tag;
+  logic [`CLOG2(SASA_ENTRIES/SASA_SETS)-1:0] input_idx;
+  logic [`CLOG2(SASA_ENTRIES/SASA_SETS)-1:0] pc_idx;
+  logic [15-`CLOG2(SASA_ENTRIES/SASA_SETS):0] pc_tag;
   logic sasa_match;
 
-  logic [SASA_SETS-1:0] sasa_hits;
+  logic [SASA_SETS:0] sasa_hits;
 
   // wiring for indexing of the cache arrays
-  assign input_idx = input_data.prev_pc[1:0];
-  assign pc_idx = sasa_if.pc[3:2]; // ignore byte addressed aspect
-  assign pc_tag = sasa_if.pc[17:4];
+  assign input_idx = (SASA_ENTRIES == SASA_SETS) ? 0 : input_data.prev_pc;
+  assign pc_idx = (SASA_ENTRIES == SASA_SETS) ? 0 : (sasa_if.pc >> 2); // ignore byte addressed aspect
+  assign pc_tag = sasa_if.pc >> (`CLOG2(SASA_ENTRIES/SASA_SETS) + 2);
   assign sasa_match = sasa_if.sasa_enable && sasa_if.sasa_wen && (sasa_if.sasa_addr == SASA_ADDR);
 
   
@@ -95,39 +101,45 @@ module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 4,
       for(int i = 0; i < SASA_SETS; i++) begin
         for(int j = 0; j < SASA_ENTRIES/SASA_SETS; j++) begin
           // set default usage values to 0, 1, 2, 3 for LRU
-          sasa_entries[i][j].usage <= (SASA_SETS-1)-i;
-          sasa_entries[i][j].valid <= 1'b0;
-          sasa_entries[i][j].tag <= '0;
-          sasa_entries[i][j].rs1 <= '0;
-          sasa_entries[i][j].rs2 <= '0;
-          sasa_entries[i][j].sasa_cond <= SASA_COND_OR;
-          sasa_entries[i][j].insts_to_skip <= '0;
+          usage[i][j]<= (SASA_SETS-1)-i;
+          valid[i][j]<= 1'b0;
+          tag[i][j]<= '0;
+          rs1[i][j]<= '0;
+          rs2[i][j]<= '0;
+          sasa_cond[i][j]<= SASA_COND_OR;
+          insts_to_skip[i][j]<= '0;
         end
       end
     end else begin
-      sasa_entries <= sasa_entries;
+      usage <= usage;
+      valid <= valid;
+      tag <= tag;
+      rs1 <= rs1;
+      rs2 <= rs2;
+      sasa_cond <= sasa_cond;
+      insts_to_skip <= insts_to_skip;
       // If the PC matches in the SASA table, update the LRU usage
       if (sasa_hits != 0) begin
         for (int i = 0; i < SASA_SETS; i++) begin
-          if(sasa_entries[i][pc_idx].usage < sasa_entries[sasa_hits][pc_idx].usage) begin
-            sasa_entries[i][pc_idx].usage <= sasa_entries[i][pc_idx].usage + 1;
-          end else if (i == sasa_hits) begin
-            sasa_entries[i][pc_idx].usage <= '0;
+          if(usage[i][pc_idx] < usage[sasa_hits-1][pc_idx]) begin
+            usage[i][pc_idx]<= (usage[i][pc_idx]+ 1) % SASA_SETS;
+          end else if (i == sasa_hits - 1) begin
+            usage[i][pc_idx] <= '0;
           end
         end
       // If the software is attempting to write to the SASA table, write in
       // the data and then update the LRU usage
       end else if(sasa_match) begin
         for (int i = 0; i < SASA_SETS; i++) begin
-          if (sasa_entries[i][input_idx].usage == '1) begin
-            sasa_entries[i][input_idx].valid <= 1;
-            sasa_entries[i][input_idx].tag <= input_data.prev_pc[15:2];
-            sasa_entries[i][input_idx].rs1 <= input_data.rs1;
-            sasa_entries[i][input_idx].rs2 <= input_data.rs2;
-            sasa_entries[i][input_idx].sasa_cond <= input_data.sasa_cond;
-            sasa_entries[i][input_idx].insts_to_skip <= input_data.insts_to_skip;
+          if (usage[i][input_idx]== '1 || SASA_SETS == 1) begin
+            valid[i][input_idx]<= 1;
+            tag[i][input_idx]<= input_data.prev_pc >> (`CLOG2(SASA_ENTRIES/SASA_SETS));
+            rs1[i][input_idx]<= input_data.rs1;
+            rs2[i][input_idx]<= input_data.rs2;
+            sasa_cond[i][input_idx]<= input_data.sasa_cond;
+            insts_to_skip[i][input_idx]<= input_data.insts_to_skip;
           end
-          sasa_entries[i][input_idx].usage <= sasa_entries[i][input_idx].usage + 1;
+          usage[i][input_idx]<= (usage[i][input_idx]+ 1) % SASA_SETS;
         end
       end
     end
@@ -142,13 +154,13 @@ module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 4,
     sasa_if.valid = 1'b0;
     sasa_hits = '0;
     for (int i = 0; i < SASA_SETS; i++) begin
-      if (sasa_entries[i][pc_idx].valid && (sasa_entries[i][pc_idx].tag == pc_tag)) begin
-        sasa_hits             = 1'b1;
+      if (valid[i][pc_idx]&& (tag[i][pc_idx]== pc_tag)) begin
+        sasa_hits             = i+1;
         sasa_if.valid         = 1'b1;
-        sasa_if.sasa_rs1      = sasa_entries[i][pc_idx].rs1;
-        sasa_if.sasa_rs2      = sasa_entries[i][pc_idx].rs2;
-        sasa_if.condition     = sasa_entries[i][pc_idx].sasa_cond;
-        sasa_if.insts_to_skip = sasa_entries[i][pc_idx].insts_to_skip;
+        sasa_if.sasa_rs1      = rs1[i][pc_idx];
+        sasa_if.sasa_rs2      = rs2[i][pc_idx];
+        sasa_if.condition     = sasa_cond[i][pc_idx];
+        sasa_if.insts_to_skip = insts_to_skip[i][pc_idx];
       end
     end
   end
