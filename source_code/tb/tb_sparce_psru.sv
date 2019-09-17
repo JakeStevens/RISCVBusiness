@@ -62,7 +62,7 @@ module tb_sparce_psru ();
   task initialize;
     i = 0;
     sparce_if.valid = 1'b0;
-    sparce_if.insts_to_skip = 16'd4;
+    sparce_if.insts_to_skip = 5'd4;
     sparce_if.preceding_pc = 32'h3000;
     sparce_if.condition = SASA_COND_OR;
     sparce_if.rs1_sparsity= 1'b0;
@@ -112,7 +112,7 @@ module tb_sparce_psru ();
     sparce_if.condition = SASA_COND_OR;
     sparce_if.rs1_sparsity = 1'b1;
     sparce_if.rs2_sparsity = 1'b1;
-    for (i = 0; i <= 16'hFFFF; i++) begin
+    for (i = 0; i <= 5'h1F; i++) begin
       @(negedge tb_clk);
       sparce_if.insts_to_skip = i;
       @(posedge tb_clk);
