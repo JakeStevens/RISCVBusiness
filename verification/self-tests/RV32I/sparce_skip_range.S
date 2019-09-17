@@ -32,7 +32,7 @@ li  TESTNUM, 1
 ori x3, x0, 0 
 ori x4, x0, 0
 ori t0, x0, 0        # loop counter (0 to 31)
-ori x9, x0, 15        # number of test cases (start from 0)
+ori x9, x0, 31       # number of test cases (start from 0)
 la  x8, skip_point   # loads addr of skip_point
 
 loop_start:
