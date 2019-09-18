@@ -77,6 +77,8 @@ module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 4,
   logic [`CLOG2(SASA_ENTRIES/SASA_SETS)-1:0] pc_idx;
   logic [15-`CLOG2(SASA_ENTRIES/SASA_SETS):0] pc_tag;
   logic sasa_match;
+  logic existing_entry;
+  logic [`CLOG2(SASA_SETS)-1:0] existing_entry_set;
 
   logic [SASA_SETS:0] sasa_hits;
 
@@ -118,28 +120,43 @@ module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 4,
       rs2 <= rs2;
       sasa_cond <= sasa_cond;
       insts_to_skip <= insts_to_skip;
+      // If the software is attempting to write to the SASA table, write in
+      // the data and then update the LRU usage
+      if(sasa_match) begin
+        if(!existing_entry) begin
+          for (int i = 0; i < SASA_SETS; i++) begin
+            if (usage[i][input_idx]== '1 || SASA_SETS == 1) begin
+              valid[i][input_idx]<= 1;
+              tag[i][input_idx]<= input_data.prev_pc >> (`CLOG2(SASA_ENTRIES/SASA_SETS));
+              rs1[i][input_idx]<= input_data.rs1;
+              rs2[i][input_idx]<= input_data.rs2;
+              sasa_cond[i][input_idx]<= input_data.sasa_cond;
+              insts_to_skip[i][input_idx]<= input_data.insts_to_skip;
+            end
+            usage[i][input_idx]<= (usage[i][input_idx]+ 1) % SASA_SETS;
+          end
+        end else begin
+          valid[existing_entry_set][input_idx]<= 1;
+          tag[existing_entry_set][input_idx]<= input_data.prev_pc >> (`CLOG2(SASA_ENTRIES/SASA_SETS));
+          rs1[existing_entry_set][input_idx]<= input_data.rs1;
+          rs2[existing_entry_set][input_idx]<= input_data.rs2;
+          sasa_cond[existing_entry_set][input_idx]<= input_data.sasa_cond;
+          insts_to_skip[existing_entry_set][input_idx]<= input_data.insts_to_skip;
+          for (int i = 0; i < SASA_SETS; i++) begin
+            if (usage[i][input_idx]  <  usage[existing_entry_set][input_idx]) begin
+              usage[i][input_idx]<= (usage[i][input_idx]+ 1) % SASA_SETS;
+            end
+          end
+        end
+      end
       // If the PC matches in the SASA table, update the LRU usage
-      if (sasa_hits != 0) begin
+      else if (sasa_hits != 0) begin
         for (int i = 0; i < SASA_SETS; i++) begin
           if(usage[i][pc_idx] < usage[sasa_hits-1][pc_idx]) begin
             usage[i][pc_idx]<= (usage[i][pc_idx]+ 1) % SASA_SETS;
           end else if (i == sasa_hits - 1) begin
             usage[i][pc_idx] <= '0;
           end
-        end
-      // If the software is attempting to write to the SASA table, write in
-      // the data and then update the LRU usage
-      end else if(sasa_match) begin
-        for (int i = 0; i < SASA_SETS; i++) begin
-          if (usage[i][input_idx]== '1 || SASA_SETS == 1) begin
-            valid[i][input_idx]<= 1;
-            tag[i][input_idx]<= input_data.prev_pc >> (`CLOG2(SASA_ENTRIES/SASA_SETS));
-            rs1[i][input_idx]<= input_data.rs1;
-            rs2[i][input_idx]<= input_data.rs2;
-            sasa_cond[i][input_idx]<= input_data.sasa_cond;
-            insts_to_skip[i][input_idx]<= input_data.insts_to_skip;
-          end
-          usage[i][input_idx]<= (usage[i][input_idx]+ 1) % SASA_SETS;
         end
       end
     end
@@ -153,6 +170,7 @@ module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 4,
     sasa_if.condition = SASA_COND_OR;
     sasa_if.valid = 1'b0;
     sasa_hits = '0;
+    existing_entry = 0;
     for (int i = 0; i < SASA_SETS; i++) begin
       if (valid[i][pc_idx]&& (tag[i][pc_idx]== pc_tag)) begin
         sasa_hits             = i+1;
@@ -161,6 +179,10 @@ module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 4,
         sasa_if.sasa_rs2      = rs2[i][pc_idx];
         sasa_if.condition     = sasa_cond[i][pc_idx];
         sasa_if.insts_to_skip = insts_to_skip[i][pc_idx];
+      end
+      if (valid[i][input_idx]&& (tag[i][input_idx] == input_data.prev_pc >> (`CLOG2(SASA_ENTRIES/SASA_SETS)))) begin
+              existing_entry = 1;
+              existing_entry_set = i;
       end
     end
   end
