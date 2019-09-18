@@ -51,7 +51,7 @@ typedef struct packed {
 } sasa_input_t;
 
 
-module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 4, parameter SASA_ADDR = 'h1000) (input logic CLK, nRST, sparce_internal_if.sasa_table sasa_if);
+module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 1, parameter SASA_ADDR = 'h1000) (input logic CLK, nRST, sparce_internal_if.sasa_table sasa_if);
 
   // struct for each entry in the SASA table
   typedef struct packed {
