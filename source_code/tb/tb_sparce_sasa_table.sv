@@ -107,6 +107,7 @@ module tb_sparce_sasa_table ();
         test_default_values(tb_i,tb_j);
         // test that the table can be loaded correctly
         load_sasa_table(tb_i,tb_j);
+        load_duplicate_entries(tb_i,tb_j);
         test_associativity(tb_i,tb_j);
         test_lru(tb_i,tb_j);
       end
@@ -162,6 +163,24 @@ module tb_sparce_sasa_table ();
       sasa_port_arr[idx].pc = ii << 2;
       @(posedge tb_clk);
       read_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii,ii), 1);
+    end
+  endtask
+
+  task load_duplicate_entries(integer size_idx, integer set_idx);
+    integer ii;
+    integer idx;
+    initialize(size_idx, set_idx);
+    idx = `GET_IDX(size_idx, set_idx);
+
+    @(negedge tb_clk);
+
+    // loop through every possible entry in the sasa table. Because these are
+    // consecutive tests, there should be no collisions, and every value
+    // should be readable immediately after writes
+    for (ii = 0; ii < (2**(size_idx+2)); ii++) begin
+      sasa_port_arr[idx].pc = 0;
+      write_sasa_entry(size_idx, set_idx, `SASA_DATA(0, ii, ii, ii, ii));
+      read_sasa_entry(size_idx, set_idx, `SASA_DATA(0, ii, ii, ii,ii), 1);
     end
   endtask
 
