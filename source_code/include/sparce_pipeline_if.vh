@@ -14,7 +14,7 @@
 *   limitations under the License.
 *   
 *   
-*   Filename:     sparce_top_if.vh
+*   Filename:     sparce_pipeline_if.vh
 *   
 *   Created by:   Vadim V. Nikiforov 
 *   Email:        vnikifor@purdue.edu

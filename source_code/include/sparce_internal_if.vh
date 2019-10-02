@@ -14,7 +14,7 @@
 *   limitations under the License.
 *   
 *   
-*   Filename:     sparce_top_if.vh
+*   Filename:     sparce_internal_if.vh
 *   
 *   Created by:   Vadim V. Nikiforov 
 *   Email:        vnikifor@purdue.edu
