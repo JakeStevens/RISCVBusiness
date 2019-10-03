@@ -55,6 +55,10 @@ interface sparce_internal_if;
   word_t sparce_target;
   logic skipping;
 
+  // CFID
+  logic ctrl_flow_enable;
+  word_t rdata;
+
   modport svc (
     output is_sparse,
     input wb_data
@@ -72,8 +76,12 @@ interface sparce_internal_if;
 
   modport psru (
     output skipping, sparce_target,
-    input valid, insts_to_skip, preceding_pc, condition, rs1_sparsity, rs2_sparsity
+    input valid, insts_to_skip, preceding_pc, condition, rs1_sparsity, rs2_sparsity, ctrl_flow_enable
   );
 
+  modport cfid (
+    output ctrl_flow_enable,
+    input rdata
+  );
 endinterface
 `endif //SPARCE_PIPELINE_IF

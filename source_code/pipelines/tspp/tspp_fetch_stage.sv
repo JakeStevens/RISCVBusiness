@@ -102,7 +102,7 @@ module tspp_fetch_stage (
   *********************************************************/
 
   assign sparce_if.pc = pc;
-
+  assign sparce_if.rdata = igen_bus_if.rdata;
 endmodule
 
 
