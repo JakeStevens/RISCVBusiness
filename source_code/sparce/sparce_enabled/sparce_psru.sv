@@ -27,7 +27,7 @@
 
 //  modport psru (
 //    output skipping, sparce_target,
-//    input valid, insts_to_skip, preceding_pc, condition, rs1_sparsity, rs2_sparsity, 
+//    input valid, insts_to_skip, preceding_pc, condition, rs1_sparsity, rs2_sparsity, ctrl_flow_enable
 //  );
 
 module sparce_psru(sparce_internal_if.psru psru_if);
@@ -36,9 +36,9 @@ module sparce_psru(sparce_internal_if.psru psru_if);
     if (psru_if.valid) begin
       // choose the correct condition to evaluate
       if(psru_if.condition == SASA_COND_OR) begin
-        psru_if.skipping = psru_if.rs1_sparsity || psru_if.rs2_sparsity;  
+        psru_if.skipping = (psru_if.rs1_sparsity || psru_if.rs2_sparsity) && psru_if.ctrl_flow_enable;
       end else begin
-        psru_if.skipping = psru_if.rs1_sparsity && psru_if.rs2_sparsity;
+        psru_if.skipping = (psru_if.rs1_sparsity && psru_if.rs2_sparsity) && psru_if.ctrl_flow_enable;
       end
       // calculate the new program counter
       psru_if.sparce_target = psru_if.preceding_pc + (psru_if.insts_to_skip << 2) + 4;

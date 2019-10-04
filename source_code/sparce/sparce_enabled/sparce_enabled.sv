@@ -41,6 +41,7 @@ module sparce_enabled(
   assign internal_if.sasa_wen = sparce_if.sasa_wen;
   assign internal_if.rd = sparce_if.rd;
   assign internal_if.sasa_enable = sparce_if.if_ex_enable;
+  assign internal_if.rdata = sparce_if.rdata;
   
   // assign to sparce module outputs 
   assign sparce_if.skipping = internal_if.skipping;
@@ -51,5 +52,7 @@ module sparce_enabled(
   sparce_sprf        sparce_sprf_i(CLK, nRST, internal_if.sprf);
   sparce_sasa_table  sparce_sasa_table_i(CLK, nRST, internal_if.sasa_table);
   sparce_psru        sparce_psru_i(internal_if.psru);
+  sparce_cfid        sparce_cfid_i(internal_if.cfid);
+
 
 endmodule
