@@ -27,7 +27,7 @@
 
  // modport psru (
  // output skipping, sparce_target,
- // input valid, insts_to_skip, preceding_pc, condition, rs1_sparsity,         rs2_sparsity, is_sparse, 
+ // input valid, insts_to_skip, preceding_pc, condition, rs1_sparsity, rs2_sparsity, ctrl_flow_enable
  // );
 
 
@@ -36,6 +36,7 @@ module tb_sparce_psru ();
   parameter PERIOD = 20;
   integer i;
   logic tb_clk;
+  logic temp_skip;
 
   sparce_internal_if sparce_if();
   sparce_psru DUT(sparce_if);
@@ -55,6 +56,9 @@ module tb_sparce_psru ();
     test_psru_skipping;
     $display("TEST2: Verify Sparce target when SASA is valid");
     test_psru_target;
+    $display("TEST3: Verify control flow enabling");
+    initialize;
+    test_ctrl_flow_enable;
     $finish;
   end
 
@@ -67,6 +71,7 @@ module tb_sparce_psru ();
     sparce_if.condition = SASA_COND_OR;
     sparce_if.rs1_sparsity= 1'b0;
     sparce_if.rs2_sparsity= 1'b0;
+    sparce_if.ctrl_flow_enable = 1'b1;
   endtask
 
   // Test0: Verify sparce skipping and target values when SASA is invalid
@@ -82,7 +87,7 @@ module tb_sparce_psru ();
     end
   endtask
 
-  // Test1: Verify sparce skipping when SASA is valid
+  // Test1: Verify sparce skipping when skip conditions are correct
   task test_psru_skipping;
     sparce_if.valid = 1'b1;
     sparce_if.condition = SASA_COND_OR;
@@ -106,7 +111,7 @@ module tb_sparce_psru ();
     end
   endtask
 
-  // Test2: Verify sparce target when SASA is valid
+  // Test2: Verify sparce target calculated correctly
   task test_psru_target;
     sparce_if.valid = 1'b1;
     sparce_if.condition = SASA_COND_OR;
@@ -121,4 +126,27 @@ module tb_sparce_psru ();
     end
     $display("Test2 finished. PASSED if no assertion errors");
   endtask
+
+  // Test3: Verify skipping suppression/enable for control flow instructions
+  task test_ctrl_flow_enable;
+    sparce_if.valid = 1'b1;
+    for (i = 0; i < 8; i++) begin
+      @(negedge tb_clk);
+      sparce_if.condition = i[0];
+      sparce_if.rs1_sparsity = i[1];
+      sparce_if.rs2_sparsity = i[2];
+      sparce_if.ctrl_flow_enable = i[3];
+      @(posedge tb_clk);
+      if (sparce_if.condition == SASA_COND_OR) 
+        temp_skip = sparce_if.rs1_sparsity || sparce_if.rs2_sparsity;
+      else
+        temp_skip = sparce_if.rs1_sparsity && sparce_if.rs2_sparsity;
+
+      assert ((temp_skip && sparce_if.ctrl_flow_enable) == sparce_if.skipping)
+      else 
+        $error("Test3 ENABLE for skipping incorrect");
+    end
+    $display("Test3 finished. PASSED if no assertion errors");
+  endtask
+
 endmodule
