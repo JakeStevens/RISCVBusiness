@@ -78,16 +78,16 @@ def parse_arguments():
            if test_type != 'sparce':
               print "ERROR: No " + test_type + " tests exist for " + ARCH
               sys.exit(1)
-      elif TEST_TYPE == 'sparce':
-        pass
-      else:
-         if TEST_TYPE == 'selfasm':
-            test_file_dir = 'self-tests/'
         else:
+          if TEST_TYPE == 'sparce':
+            pass
+          elif TEST_TYPE == 'selfasm':
+            test_file_dir = 'self-tests/'
+          else:
             test_file_dir = TEST_TYPE + '-tests/'
-        SUPPORTED_ARCHS = glob.glob('./verification/' + test_file_dir + '*')
-        SUPPORTED_ARCHS = [a.split('/'+test_file_dir)[1] for a in SUPPORTED_ARCHS]
-        if ARCH not in SUPPORTED_ARCHS:
+          SUPPORTED_ARCHS = glob.glob('./verification/' + test_file_dir + '*')
+          SUPPORTED_ARCHS = [a.split('/'+test_file_dir)[1] for a in SUPPORTED_ARCHS]
+          if ARCH not in SUPPORTED_ARCHS:
             print "ERROR: No " + TEST_TYPE + " tests exist for " + ARCH
             sys.exit(1)
 
