@@ -27,6 +27,7 @@
 `include "component_selection_defines.vh"
 `include "risc_mgmt_if.vh"
 `include "cache_control_if.vh"
+`include "sparce_pipeline_if.vh"
 
 module RISCVBusiness (
   input logic CLK, nRST,
@@ -50,6 +51,7 @@ module RISCVBusiness (
   predictor_pipeline_if predict_if();
   prv_pipeline_if prv_pipe_if();
   cache_control_if cc_if();
+  sparce_pipeline_if sparce_if();
 
   // Module Instantiations
 
@@ -62,7 +64,8 @@ module RISCVBusiness (
     .prv_pipe_if(prv_pipe_if),
     .predict_if(predict_if),
     .rm_if(rm_if),
-    .cc_if(cc_if)
+    .cc_if(cc_if),
+    .sparce_if(sparce_if)
   );
 
   branch_predictor_wrapper branch_predictor_i (
@@ -99,6 +102,12 @@ module RISCVBusiness (
     .d_gen_bus_if(dcache_mc_if),
     .i_gen_bus_if(icache_mc_if),
     .out_gen_bus_if(pipeline_trans_if)
+  );
+
+  sparce_wrapper sparce_wrapper_i (
+    .CLK(CLK),
+    .nRST(nRST),
+    .sparce_if(sparce_if)
   );
 
   // Instantiate the chosen bus interface
