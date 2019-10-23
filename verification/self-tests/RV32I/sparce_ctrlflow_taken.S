@@ -11,6 +11,7 @@
 # x3, x4  = condition regs to SASA entries
 # x5 (t0) = word address offset to access the SASA data
 # x6, x7 (t1, t2) = temp regs passed to macro
+# x8 = temp reg
 
 #include "riscv_test.h"
 #include "test_macros.h"
@@ -36,6 +37,7 @@ nop
 nop
 la x5, skip_point_2 # load return addr
 
+ori x8, x0, 7
 skip_point_0:       # SASA_AND: 0,0 -> skip 2 instructions
   j   skip_point_1  # jump and skip have same destination; jump has priority
   j   sasa_test_case_end_fail
@@ -54,14 +56,14 @@ skip_point_2:       # SASA_OR: 0,0 -> skip 2 instructions:
   j   sasa_test_case_end_fail
 
 skip_point_3:       # SASA_OR: 0,0 -> skip 2 instructions:
-  bne x0, x5, skip_point_4
+  bne x0, x8, skip_point_4
   j   sasa_test_case_end_fail
   j   sasa_test_case_end_fail
   j   sasa_test_case_end_fail
   j   sasa_test_case_end_fail
 
 skip_point_4:       # SASA_OR: 0,0 -> skip 2 instructions:
-  blt x0, x5, sasa_test_case_end  # branch and skip have same destination
+  blt x0, x8, sasa_test_case_end  # branch and skip have same destination
   j   sasa_test_case_end_fail
   j   sasa_test_case_end_fail
 
