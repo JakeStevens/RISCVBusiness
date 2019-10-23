@@ -90,9 +90,9 @@ _start:
 // End Macro
 //-----------------------------------------------------------------------
 
-#define RVTEST_CODE_END                                                 \
-ecall:  ecall;                                                          \
-        j ecall
+//#define RVTEST_CODE_END                                                 \
+//ecall:  ecall;                                                          \
+//        j ecall
 
 
 //-----------------------------------------------------------------------
