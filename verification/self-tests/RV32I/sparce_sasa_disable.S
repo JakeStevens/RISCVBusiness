@@ -11,6 +11,7 @@
 # x3, x4  = condition regs to SASA entries
 # x5 (t0) = word address offset to access the SASA data
 # x6, x7 (t1, t2) = temp regs passed to macro
+# x8      = temp regs to store SASA_CONFIG_ADDR
 
 #include "riscv_test.h"
 #include "test_macros.h"
@@ -40,7 +41,8 @@ skip_point_0:     # SASA_AND: 0,0 -> skip 2 instructions
   j   skip_point_1
   j   sasa_test_case_end_fail
 
-sw t0, 4100(x0) // disable SASA table
+ori x8, x0, SPARCE_CONFIG_ADDR
+sw  t0, 0(x8)     # disable SASA table
 
 skip_point_1:     # SASA_AND: 0,0 -> skip 2 instructions
   nop
