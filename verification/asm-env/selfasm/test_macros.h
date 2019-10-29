@@ -8,6 +8,7 @@
 # Helper macros
 #-----------------------------------------------------------------------
 #define SPARCE_ADDR 0x1000
+#define SPARCE_CONFIG_ADDR (SPARCE_ADDR + 4)
 
 #define TEST_CASE( testnum, testreg, correctval, code... ) \
 test_ ## testnum: \
