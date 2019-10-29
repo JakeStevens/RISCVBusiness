@@ -40,7 +40,7 @@ skip_point_0:     # SASA_AND: 0,0 -> skip 2 instructions
   j   skip_point_1
   j   sasa_test_case_end_fail
 
-sw t0, 0x1004(x0) // disable SASA table
+sw t0, 4100(x0) // disable SASA table
 
 skip_point_1:     # SASA_AND: 0,0 -> skip 2 instructions
   nop
