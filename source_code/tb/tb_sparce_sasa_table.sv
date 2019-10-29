@@ -19,6 +19,9 @@
 *   Created by:   Vadim Nikiforov 
 *   Email:        vnikifor@purdue.edu
 *   Date Created: 08/23/2019
+*   Updated by:   Wengyan Chan
+*   Email:        cwengyan@purdue.edu
+*   Last updated: 10/30/2019
 *   Description:  Testbench for the sasa table file
 */
 
@@ -60,6 +63,8 @@ module tb_sparce_sasa_table ();
   parameter NUM_TABLE_SIZES = 5;
   parameter NUM_SETS = 3;
   parameter NUM_SASA_TABLES = NUM_TABLE_SIZES * NUM_SETS;
+  parameter SASA_ADDR = 'h1000;
+  parameter SASA_CONF_ADDR = SASA_ADDR + 4;
 
   logic tb_clk;
   logic tb_nRST;
@@ -75,7 +80,7 @@ module tb_sparce_sasa_table ();
   begin : tb_variable_sasa
     for (i=0; i < NUM_TABLE_SIZES; i++) begin
       for (j=0; j < NUM_SETS; j++) begin
-        sparce_sasa_table #(.SASA_ENTRIES(2**(i+2)),.SASA_SETS(2**j)) DUT (tb_clk, tb_nRST, sparce_if_arr[`GET_IDX(i,j)]);
+        sparce_sasa_table #(.SASA_ENTRIES(2**(i+2)),.SASA_SETS(2**j), .SASA_ADDR(SASA_ADDR)) DUT (tb_clk, tb_nRST, sparce_if_arr[`GET_IDX(i,j)]);
         assign sparce_if_arr[`GET_IDX(i,j)].pc = sasa_port_arr[`GET_IDX(i,j)].pc;
         assign sparce_if_arr[`GET_IDX(i,j)].sasa_addr = sasa_port_arr[`GET_IDX(i,j)].sasa_addr;
         assign sparce_if_arr[`GET_IDX(i,j)].sasa_data = sasa_port_arr[`GET_IDX(i,j)].sasa_data;
@@ -97,6 +102,9 @@ module tb_sparce_sasa_table ();
     tb_clk <= ~tb_clk;
   end
 
+  /*************************************************************************
+  * Initial block; Call tasks here.
+  *************************************************************************/
   initial begin
     tb_clk  = 0;
     tb_nRST = 1;
@@ -110,13 +118,18 @@ module tb_sparce_sasa_table ();
         load_duplicate_entries(tb_i,tb_j);
         test_associativity(tb_i,tb_j);
         test_lru(tb_i,tb_j);
+        disable_sasa_table(tb_i,tb_j);
+        reenable_sasa_table(tb_i, tb_j);
       end
     end
     $finish;
   end
 
-  // ensure that when initialized, the SASA table outputs every entry as not
-  // valid
+  /*************************************************************************
+  * TEST #0: 
+  * Ensure that when initialized, the SASA table outputs every 
+  * entry as not valid
+  *************************************************************************/
   task test_default_values(integer size_idx, integer set_idx);
     integer ii;
     integer idx;
@@ -133,8 +146,11 @@ module tb_sparce_sasa_table ();
     end
   endtask
 
-  // ensure that basic loading of the sasa table functions correctly (and
-  // consequently that reading loaded values functions properly as well)
+  /*************************************************************************
+  * TEST #1: 
+  * Ensure that basic loading of the sasa table functions correctly (and
+  * consequently that reading loaded values functions properly as well)
+  *************************************************************************/
   task load_sasa_table(integer size_idx, integer set_idx);
     integer ii;
     integer idx;
@@ -166,6 +182,12 @@ module tb_sparce_sasa_table ();
     end
   endtask
 
+  /*************************************************************************
+  * TEST #2:
+  * Ensure when a SASA entry has the same program counter that already exists
+  * in the SASA table, it will update the existing entry instead of writing to
+  * the other set. 
+  *************************************************************************/
   task load_duplicate_entries(integer size_idx, integer set_idx);
     integer ii;
     integer idx;
@@ -174,6 +196,9 @@ module tb_sparce_sasa_table ();
 
     @(negedge tb_clk);
 
+    // write entry to set 1
+    write_sasa_entry(size_idx, set_idx, `SASA_DATA(SASA_ADDR, 1, 2, 3, 4));
+
     // loop through every possible entry in the sasa table. Because these are
     // consecutive tests, there should be no collisions, and every value
     // should be readable immediately after writes
@@ -181,9 +206,18 @@ module tb_sparce_sasa_table ();
       sasa_port_arr[idx].pc = 0;
       write_sasa_entry(size_idx, set_idx, `SASA_DATA(0, ii, ii, ii, ii));
       read_sasa_entry(size_idx, set_idx, `SASA_DATA(0, ii, ii, ii,ii), 1);
+
+      // make sure that set 1 is not replaced
+      sasa_port_arr[idx].pc = SASA_ADDR;
+      read_sasa_entry(size_idx, set_idx, `SASA_DATA(SASA_ADDR, 1, 2, 3, 4), set_idx != 0);
     end
   endtask
 
+  /*************************************************************************
+  * TEST #3:
+  * Ensures that when the SASA table reaches full capacity, it forces the
+  * original entry out of the table.
+  *************************************************************************/
   task test_associativity(integer size_idx, integer set_idx);
     integer ii;
     integer idx;
@@ -211,6 +245,11 @@ module tb_sparce_sasa_table ();
     end
   endtask
 
+  /*************************************************************************
+  * TEST #4:
+  * Ensures that when the SASA table reaches full capacity, it forces the LRU
+  * entry out of the table
+  *************************************************************************/
   task test_lru(integer size_idx, integer set_idx);
     integer ii;
     integer idx;
@@ -259,6 +298,78 @@ module tb_sparce_sasa_table ();
     end
   endtask
 
+  /*************************************************************************
+  * TEST #5: 
+  * Ensure that after sasa table is disabled, the outputs are invalid.
+  *************************************************************************/
+  task disable_sasa_table(integer size_idx, integer set_idx);
+    integer ii;
+    integer idx;
+    idx = `GET_IDX(size_idx, set_idx);
+    initialize(size_idx, set_idx);
+
+    // disable sasa table by writing not 0 to config register
+    write_to_sasa_config (size_idx, set_idx, `SASA_DATA(0, 0, 0, 0, 7));
+
+    // write data to every entry in the SASA table
+    for (ii = 0; ii < (2**(size_idx+2)); ii++) begin
+      sasa_port_arr[idx].pc = ii << 2;
+      write_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii, ii));
+    end
+
+    // read all entries and outputs are invalid
+    @(negedge tb_clk);
+    sasa_port_arr[idx].sasa_wen = '0;
+    sasa_port_arr[idx].sasa_data = '1;
+    sasa_port_arr[idx].sasa_addr = '1;
+    sasa_port_arr[idx].sasa_enable = '0;
+    for (ii = 0; ii < (2**(size_idx+2)); ii++) begin
+      @(negedge tb_clk);
+      sasa_port_arr[idx].pc = ii << 2;
+      @(posedge tb_clk);
+      read_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii,ii), 0);
+    end
+  endtask
+
+  /*************************************************************************
+  * TEST #6:
+  * Ensure that after sasa table is re-enabled, the outputs are valid.
+  *************************************************************************/
+  task reenable_sasa_table(integer size_idx, integer set_idx);
+    integer ii;
+    integer idx;
+    idx = `GET_IDX(size_idx, set_idx);
+    initialize(size_idx, set_idx);
+
+    // disable sasa table by writing 1 to config register
+    write_to_sasa_config (size_idx, set_idx, `SASA_DATA(0, 0, 0, 0, 1));
+
+    // write data to every entry in the SASA table
+    for (ii = 0; ii < (2**(size_idx+2)); ii++) begin
+      sasa_port_arr[idx].pc = ii << 2;
+      write_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii, ii));
+    end
+
+    // enable sasa table by writing 0 to config register
+    write_to_sasa_config (size_idx, set_idx, `SASA_DATA(0, 0, 0, 0, 0));
+
+    // read all entries
+    @(negedge tb_clk);
+    sasa_port_arr[idx].sasa_wen = '0;
+    sasa_port_arr[idx].sasa_data = '1;
+    sasa_port_arr[idx].sasa_addr = '1;
+    sasa_port_arr[idx].sasa_enable = '0;
+    for (ii = 0; ii < (2**(size_idx+2)); ii++) begin
+      @(negedge tb_clk);
+      sasa_port_arr[idx].pc = ii << 2;
+      @(posedge tb_clk);
+      read_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii,ii), 1);
+    end
+  endtask
+
+  /*************************************************************************
+  * Helper function #1: read sasa entry
+  *************************************************************************/
   task read_sasa_entry(integer size_idx, integer set_idx, word_t data, logic valid);
       integer expected;
       integer idx;
@@ -268,31 +379,47 @@ module tb_sparce_sasa_table ();
         assert (sasa_port_arr[idx].valid == '0) else $error("Unitialized entry in SASA table outputs as valid");
       end else begin
         assert (sasa_port_arr[idx].valid == '1) else $error("Initialized entry in SASA table outputs as invalid");
+
         expected = (data >> 11) & 'h1F;
-        assert (sasa_port_arr[idx].sasa_rs1== expected) else $error("Initialized entry in SASA table outputs incorrect sasa_rs1 value (exp: %d, got: %d)", expected , sasa_port_arr[idx].sasa_rs1);
+        assert (sasa_port_arr[idx].sasa_rs1 == expected) 
+        else $error("Initialized entry in SASA table outputs incorrect sasa_rs1 value (exp: %d, got: %d)", expected , sasa_port_arr[idx].sasa_rs1);
+
         expected = (data >> 6) & 'h1F;
-        assert (sasa_port_arr[idx].sasa_rs2==  expected) else $error("Initialized entry in SASA table outputs incorrect sasa_rs2 value (exp: %d, got: %d)", expected, sasa_port_arr[idx].sasa_rs2);
+        assert (sasa_port_arr[idx].sasa_rs2 == expected) 
+        else $error("Initialized entry in SASA table outputs incorrect sasa_rs2 value (exp: %d, got: %d)", expected, sasa_port_arr[idx].sasa_rs2);
+
         expected = data & 'h1F;
-        assert (sasa_port_arr[idx].insts_to_skip ==  expected) else $error("Initialized entry in SASA table outputs incorrect insts_to_skip value (exp: %d, got: %d)", expected, sasa_port_arr[idx].insts_to_skip);
-        assert (sasa_port_arr[idx].preceding_pc ==  sasa_port_arr[idx].pc) else $error("Initialized entry in SASA table outputs incorrect preceding_pc value (exp: %d, got: %d)",  sasa_port_arr[idx].pc, sasa_port_arr[idx].insts_to_skip);
+        assert (sasa_port_arr[idx].insts_to_skip == expected) 
+        else $error("Initialized entry in SASA table outputs incorrect insts_to_skip value (exp: %d, got: %d)", expected, sasa_port_arr[idx].insts_to_skip);
+
+        assert (sasa_port_arr[idx].preceding_pc ==  sasa_port_arr[idx].pc) 
+        else $error("Initialized entry in SASA table outputs incorrect preceding_pc value (exp: %d, got: %d)",  sasa_port_arr[idx].pc, sasa_port_arr[idx].insts_to_skip);
+
         expected = (data >> 5) & '1;
-        assert (sasa_port_arr[idx].condition ==  sasa_cond_t'(expected)) else $error("Initialized entry in SASA table outputs incorrect preceding_pc value (exp: %d, got: %d)",  sasa_cond_t'(expected), sasa_port_arr[idx].condition);
+        assert (sasa_port_arr[idx].condition ==  sasa_cond_t'(expected)) 
+        else $error("Initialized entry in SASA table outputs incorrect preceding_pc value (exp: %d, got: %d)",  sasa_cond_t'(expected), sasa_port_arr[idx].condition);
       end
   endtask
 
+  /*************************************************************************
+  * Helper function #2: write sasa entry
+  *************************************************************************/
   task write_sasa_entry(integer size_idx, integer set_idx, word_t data);
-      integer idx;
-      idx = `GET_IDX(size_idx, set_idx);
-      @(negedge tb_clk);
-      sasa_port_arr[idx].sasa_wen = '1;
-      sasa_port_arr[idx].sasa_data = data;
-      sasa_port_arr[idx].sasa_addr = 'h1000;
-      sasa_port_arr[idx].sasa_enable = '1;
-      @(posedge tb_clk);
+    integer idx;
+    idx = `GET_IDX(size_idx, set_idx);
+    @(negedge tb_clk);
+    sasa_port_arr[idx].sasa_wen = '1;
+    sasa_port_arr[idx].sasa_data = data;
+    sasa_port_arr[idx].sasa_addr = SASA_ADDR;
+    sasa_port_arr[idx].sasa_enable = '1;
+    @(posedge tb_clk);
   endtask
 
+  /*************************************************************************
+  * Helper function #3: initialize signals
+  *************************************************************************/
   task initialize(integer size_idx, integer set_idx);
-    int idx;
+    integer idx;
     idx = `GET_IDX(size_idx, set_idx);
     @(negedge tb_clk);
     tb_nRST = 0;
@@ -305,9 +432,21 @@ module tb_sparce_sasa_table ();
     @(negedge tb_clk);
     tb_nRST = 1;
     @(negedge tb_clk);
-
   endtask
 
+  /*************************************************************************
+  * Helper function #4: write to configuration register
+  *************************************************************************/
+  task write_to_sasa_config (integer size_idx, integer set_idx, word_t data);
+    integer idx;
+    idx = `GET_IDX(size_idx, set_idx);
+    @(negedge tb_clk);
+    sasa_port_arr[idx].sasa_wen = '1;
+    sasa_port_arr[idx].sasa_data = data;
+    sasa_port_arr[idx].sasa_addr = SASA_CONF_ADDR;
+    sasa_port_arr[idx].sasa_enable = '1;
+    @(posedge tb_clk);
+  endtask
 
 endmodule
 

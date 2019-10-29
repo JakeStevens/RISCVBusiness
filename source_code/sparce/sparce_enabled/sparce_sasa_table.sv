@@ -81,6 +81,22 @@ module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 1,
   logic [`CLOG2(SASA_SETS)-1:0] existing_entry_set;
 
   logic [SASA_SETS:0] sasa_hits;
+  logic sasa_config, sasa_config_match;
+  
+  // sasa table configuration register
+  assign sasa_config_match = sasa_if.sasa_enable && sasa_if.sasa_wen && (sasa_if.sasa_addr == SASA_ADDR + 4);
+
+  always_ff @(posedge CLK, negedge nRST) begin : sasa_configuration
+    if (!nRST) begin
+      sasa_config <= '0;
+    end
+    else begin
+      sasa_config <= sasa_config;
+      if (sasa_config_match) begin
+        sasa_config <= sasa_if.sasa_data;
+      end
+    end
+  end 
 
   // wiring for indexing of the cache arrays
   assign input_idx = (SASA_ENTRIES == SASA_SETS) ? 0 : input_data.prev_pc;
@@ -174,7 +190,7 @@ module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 1,
     for (int i = 0; i < SASA_SETS; i++) begin
       if (valid[i][pc_idx]&& (tag[i][pc_idx]== pc_tag)) begin
         sasa_hits             = i+1;
-        sasa_if.valid         = 1'b1;
+        sasa_if.valid         = (sasa_config == '0);
         sasa_if.sasa_rs1      = rs1[i][pc_idx];
         sasa_if.sasa_rs2      = rs2[i][pc_idx];
         sasa_if.condition     = sasa_cond[i][pc_idx];
