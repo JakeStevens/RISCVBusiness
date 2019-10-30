@@ -33,6 +33,7 @@ addi t0, t0, 1
 STORE_SASA_FROM_MEM(sasa_entry_0, t0, t1, t2)  
 nop
 nop
+nop
 
 skip_point_0:     # SASA_AND: 0,0 -> skip 2 instructions
   nop
