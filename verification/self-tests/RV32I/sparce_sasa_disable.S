@@ -38,8 +38,6 @@ skip_point_0:     # SASA_AND: 0,0 -> skip 2 instructions
   nop
   j   sasa_test_case_end_fail
   j   sasa_test_case_end_fail
-  j   skip_point_1
-  j   sasa_test_case_end_fail
 
 li  x8, SPARCE_CONFIG_ADDR     
 sw  t0, 0(x8)     # disable SASA table
