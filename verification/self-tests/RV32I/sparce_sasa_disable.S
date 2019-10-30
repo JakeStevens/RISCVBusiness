@@ -42,7 +42,7 @@ skip_point_0:     # SASA_AND: 0,0 -> skip 2 instructions
 li  x8, SPARCE_CONFIG_ADDR     
 sw  t0, 0(x8)     # disable SASA table
 
-skip_point_1:     # SASA_AND: 0,0 -> skip 2 instructions
+skip_point_1:     # SASA_AND: 0,0 -> skip 2 instructions but DISABLED
   nop
   j   skip_point_2
   j   sasa_test_case_end_fail
@@ -50,15 +50,14 @@ skip_point_1:     # SASA_AND: 0,0 -> skip 2 instructions
   j   sasa_test_case_end_fail
   j   sasa_test_case_end_fail
 
-skip_point_2:     # SASA_OR: 0,0 -> skip 2 instructions
+skip_point_2:     # SASA_OR: 0,0 -> skip 2 instructions but DISABLED
   nop
+  sw  x0, 0(x8)     # enable SASA table
   j   skip_point_3
   j   sasa_test_case_end_fail
   j   sasa_test_case_end_fail
   j   sasa_test_case_end_fail
   j   sasa_test_case_end_fail
-
-sw  x0, 0(x8)     # enable SASA table
 
 skip_point_3:     # SASA_OR: 0,0 -> skip 2 instructions
   nop
