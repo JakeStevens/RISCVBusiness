@@ -52,12 +52,19 @@ skip_point_1:     # SASA_AND: 0,0 -> skip 2 instructions
 
 skip_point_2:     # SASA_OR: 0,0 -> skip 2 instructions
   nop
-  j   sasa_test_case_end
+  j   skip_point_3
   j   sasa_test_case_end_fail
   j   sasa_test_case_end_fail
   j   sasa_test_case_end_fail
   j   sasa_test_case_end_fail
 
+sw  x0, 0(x8)     # enable SASA table
+
+skip_point_3:     # SASA_OR: 0,0 -> skip 2 instructions
+  nop
+  j   sasa_test_case_end_fail
+  j   sasa_test_case_end_fail
+  j   sasa_test_case_end
 
 sasa_test_case_end_fail:
 li TESTNUM, 0
@@ -72,6 +79,7 @@ sasa_entry_0:
 CREATE_SASA_MEMORY_ENTRIES(skip_point_0, 3, 4, SASA_COND_AND, 2)
 CREATE_SASA_MEMORY_ENTRIES(skip_point_1, 3, 4, SASA_COND_AND, 2)
 CREATE_SASA_MEMORY_ENTRIES(skip_point_2, 3, 4, SASA_COND_OR, 2)
+CREATE_SASA_MEMORY_ENTRIES(skip_point_3, 3, 4, SASA_COND_OR, 2)
 
 TEST_DATA
 
