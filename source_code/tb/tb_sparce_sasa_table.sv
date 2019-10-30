@@ -63,7 +63,7 @@ module tb_sparce_sasa_table ();
   parameter NUM_TABLE_SIZES = 5;
   parameter NUM_SETS = 3;
   parameter NUM_SASA_TABLES = NUM_TABLE_SIZES * NUM_SETS;
-  parameter SASA_ADDR = 'h1000;
+  parameter SASA_ADDR = 32'h90000000;
   parameter SASA_CONF_ADDR = SASA_ADDR + 4;
 
   logic tb_clk;
@@ -197,7 +197,7 @@ module tb_sparce_sasa_table ();
     @(negedge tb_clk);
 
     // write entry to set 1
-    write_sasa_entry(size_idx, set_idx, `SASA_DATA(SASA_ADDR, 1, 2, 3, 4));
+    write_sasa_entry(size_idx, set_idx, `SASA_DATA('h1000, 1, 2, 3, 4));
 
     // loop through every possible entry in the sasa table. Because these are
     // consecutive tests, there should be no collisions, and every value
@@ -208,8 +208,8 @@ module tb_sparce_sasa_table ();
       read_sasa_entry(size_idx, set_idx, `SASA_DATA(0, ii, ii, ii,ii), 1);
 
       // make sure that set 1 is not replaced
-      sasa_port_arr[idx].pc = SASA_ADDR;
-      read_sasa_entry(size_idx, set_idx, `SASA_DATA(SASA_ADDR, 1, 2, 3, 4), set_idx != 0);
+      sasa_port_arr[idx].pc = 'h1000;
+      read_sasa_entry(size_idx, set_idx, `SASA_DATA('h1000, 1, 2, 3, 4), set_idx != 0);
     end
   endtask
 
