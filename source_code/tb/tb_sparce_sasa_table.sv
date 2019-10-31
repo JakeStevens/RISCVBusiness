@@ -120,6 +120,7 @@ module tb_sparce_sasa_table ();
         test_lru(tb_i,tb_j);
         disable_sasa_table(tb_i,tb_j);
         reenable_sasa_table(tb_i, tb_j);
+        pc_out_of_range(tb_i, tb_j);
       end
     end
     $finish;
@@ -364,6 +365,37 @@ module tb_sparce_sasa_table ();
       sasa_port_arr[idx].pc = ii << 2;
       @(posedge tb_clk);
       read_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii,ii), 1);
+    end
+  endtask
+
+  /*************************************************************************
+  * TEST #7:
+  * Ensure that only PC <= 'hFFFC 0000 can be skipped 
+  *************************************************************************/
+  task pc_out_of_range(integer size_idx, integer set_idx);
+    integer ii;
+    integer idx;
+    idx = `GET_IDX(size_idx, set_idx);
+    initialize(size_idx, set_idx);
+
+    // write data to every entry in the SASA table
+    for (ii = 0; ii < (2**(size_idx+2)); ii++) begin
+      sasa_port_arr[idx].pc = ii << 2;
+      write_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii, ii));
+    end
+
+    // read all entries
+    @(negedge tb_clk);
+    sasa_port_arr[idx].sasa_wen = '0;
+    sasa_port_arr[idx].sasa_data = '1;
+    sasa_port_arr[idx].sasa_addr = '1;
+    sasa_port_arr[idx].sasa_enable = '0;
+    for (ii = 0; ii < (2**(size_idx+2)); ii++) begin
+      @(negedge tb_clk);
+      sasa_port_arr[idx].pc = ii << 2;
+      sasa_port_arr[idx].pc[31:18] = (ii + 1) << 2; 
+      @(posedge tb_clk);
+      read_sasa_entry(size_idx, set_idx, `SASA_DATA(ii << 2, ii, ii, ii,ii), 0);
     end
   endtask
 

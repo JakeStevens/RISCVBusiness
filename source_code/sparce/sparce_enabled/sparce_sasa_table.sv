@@ -190,7 +190,9 @@ module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 1,
     for (int i = 0; i < SASA_SETS; i++) begin
       if (valid[i][pc_idx]&& (tag[i][pc_idx]== pc_tag)) begin
         sasa_hits             = i+1;
-        sasa_if.valid         = (sasa_config == '0);
+        // ensure skipping is only valid for PC < 'hFFFF FFFC
+        //sasa_if.valid         = (sasa_config == '0);
+        sasa_if.valid         = (sasa_config == '0) && (sasa_if.pc[31:18] == '0);
         sasa_if.sasa_rs1      = rs1[i][pc_idx];
         sasa_if.sasa_rs2      = rs2[i][pc_idx];
         sasa_if.condition     = sasa_cond[i][pc_idx];
