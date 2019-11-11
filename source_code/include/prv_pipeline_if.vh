@@ -31,7 +31,7 @@
 `include "component_selection_defines.vh"
 
 interface prv_pipeline_if();
-  import machine_mode_types_pkg::*;
+  import machine_mode_types_1_11_pkg::*;
   import rv32i_types_pkg::*;
 
   // exception signals

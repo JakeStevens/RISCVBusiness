@@ -29,7 +29,7 @@
 interface control_unit_if;
   import alu_types_pkg::*;
   import rv32i_types_pkg::*;
-  import machine_mode_types_pkg::*;
+  import machine_mode_types_1_11_pkg::*;
 
   logic dwen, dren, j_sel, branch, jump, ex_pc_sel, imm_shamt_sel, halt, wen, ifence;
   aluop_t alu_op;

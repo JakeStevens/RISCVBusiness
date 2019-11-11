@@ -29,7 +29,7 @@ module priv_1_11_control (
   priv_1_11_internal_if.prv_control prv_intern_if
 );
   import rv32i_types_pkg::*;
-  import machine_mode_types_pkg::*;
+  import machine_mode_types_1_11_pkg::*;
 
   ex_code_t ex_src;
   logic exception;
