@@ -241,13 +241,19 @@ module priv_1_11_csr_rfile (
 
   logic valid_csr_addr;
   logic csr_op;
+  logic swap, clr, set;
   word_t rup_data;
+
 
   assign csr_op = prv_intern_if.swap | prv_intern_if.clr | prv_intern_if.set;
   assign prv_intern_if.invalid_csr = csr_op & ~valid_csr_addr;
-  assign rup_data = prv_intern_if.swap ? prv_intern_if.wdata : (
-                      prv_intern_if.clr ? prv_intern_if.rdata & ~prv_intern_if.wdata : 
-                      prv_intern_if.set ? prv_intern_if.rdata | prv_intern_if.wdata :
+  // Should not update data if the csr addr is invalid
+  assign swap = prv_intern_if.swap & valid_csr_addr & prv_intern_if.valid_write;
+  assign clr = prv_intern_if.clr & valid_csr_addr & prv_intern_if.valid_write;
+  assign set = prv_intern_if.set & valid_csr_addr & prv_intern_if.valid_write;
+  assign rup_data = swap ? prv_intern_if.wdata : (
+                      clr ? prv_intern_if.rdata & ~prv_intern_if.wdata :
+                      set ? prv_intern_if.rdata | prv_intern_if.wdata :
                       prv_intern_if.rdata
                       );
 
@@ -285,19 +291,19 @@ module priv_1_11_csr_rfile (
       MIMPID_ADDR     : prv_intern_if.rdata = mimpid;
       MHARTID_ADDR    : prv_intern_if.rdata = mhartid;
       MISA_ADDR       : prv_intern_if.rdata = misaid; 
-      
+
       MSTATUS_ADDR    : prv_intern_if.rdata = mstatus;
       MTVEC_ADDR      : prv_intern_if.rdata = mtvec;
       MEDELEG_ADDR    : prv_intern_if.rdata = medeleg; 
       MIDELEG_ADDR    : prv_intern_if.rdata = mideleg; 
       MIE_ADDR        : prv_intern_if.rdata = mie;
-      
+
       MSCRATCH_ADDR   : prv_intern_if.rdata = mscratch;
       MEPC_ADDR       : prv_intern_if.rdata = mepc;
       MCAUSE_ADDR     : prv_intern_if.rdata = mcause;
       MTVAL_ADDR      : prv_intern_if.rdata = mtval;
       MIP_ADDR        : prv_intern_if.rdata = mip; 
-     
+
       //machine protection and translation not present 
       MBASE_ADDR      : prv_intern_if.rdata = '0;
       MBOUND_ADDR     : prv_intern_if.rdata = '0;
@@ -309,12 +315,12 @@ module priv_1_11_csr_rfile (
       //only machine mode
       HTIMEW_ADDR     : prv_intern_if.rdata = '0;
       HTIMEHW_ADDR    : prv_intern_if.rdata = '0;
-            
+
       //Timers
       MTIMECMP_ADDR   : prv_intern_if.rdata = mtimecmp;
       MTIME_ADDR      : prv_intern_if.rdata = mtime;
       MTIMEH_ADDR     : prv_intern_if.rdata = mtimeh;
-      
+
       // Non-Standard mtohost/mfromhost
       MTOHOST_ADDR    : prv_intern_if.rdata = mtohost;
       MFROMHOST_ADDR  : prv_intern_if.rdata = mfromhost;
@@ -326,7 +332,7 @@ module priv_1_11_csr_rfile (
       MCYCLEH_ADDR     : prv_intern_if.rdata = cycleh;
       MTIMEH_ADDR      : prv_intern_if.rdata = timeh;
       MINSTRETH_ADDR   : prv_intern_if.rdata = instreth;
- 
+
       default : begin
         valid_csr_addr = 1'b0;
         prv_intern_if.rdata = '0;

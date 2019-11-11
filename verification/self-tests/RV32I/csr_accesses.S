@@ -47,7 +47,7 @@ RVTEST_CODE_BEGIN
   bne x3, x1, failure
   RVTEST_PASS
 failure:
-  RVTEST_FAIL 
+  RVTEST_FAIL
 
 
 RVTEST_CODE_END
