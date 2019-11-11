@@ -30,7 +30,7 @@ module priv_1_11_csr_rfile (
   input CLK, nRST,
   priv_1_11_internal_if.csr prv_intern_if
 );
-  import machine_mode_types_pkg::*;
+  import machine_mode_types_1_11_pkg::*;
   import rv32i_types_pkg::*;
  
   /* Machine Information Registers */
