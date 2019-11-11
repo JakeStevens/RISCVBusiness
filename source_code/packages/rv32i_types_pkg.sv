@@ -122,8 +122,8 @@ package rv32i_types_pkg;
   } rv32i_system_t;
 
   typedef enum logic [11:0] {
-    ECALL   = 12'b0000000000000,
-    EBREAK  = 12'b0000000000001,
+    ECALL   = 12'b0000000_00000,
+    EBREAK  = 12'b0000000_00001,
     MRET    = 12'b0011000_00010,
     SRET    = 12'b0001000_00010,
     URET    = 12'b0000000_00010
