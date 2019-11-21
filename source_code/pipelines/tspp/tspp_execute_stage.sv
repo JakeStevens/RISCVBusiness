@@ -45,7 +45,7 @@ module tspp_execute_stage(
   output logic halt,
   risc_mgmt_if.ts_execute rm_if,
   cache_control_if.pipeline cc_if,
-  sparce_pipeline_if.pipeline sparce_if
+  sparce_pipeline_if.pipe_execute sparce_if
 );
 
   import rv32i_types_pkg::*;

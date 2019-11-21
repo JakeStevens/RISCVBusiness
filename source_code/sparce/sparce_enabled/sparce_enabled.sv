@@ -50,7 +50,7 @@ module sparce_enabled(
   // instantiate internal modules
   sparce_svc         sparce_svc_i(internal_if.svc);
   sparce_sprf        sparce_sprf_i(CLK, nRST, internal_if.sprf);
-  sparce_sasa_table  sparce_sasa_table_i(CLK, nRST, internal_if.sasa_table);
+  sparce_sasa_table  #(.SASA_SETS(4)) sparce_sasa_table_i (CLK, nRST, internal_if.sasa_table);
   sparce_psru        sparce_psru_i(internal_if.psru);
   sparce_cfid        sparce_cfid_i(internal_if.cfid);
 
