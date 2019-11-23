@@ -64,9 +64,9 @@ module sparce_sasa_table #(parameter SASA_ENTRIES = 16, parameter SASA_SETS = 1,
     logic [4:0]  insts_to_skip;
   } sasa_entry_t;
 
-  logic [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0][`CLOG2(SASA_SETS)-1:0] usage;
+  logic [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0][`CLOG2(SASA_SETS) - 1 :0] usage;
   logic [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0]     valid;
-  logic [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0][15-`CLOG2(SASA_SETS):0] tag;
+  logic [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0][15- `CLOG2(SASA_SETS) :0] tag;
   logic [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0][4:0] rs1;
   logic [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0][4:0] rs2;
   sasa_cond_t [SASA_SETS-1:0][(SASA_ENTRIES/SASA_SETS)-1:0] sasa_cond;

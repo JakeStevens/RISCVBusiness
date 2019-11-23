@@ -28,11 +28,11 @@
 `include "risc_mgmt_if.vh"
 `include "cache_control_if.vh"
 `include "sparce_pipeline_if.vh"
+`include "tspp_fetch_execute_if.vh"
+`include "tspp_hazard_unit_if.vh"
 
 module RISCVBusiness (
   input logic CLK, nRST,
-  output logic halt,
-
   `ifdef BUS_INTERFACE_GENERIC_BUS
   generic_bus_if.cpu gen_bus_if
   `elsif BUS_INTERFACE_AHB
@@ -53,8 +53,14 @@ module RISCVBusiness (
   cache_control_if cc_if();
   sparce_pipeline_if sparce_if();
 
-  // Module Instantiations
+  //interface instantiations
+  tspp_fetch_execute_if      fetch_ex_if();
+  tspp_hazard_unit_if        hazard_if();
 
+  logic halt;    //JOHN CHANGED THIS
+
+  // Module Instantiations
+/*
   pipeline_wrapper pipeline (
     .CLK(CLK),
     .nRST(nRST),
@@ -67,6 +73,38 @@ module RISCVBusiness (
     .cc_if(cc_if),
     .sparce_if(sparce_if)
   );
+*/
+  tspp_fetch_stage fetch_stage_i (
+    .CLK(CLK),
+    .nRST(nRST),
+    .fetch_ex_if(fetch_ex_if),
+    .hazard_if(hazard_if),
+    .predict_if(predict_if),
+    .igen_bus_if(tspp_icache_gen_bus_if),
+    .sparce_if(sparce_if)
+  );
+
+  tspp_execute_stage execute_stage_i (
+    .CLK(CLK),
+    .nRST(nRST),
+    .fetch_ex_if(fetch_ex_if),
+    .hazard_if(hazard_if),
+    .predict_if(predict_if),
+    .dgen_bus_if(tspp_dcache_gen_bus_if),
+    .prv_pipe_if(prv_pipe_if),
+    .halt(halt),
+    .rm_if(rm_if),
+    .cc_if(cc_if),
+    .sparce_if(sparce_if)
+  );
+
+  tspp_hazard_unit hazard_unit_i (
+    .hazard_if(hazard_if),
+    .prv_pipe_if(prv_pipe_if),
+    .rm_if(rm_if),
+    .sparce_if(sparce_if)
+  );
+
 
   branch_predictor_wrapper branch_predictor_i (
     .CLK(CLK),
@@ -86,7 +124,19 @@ module RISCVBusiness (
     .rm_if(rm_if)
   );
 
+/*
   caches_wrapper caches (
+    .CLK(CLK),
+    .nRST(nRST),
+    .icache_proc_gen_bus_if(tspp_icache_gen_bus_if),
+    .icache_mem_gen_bus_if(icache_mc_if),
+    .dcache_proc_gen_bus_if(tspp_dcache_gen_bus_if),
+    .dcache_mem_gen_bus_if(dcache_mc_if),
+    .cc_if(cc_if)
+  );
+*/
+
+  separate_caches sep_caches (
     .CLK(CLK),
     .nRST(nRST),
     .icache_proc_gen_bus_if(tspp_icache_gen_bus_if),
