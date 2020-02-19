@@ -51,7 +51,7 @@ module tspp_execute_stage(
   // Interface declarations
   control_unit_if   cu_if();
   rv32i_reg_file_if rf_if(); 
-  alu_if            alu_if();
+  alu_if            aluif();
   jump_calc_if      jump_if();
   branch_res_if     branch_if(); 
  
@@ -66,7 +66,7 @@ module tspp_execute_stage(
     .rmgmt_req_reg_w(rm_if.req_reg_w)
   );
   rv32i_reg_file rf (.*);
-  alu alu (.*);
+  alu alu (aluif);
   jump_calc jump_calc (.*);
   
   branch_res branch_res (
@@ -144,24 +144,24 @@ module tspp_execute_stage(
   *******************************************************/
   word_t imm_or_shamt;
   assign imm_or_shamt = (cu_if.imm_shamt_sel == 1'b1) ? cu_if.shamt : imm_I_ext;
-  assign alu_if.aluop = cu_if.alu_op;
+  assign aluif.aluop = cu_if.alu_op;
   logic mal_addr;
  
   always_comb begin
     case (cu_if.alu_a_sel)
-      2'd0: alu_if.port_a = rf_if.rs1_data;
-      2'd1: alu_if.port_a = imm_S_ext;
-      2'd2: alu_if.port_a = fetch_ex_if.fetch_ex_reg.pc;
-      2'd3: alu_if.port_a = '0; //Not Used 
+      2'd0: aluif.port_a = rf_if.rs1_data;
+      2'd1: aluif.port_a = imm_S_ext;
+      2'd2: aluif.port_a = fetch_ex_if.fetch_ex_reg.pc;
+      2'd3: aluif.port_a = '0; //Not Used 
     endcase
   end
 
   always_comb begin
     case(cu_if.alu_b_sel)
-      2'd0: alu_if.port_b = rf_if.rs1_data;
-      2'd1: alu_if.port_b = rf_if.rs2_data;
-      2'd2: alu_if.port_b = imm_or_shamt;
-      2'd3: alu_if.port_b = cu_if.imm_U;
+      2'd0: aluif.port_b = rf_if.rs1_data;
+      2'd1: aluif.port_b = rf_if.rs2_data;
+      2'd2: aluif.port_b = imm_or_shamt;
+      2'd3: aluif.port_b = cu_if.imm_U;
     endcase
   end
 
@@ -173,7 +173,7 @@ module tspp_execute_stage(
         3'd0    : rf_if.w_data = dload_ext;
         3'd1    : rf_if.w_data = fetch_ex_if.fetch_ex_reg.pc4;
         3'd2    : rf_if.w_data = cu_if.imm_U;
-        3'd3    : rf_if.w_data = alu_if.port_out;
+        3'd3    : rf_if.w_data = aluif.port_out;
         3'd4    : rf_if.w_data = prv_pipe_if.rdata;
         default : rf_if.w_data = '0; 
       endcase
@@ -224,9 +224,9 @@ module tspp_execute_stage(
   assign dgen_bus_if.wen        = rm_if.req_mem ? rm_if.mem_wen : cu_if.dwen & ~mal_addr;
   assign byte_en_temp           = rm_if.req_mem ? rm_if.mem_byte_en : byte_en_standard;
   assign dgen_bus_if.byte_en    = byte_en;
-  assign dgen_bus_if.addr       = rm_if.req_mem ? rm_if.mem_addr : alu_if.port_out;
+  assign dgen_bus_if.addr       = rm_if.req_mem ? rm_if.mem_addr : aluif.port_out;
   assign hazard_if.d_mem_busy   = dgen_bus_if.busy;
-  assign byte_offset            = alu_if.port_out[1:0]; 
+  assign byte_offset            = aluif.port_out[1:0]; 
   
   always_comb begin
     dgen_bus_if.wdata = '0;

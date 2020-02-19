@@ -34,16 +34,13 @@ module rv32i_reg_file (
   parameter NUM_REGS = 32;
 
   word_t [NUM_REGS-1:0] registers;
+  // To access the i-th register, use registers[i]
 
   always_ff @ (posedge CLK, negedge nRST) begin
-    if (~nRST) begin
-      registers <= '0;
-    end else if (rf_if.wen && rf_if.rd) begin
-      registers[rf_if.rd] <= rf_if.w_data;
-    end
-  end 
+    //TODO
+  end
 
-  assign rf_if.rs1_data = registers[rf_if.rs1];
-  assign rf_if.rs2_data = registers[rf_if.rs2];
+  assign rf_if.rs1_data = //TODO;
+  assign rf_if.rs2_data = //TODO;
 
 endmodule
