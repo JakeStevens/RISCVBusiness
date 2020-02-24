@@ -75,7 +75,7 @@ def configure(ctx):
       tb = 'tb_caches',
       tb_includes = ['include']
     )
-    ctx.SFFUnits.add('priv_1_11_block',
+    ctx.SFFUnits.add('priv_1_11_block', // TODO: Figure out how to modify this for the priv unit
     includes = ['include'],
     src_dir = ['privs/priv_1_11'],
     use = ['RISCVBusiness_packages'],

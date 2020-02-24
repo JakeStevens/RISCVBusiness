@@ -57,7 +57,7 @@ module tb_priv_1_11_block ();
   priv_1_11_block DUT (
     .CLK(CLK),
     .nRST(nRST),
-    .prv_pipeline_if.priv_block(prv_pipeline_if2)
+    .prv_pipeline_if.priv_block(prv_pipeline_if2.block)
   );
 
   /*ram_wrapper ram (
