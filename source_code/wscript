@@ -21,7 +21,7 @@ def configure(ctx):
     )
     ctx.SFFUnits.add('alu',
       includes = ['include'],
-      src_dir = ['standard_core'],
+      src = 'standard_core/alu.sv',
       use = ['RISCVBusiness_packages'],
       tb_use = ['RISCVBusiness_packages'],
       tb = 'tb_alu',
@@ -29,7 +29,7 @@ def configure(ctx):
     )
     ctx.SFFUnits.add('rf',
       includes = ['include'],
-      src_dir = ['standard_core'],
+      src = 'standard_core/rv32i_reg_file.sv',
       use = ['RISCVBusiness_packages'],
       tb_use = ['RISCVBusiness_packages'],
       tb = 'tb_rf',
