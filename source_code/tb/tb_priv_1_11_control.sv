@@ -27,14 +27,14 @@
 
 `timescale 1ns/100ps
 
-`include "prv_pipeline_if.vh"
+//`include "prv_pipeline_if.vh"
 `include "priv_1_11_internal_if.vh"
 
 `define OUTPUT_FILE_NAME "cpu.hex"
 `define STATS_FILE_NAME "stats.txt"
 `define RVB_CLK_TIMEOUT 10000
 
-module tb_priv_1_11_block ();
+module tb_priv_1_11_control ();
    
   parameter PERIOD = 20;
  
@@ -48,14 +48,14 @@ module tb_priv_1_11_block ();
   //integer clk_count;
 
   //Interface Instantiations
-  prv_pipeline_if prv_pipeline_if();
+  priv_1_11_internal_if prv_internal_if();
 
   //Module Instantiations
 
-  priv_1_11_block DUT (
+  priv_1_11_control DUT (
     .CLK(CLK),
     .nRST(nRST),
-    .prv_pipe_if(prv_pipeline_if)
+    .prv_intern_if(prv_internal_if)
   ); // TODO: Figure out IO for the priv pipeline unit
 
   /*ram_wrapper ram (
@@ -135,7 +135,7 @@ module tb_priv_1_11_block ();
     nRST = 0;
 
    // TODO: Write logic to control the inputs and see what outputs are!
-    prv_pipeline_if.pipe_clear = '0;
+    /*prv_pipeline_if.pipe_clear = '0;
     prv_pipeline_if.ret = '0;
     prv_pipeline_if.epc = '0;
     prv_pipeline_if.fault_insn = '0;
@@ -157,18 +157,12 @@ module tb_priv_1_11_block ();
     prv_pipeline_if.wb_enable = '0;
     prv_pipeline_if.instr = '0;
     prv_pipeline_if.ex_rmgmt = '0;
-    prv_pipeline_if.ex_rmgmt_cause = '0;
+    prv_pipeline_if.ex_rmgmt_cause = '0; */
     
 
 
    
-    prv_pipeline_if.rdata = 32'h1;
-    prv_pipeline_if.raddr = 32'h15;
-    prv_pipeline_if.rvalid_write = 1'b1;
-    prv_pipeline_if.rb_enable = 1'b0;
-    prv_pipeline_if.rinstr = 32'h45;
-    prv_pipeline_if.rex_rmgmt = 1'b1;
-    prv_pipeline_if.rex_rmgmt_cause = 2'd2;
+    
  
     @(posedge CLK);
     @(posedge CLK);
