@@ -27,7 +27,7 @@
 
 module priv_1_11_block (
   input logic CLK, nRST,
-  prv_pipeline_if.priv_block prv_pipe_if
+  prv_pipeline_if.priv_block prv_pipe_if //
 );
   priv_1_11_internal_if prv_intern_if();
 
@@ -47,7 +47,7 @@ module priv_1_11_block (
 
   // Assign inputs to the prv_block to the corresponding internal signals
   assign prv_intern_if.pipe_clear   = prv_pipe_if.pipe_clear;
-  assign prv_intern_if.ret          = prv_pipe_if.ret;
+  assign prv_intern_if.ret          = prv_pipe_if.ret; 
   assign prv_intern_if.epc          = prv_pipe_if.epc;
   assign prv_intern_if.fault_insn   = prv_pipe_if.fault_insn;
   assign prv_intern_if.mal_insn = prv_pipe_if.mal_insn;

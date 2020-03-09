@@ -22,18 +22,18 @@
 *   Description:  Control signals for the pipeline from the exception/IRQ
 *                 block 
 */
-
+// Code will mainly be used as pipeline control
 `include "priv_1_11_internal_if.vh"
 
 module priv_1_11_pipeline_control
 (
   input logic [1:0] prv_intr, prv_ret,
-  priv_1_11_internal_if.pipe_ctrl prv_intern_if
+  priv_1_11_internal_if.pipe_ctrl prv_intern_if // interface for pipeline control
 );
   import rv32i_types_pkg::*;
   logic interrupt_pending;
  
-  assign prv_intern_if.insert_pc = prv_intern_if.ret | (prv_intern_if.pipe_clear & prv_intern_if.intr);
+  assign prv_intern_if.insert_pc = prv_intern_if.ret | (prv_intern_if.pipe_clear & prv_intern_if.intr); // only need to insert the Program Counter if 
  
   always_comb begin
     if(prv_intern_if.intr)
