@@ -1,0 +1,77 @@
+/*
+*   Copyright 2016 Purdue University
+*   
+*   Licensed under the Apache License, Version 2.0 (the "License");
+*   you may not use this file except in compliance with the License.
+*   You may obtain a copy of the License at
+*   
+*       http://www.apache.org/licenses/LICENSE-2.0
+*   
+*   Unless required by applicable law or agreed to in writing, software
+*   distributed under the License is distributed on an "AS IS" BASIS,
+*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*   See the License for the specific language governing permissions and
+*   limitations under the License.
+*
+*
+*   Filename:     basic_branch.S
+*
+*   Created by:   Jacob R. Stevens
+*   Email:        steven69@purdue.edu
+*   Date Created: 07/01/2016
+*   Description:  Test of basic branching behavior
+*/
+
+#include "riscv_test.h"
+#include "test_macros.h"
+# NOTE: You should modify this code to make it for external interrupts
+
+RVTEST_RV32U
+
+
+RVTEST_CODE_BEGIN
+
+// xlen is 32 bits since each instruction has a size of 32 bits
+main:
+  # Define trap vector address
+  la t0, mtvec_handler # load in address of mtvec_handler
+  csrw mtvec, t0 # encoded as csrrw x0, csr(mtvec), rs1(t0). write t0 into mtvec
+// mtvec stands for Machine Trap-Vector Base-Address Register
+
+  addi x6, x0, 0xFF // store FF into x6
+  addi x7, x0, 0xFF // store FF into x7
+  addi x3, x0, 0x1 // store 1 into x3
+  csrw mstatus, x3 // write value of 1 into mstatus register, enable the current interrupt via UIE
+
+  ori x3, x0, 0x800
+  ori x4, x0, 0x800
+  csrw mip, x3 
+  csrw mie, x4 // Write value of 0x800 into mie, external interrupt enable for M-mode (machine mode, bootloader firmware)
+
+idle_loop: # infinite while loop to wait until interrupt passes
+  la x1, mcause
+  lw x2, 0(x1)
+  srli x5, x2, 0x1F // obtain the MSB to determine if it was an interrupt instead of an exception
+  andi x6, x2, 0xF // find the source which should be a user external interrupt
+  beq x5, x0, idle_loop // keep looping until an interrupt is received
+
+  RVTEST_PASS
+
+.align 2
+mtvec_handler: // TODO: What is mtvec_handler??
+  # Write to mtimecmp using the zero register
+  # Check that nothing happened to interrupt
+  # Actually write to mtimecmp
+  # Check that the interrupt cleared
+  # Change sigil to show interrupt was entered
+  ori x6, x0, 0x0F
+  # Return
+  mret
+
+RVTEST_CODE_END
+
+.data
+RVTEST_DATA_BEGIN
+  TEST_DATA
+RVTEST_DATA_END
+  
