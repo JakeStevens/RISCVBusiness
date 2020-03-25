@@ -1,0 +1,41 @@
+# //  Questa Sim-64
+# //  Version 10.6b linux_x86_64 May 25 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  QuestaSim and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# vsim -Lf /home/ecegrid/a/ece337/Course_Prod/IP_Libs/Lab_IP_Lib/Vsim -L /home/ecegrid/a/ece337/Course_Prod/Cell_Libs/AMI_05/vhdl_work -L /home/ecegrid/a/ece337/Class0.5u/GOLD_LIB "+no_glitch_msg" -coverage -voptargs="+acc" -i -t ps source_work.tb_FPU_top_level 
+# Start time: 15:19:10 on Feb 05,2020
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# Loading sv_std.std
+# Loading work.tb_FPU_top_level(fast)
+# Loading work.FPU_top_level(fast)
+# Loading work.ADD_step1(fast)
+# Loading work.int_compare(fast)
+# Loading work.right_shift(fast)
+# Loading work.MUL_step1(fast)
+# Loading work.mul_26b(fast)
+# Loading work.ADD_step2(fast)
+# Loading work.u_to_s(fast)
+# Loading work.adder_26b(fast)
+# Loading work.s_to_u(fast)
+# Loading work.MUL_step2(fast)
+# Loading work.adder_8b(fast)
+# Loading work.ADD_step3(fast)
+# Loading work.left_shift(fast)
+# Loading work.subtract(fast)
+# Loading work.rounder(fast)
+# ** Warning: (vsim-8634) Code was not compiled with coverage options.
+source wave.do
+run 50 ns
+quit -f
+# End time: 15:24:19 on Feb 05,2020, Elapsed time: 0:05:09
+# Errors: 0, Warnings: 1

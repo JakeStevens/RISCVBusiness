@@ -1,0 +1,9 @@
+QuestaSim-64 vlog 10.6b Compiler 2017.05 May 25 2017
+Start time: 23:48:18 on Mar 02,2020
+vlog -sv -work source_work source/tb_f_register_file.sv 
+-- Compiling module tb_f_register_file
+
+Top level modules:
+	tb_f_register_file
+End time: 23:48:19 on Mar 02,2020, Elapsed time: 0:00:01
+Errors: 0, Warnings: 0

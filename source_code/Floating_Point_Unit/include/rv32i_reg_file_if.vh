@@ -45,4 +45,3 @@ interface rv32i_reg_file_if();
 endinterface
 
 `endif //RV32I_REG_FILE_IF_VH
-

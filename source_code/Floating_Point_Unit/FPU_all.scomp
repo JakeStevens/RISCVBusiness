@@ -1,0 +1,11 @@
+QuestaSim-64 vlog 10.6b Compiler 2017.05 May 25 2017
+Start time: 00:45:48 on Mar 24,2020
+vlog -sv -work source_work source/FPU_all.sv 
+-- Compiling interface FPU_all_if
+-- Compiling interface f_register_file_if
+-- Compiling module FPU_all
+
+Top level modules:
+	FPU_all
+End time: 00:45:48 on Mar 24,2020, Elapsed time: 0:00:00
+Errors: 0, Warnings: 0

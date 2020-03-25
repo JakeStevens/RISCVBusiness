@@ -1,0 +1,31 @@
+# 
+# 
+# 
+# 
+# //  Questa Sim-64
+# //  Version 10.6b linux_x86_64 May 25 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  QuestaSim and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# vsim -Lf /home/ecegrid/a/ece337/Course_Prod/IP_Libs/Lab_IP_Lib/Vsim -L /home/ecegrid/a/ece337/Course_Prod/Cell_Libs/AMI_05/vhdl_work -L /home/ecegrid/a/ece337/Class0.5u/GOLD_LIB "+no_glitch_msg" -coverage -voptargs="+acc" -i -t ps source_work.FPU_all 
+# Start time: 00:48:23 on Mar 24,2020
+# ** Note: (vsim-3812) Design is being optimized...
+# ** Error: source/FPU_top_level.sv(94): Module 'ADD_step1' is not defined.
+# ** Error: source/FPU_top_level.sv(106): Module 'MUL_step1' is not defined.
+# ** Error: source/FPU_top_level.sv(187): Module 'ADD_step2' is not defined.
+# ** Error: source/FPU_top_level.sv(201): Module 'MUL_step2' is not defined.
+# ** Error: source/FPU_top_level.sv(259): Module 'ADD_step3' is not defined.
+# ** Error (suppressible): source/FPU_all.sv(43): (vopt-13259) Missing instance name in instantiation of module/program/interface 'f_register_file'.
+# Optimization failed
+# Error loading design
+# End time: 00:48:24 on Mar 24,2020, Elapsed time: 0:00:01
+# Errors: 6, Warnings: 0
