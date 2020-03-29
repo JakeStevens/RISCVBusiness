@@ -54,8 +54,8 @@ module ADD_step3
    reg [31:0] temp_floating_point_out;
    reg 	      temp_sign;
    reg [31:0] dummy_floating_point_out;
-   reg [7:0]  temp_exp_out; 
-   reg [7:0]  temp_exp_value;
+	      
+
    left_shift shift_left (
 			  .fraction(frac_in),
 			  .result(shifted_frac),
@@ -77,25 +77,18 @@ module ADD_step3
       if(carry_out == 1) begin
 	 round_this = frac_in[25:1];
 	 if (function_mode == 7'b0100100) begin
-	    //temp_exp_out = exponent_max_in;
-		exp_out = exponent_max_in;
+	    exp_out = exponent_max_in;
 	 end else begin
-	    //temp_exp_out    = exponent_max_in + 1;
-		exp_out    = exponent_max_in + 1;
+	    exp_out    = exponent_max_in + 1;
 	 end
 	 if((exponent_max_in == 8'b11111110) && (~unf_in)) ovf = 1;
       end
       else begin
 	 round_this = shifted_frac[24:0];
-	 //temp_exp_out    = exp_minus_shift_amount;
-exp_out    = exp_minus_shift_amount;
+	 exp_out    = exp_minus_shift_amount;
 	 if(({1'b0, exponent_max_in} < shifted_amount) && (~ovf_in)) unf = 1;
       end
-      //temp_exp_value = temp_exp_out - 8'b0000010;
    end
-
-
-   //assign exp_out = (function_mode == 7'b0100100)? temp_exp_value:temp_exp_out;
 
    reg [31:0] round_out;
    
@@ -121,7 +114,7 @@ exp_out    = exp_minus_shift_amount;
    assign temp_sign = dummy_floating_point_out[31];
    sign_determine sign_determine (
 					.temp_sign(temp_sign),
-					.temp_floating_point_out(dummy_floating_point_out),
+					.temp_floating_poi    nt_out(dummy_floating_point_out),
 					.cmp_out(cmp_out),
 					.floating_point1(floating_point1),
 					.floating_point2(floating_point2),
