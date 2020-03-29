@@ -16,7 +16,7 @@ include /home/ecegrid/a/ece337/Course_Prod/course_make_vars
 # (do not include the source folder in the name)
 # NOTE: YOU WILL NEED TO SET THIS VARIABLE'S VALUE WHEN WORKING WITH HEIRARCHICAL DESIGNS
 # AND THE AUTOMATED GRADING SYSTEM
-COMPONENT_FILES	:= adder_8b.sv mul_26b.sv left_shift.sv subtract.sv rounder.sv int_compare.sv right_shift.sv u_to_s.sv adder_26b.sv s_to_u.sv ADD_step1.sv ADD_step2.sv ADD_step3.sv MUL_step1.sv MUL_step2.sv SUB_step1.sv SUB_step2.sv sub_26b.sv DIV_step1.sv div_26b.sv sign_determine.sv subtracter_8b.sv DIV_step2.sv c_to_cp.sv right_shift_minus.sv
+COMPONENT_FILES	:= adder_8b.sv mul_26b.sv left_shift.sv subtract.sv rounder.sv int_compare.sv right_shift.sv u_to_s.sv adder_26b.sv s_to_u.sv ADD_step1.sv ADD_step2.sv ADD_step3.sv MUL_step1.sv MUL_step2.sv SUB_step1.sv SUB_step2.sv sub_26b.sv sign_determine.sv subtracter_8b.sv c_to_cp.sv right_shift_minus.sv
 
 # Specify the name of the top level file (do not include the source folder in the name)
 # NOTE: YOU WILL NEED TO SET THIS VARIABLE'S VALUE WHEN WORKING WITH HEIRARCHICAL DESIGNS
