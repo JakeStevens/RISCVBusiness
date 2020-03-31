@@ -24,10 +24,11 @@
 
 #include "riscv_test.h"
 #include "test_macros.h"
-# NOTE: You should modify this code to make it for external interrupts
+// NOTE: You should modify this code to make it for external interrupts
 
 RVTEST_RV32U
 
+// TODO: Comment more to understand where these packages come from
 
 RVTEST_CODE_BEGIN
 
@@ -43,19 +44,26 @@ main:
   addi x3, x0, 0x1 // store 1 into x3
   csrw mstatus, x3 // write value of 1 into mstatus register, enable the current interrupt via UIE
 
-  ori x3, x0, 0x800
-  ori x4, x0, 0x800
+
+  addi x3, x0, 0x1
+  addi x4, x0, 0x1
+  slli x3, x3, 11 // store 0x800 into x3 and x4
+  slli x4, x4, 11
+
+
   csrw mip, x3 
   csrw mie, x4 // Write value of 0x800 into mie, external interrupt enable for M-mode (machine mode, bootloader firmware)
 
-idle_loop: # infinite while loop to wait until interrupt passes
-  la x1, mcause
-  lw x2, 0(x1)
+idle_loop: // infinite while loop to wait until interrupt passes
+  //la x1, mcause
+  //lw x2, 0(x1)
+  csrs mcause, x2
+
   srli x5, x2, 0x1F // obtain the MSB to determine if it was an interrupt instead of an exception
-  andi x6, x2, 0xF // find the source which should be a user external interrupt
+  andi x6, x2, 0xB // find the source which should be EXT_INT (or hex value of 0xB)
   beq x5, x0, idle_loop // keep looping until an interrupt is received
 
-  RVTEST_PASS
+  RVTEST_PASS // denote this as a passed test
 
 .align 2
 mtvec_handler: // TODO: What is mtvec_handler??
