@@ -44,7 +44,8 @@ UARCH_PARAMS = \
     'icache_type' : ['pass_through', 'direct_mapped_tpf'],
     # Bus Configurations
     'bus_endianness' : ['big', 'little'],
-    'bus_interface_type' : ['ahb_if', 'generic_bus_if']
+    'bus_interface_type' : ['ahb_if', 'generic_bus_if'],
+    'FPU_enabled' : ['enabled', 'disabled']
   }
 
 RISC_MGMT_PARAMS = \

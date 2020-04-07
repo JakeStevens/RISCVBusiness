@@ -34,6 +34,8 @@
 `include "risc_mgmt_if.vh"
 `include "cache_control_if.vh"
 
+`include "FPU_all_if.vh"
+
 module tspp_execute_stage(
   input logic CLK, nRST,
   tspp_fetch_execute_if.execute fetch_ex_if,
@@ -54,7 +56,8 @@ module tspp_execute_stage(
   alu_if            alu_if();
   jump_calc_if      jump_if();
   branch_res_if     branch_if(); 
- 
+  FPU_all_if 	    fp_if();
+
   // Module instantiations
   control_unit cu (
     .cu_if(cu_if),
@@ -72,6 +75,12 @@ module tspp_execute_stage(
   branch_res branch_res (
     .br_if(branch_if)
   ); 
+
+  FPU_all FPU(
+    .CLK(CLK),
+    .nRST(nRST),
+    .fpif(fp_if)
+  );
 
   word_t store_swapped;
   endian_swapper store_swap (

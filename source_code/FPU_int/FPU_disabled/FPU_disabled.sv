@@ -1,7 +1,7 @@
 `include "FPU_all_if.vh"
 `include "f_register_file_if.vh"
 
-module FPU_all
+module FPU_disabled
 (
  input 	       clk,
  input 	       nrst,

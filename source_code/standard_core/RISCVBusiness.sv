@@ -28,6 +28,9 @@
 `include "risc_mgmt_if.vh"
 `include "cache_control_if.vh"
 
+//`include "FPU_all_if.vh"
+//`include "f_register_file_if.vh"
+
 module RISCVBusiness (
   input logic CLK, nRST,
   output logic halt,
@@ -51,8 +54,23 @@ module RISCVBusiness (
   prv_pipeline_if prv_pipe_if();
   cache_control_if cc_if();
 
-  // Module Instantiations
+//  FPU_all_if fp_if();
+//  f_register_file_if freg_if();
 
+  // Module Instantiations
+/*
+  FPU_all FPU(
+    .CLK(CLK),
+    .nRST(nRST),
+    .fpif(fp_if)
+  );
+
+  f_register_file f_reg(
+    .CLK(CLK),
+    .nRST(nRST),
+    .frf_if(freg_if)
+  );
+*/
   pipeline_wrapper pipeline (
     .CLK(CLK),
     .nRST(nRST),
