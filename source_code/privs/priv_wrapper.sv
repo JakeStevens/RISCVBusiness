@@ -23,10 +23,12 @@
 */
 
 `include "prv_pipeline_if.vh"
+`include "priv_1_11_internal_if.vh"
 
 module priv_wrapper (
   input logic CLK, nRST,
-  prv_pipeline_if.priv_block prv_pipe_if
+  prv_pipeline_if.priv_block prv_pipe_if,
+  priv_1_11_internal_if prv_intern_if
 );
 
   //TODO: Select different priv blocks for backwards compatibility

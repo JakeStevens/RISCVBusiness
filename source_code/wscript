@@ -83,4 +83,12 @@ def configure(ctx):
     tb = 'tb_priv_1_11_block',
     tb_includes = ['include']
     )
+    ctx.SFFUnits.add('priv_1_11_control',
+    includes = ['include'],
+    src_dir = ['privs/priv_1_11'],
+    use = ['RISCVBusiness_packages'],
+    tb_use = ['RISCVBusiness_packages'],
+    tb = 'tb_priv_1_11_control',
+    tb_includes = ['include']
+    )
 

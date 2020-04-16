@@ -92,10 +92,13 @@ module priv_1_11_csr_rfile (
   assign mie.zero_0 = '0;
   assign mie.zero_1 = '0;
   assign mie.zero_2 = '0;
+  assign mie.zero_3 = '0;
   assign mie.htie = 1'b0;
   assign mie.stie = 1'b0;
   assign mie.hsie = 1'b0;
   assign mie.ssie = 1'b0;
+  assign mie.heie = 1'b0;
+  assign mie.seie = 1'b0;
 
  /* Machine Trap Handling */
  
@@ -108,10 +111,13 @@ module priv_1_11_csr_rfile (
   assign mip.zero_0 = '0;
   assign mip.zero_1 = '0;
   assign mip.zero_2 = '0;
+  assign mip.zero_3 = '0;
   assign mip.htip = 1'b0;
   assign mip.stip = 1'b0;
   assign mip.hsip = 1'b0;
   assign mip.ssip = 1'b0;
+  assign mip.heip = 1'b0;
+  assign mip.seip = 1'b0;
 
 
   /* Machine Protection and Translation */
@@ -163,6 +169,8 @@ module priv_1_11_csr_rfile (
       mie.msie    <= 1'b0;
       mip.msip    <= 1'b0;
       mip.mtip    <= 1'b0;
+      mie.meie    <= 1'b0;
+      mip.meip    <= 1'b0;
       mtvec       <= '0;
       mcause      <= '0;
       mepc        <= '0;
@@ -178,10 +186,12 @@ module priv_1_11_csr_rfile (
       instretfull <= '0;
     end else if (prv_intern_if.addr == MTIMEH_ADDR)begin
       mstatus.ie  <= mstatus_next.ie;
-      mie.mtie    <= mie_next.mtie; 
-      mie.msie    <= mie_next.msie;
-      mip.msip    <= mip_next.msip; // interrupt
-      mip.mtip    <= mip_next.mtip; // interrupt
+      mie.mtie    <= mie_next.mtie; // timer interrupt enable
+      mie.msie    <= mie_next.msie; // software interrupt enable
+      mie.meie    <= mie_next.meie; // external interrupt enable
+      mip.msip    <= mip_next.msip; // software interrupt pending
+      mip.mtip    <= mip_next.mtip; // timer interrupt pending
+      mip.meip    <= mip_next.meip; // external interrupt pending
       mtvec       <= mtvec_next;
       mcause      <= mcause_next;
       mepc        <= mepc_next;
@@ -197,10 +207,12 @@ module priv_1_11_csr_rfile (
       instretfull <= instretfull_next;
     end else if (prv_intern_if.addr == MTIME_ADDR) begin
       mstatus.ie  <= mstatus_next.ie;
-      mie.mtie    <= mie_next.mtie; 
-      mie.msie    <= mie_next.msie;
-      mip.msip    <= mip_next.msip; // interrupt
-      mip.mtip    <= mip_next.mtip; // interrupt
+      mie.mtie    <= mie_next.mtie; // timer interrupt enable
+      mie.msie    <= mie_next.msie; // software interrupt enable
+      mie.meie    <= mie_next.meie; // external interrupt enable
+      mip.msip    <= mip_next.msip; // software interrupt pending
+      mip.mtip    <= mip_next.mtip; // timer interrupt pending
+      mip.meip    <= mip_next.meip; // external interrupt pending
       mtvec       <= mtvec_next;
       mcause      <= mcause_next;
       mepc        <= mepc_next;
@@ -216,10 +228,12 @@ module priv_1_11_csr_rfile (
       instretfull <= instretfull_next;
     end else begin      
       mstatus.ie  <= mstatus_next.ie;
-      mie.mtie    <= mie_next.mtie; 
-      mie.msie    <= mie_next.msie;
-      mip.msip    <= mip_next.msip; // interrupt
-      mip.mtip    <= mip_next.mtip; // interrupt
+      mie.mtie    <= mie_next.mtie; // timer interrupt enable
+      mie.msie    <= mie_next.msie; // software interrupt enable
+      mie.meie    <= mie_next.meie; // external interrupt enable
+      mip.msip    <= mip_next.msip; // software interrupt pending
+      mip.mtip    <= mip_next.mtip; // timer interrupt pending
+      mip.meip    <= mip_next.meip; // external interrupt pending
       mtvec       <= mtvec_next;
       mcause      <= mcause_next;
       mepc        <= mepc_next;

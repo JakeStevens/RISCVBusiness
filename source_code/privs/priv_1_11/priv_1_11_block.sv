@@ -27,9 +27,10 @@
 
 module priv_1_11_block (
   input logic CLK, nRST,
-  prv_pipeline_if.priv_block prv_pipe_if //
+  prv_pipeline_if.priv_block prv_pipe_if, //
+  priv_1_11_internal_if prv_intern_if
 );
-  priv_1_11_internal_if prv_intern_if();
+  //priv_1_11_internal_if prv_intern_if(); NOTE: This is not necessary because this module is being passed all the way from the top level test bench
 
   logic [1:0] prv_intr, prv_ret;
   
@@ -43,7 +44,7 @@ module priv_1_11_block (
 
   assign prv_intern_if.soft_int = 1'b0;
   //TODO: PIC (Programmable Interrupt Controller) 
-  assign prv_intern_if.ext_int =  1'b0;
+  // assign prv_intern_if.ext_int =  1'b1; // NOTE: This is only being asserted to test what happens with an external interrupt
 
   // Assign inputs to the prv_block to the corresponding internal signals
   assign prv_intern_if.pipe_clear   = prv_pipe_if.pipe_clear;

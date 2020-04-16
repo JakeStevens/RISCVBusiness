@@ -61,7 +61,7 @@ module priv_1_11_control (
     if (prv_intern_if.timer_int) prv_intern_if.mip_next.mtip = 1'b1;
     if (prv_intern_if.clear_timer_int) prv_intern_if.mip_next.mtip = 1'b0;
     if (prv_intern_if.soft_int) prv_intern_if.mip_next.msip = 1'b1;
-    if (prv_intern_if.ext_int) prv_intern_if.mip_next.msip = 1'b1; //external interrupts not specified in 1.7
+    if (prv_intern_if.ext_int) prv_intern_if.mip_next.meip = 1'b1; //in 1.7, this was msip. However, priv_1.11 allows external interrupts
   end
 
   always_comb begin
@@ -95,7 +95,7 @@ module priv_1_11_control (
   //output to pipeline control
   assign prv_intern_if.intr = exception | interrupt_reg;
   assign interrupt_fired = (prv_intern_if.mstatus.ie & ((prv_intern_if.mie.mtie & prv_intern_if.mip.mtip) | 
-                     (prv_intern_if.mie.msie & prv_intern_if.mip.msip)));
+                     (prv_intern_if.mie.msie & prv_intern_if.mip.msip) | (prv_intern_if.mie.meie & prv_intern_if.mip.meip))); // changed this to allow external interrupt for PLIC
  
   // Register Updates on Interrupt/Exception
   assign prv_intern_if.mcause_rup = exception | interrupt_fired;

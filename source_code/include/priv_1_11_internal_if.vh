@@ -27,25 +27,27 @@
 
 `include "component_selection_defines.vh"
 
-interface priv_1_11_internal_if;
+interface priv_1_11_internal_if; // also labeled as prv_intern_if in most modules
   import machine_mode_types_1_11_pkg::*;
   import rv32i_types_pkg::*;
 
-  logic mip_rup;
-  logic mtval_rup;
-  logic mcause_rup;
-  logic mepc_rup;
-  logic mstatus_rup;
-  logic clear_timer_int;
-  logic intr;
-  logic pipe_clear;
-  logic ret;
-  logic fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s;
-  logic breakpoint, env_m, timer_int, soft_int, ext_int;
-  logic insert_pc;
-  logic swap, clr, set;
-  logic valid_write, invalid_csr;
-  logic instr_retired;
+  // Signals that are not being used: clear_timer_int, timer_int, soft_int, ext_int, invalid_csr
+
+  logic mip_rup; // interrupt has occurred or the clear timer int signal has gone high
+  logic mtval_rup; // denotes any pipeline hazard
+  logic mcause_rup; //denotes either an exception or interrupt fired
+  logic mepc_rup; //denotes either an exception or interrupt fired
+  logic mstatus_rup; // denotes either an exception or interrupt fired (same as above)
+  logic clear_timer_int; // 
+  logic intr; // denote whether an exception or interrupt register
+  logic pipe_clear; // e_ex_stage is where you check what type of hazard unit instruction you are receiving. Simply, checking whether or not the pipeline is clear of any hazards
+  logic ret; //declares whether an instruction is a ret instruction
+  logic fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s; // fault_insn never occurs, mal_insn only occurs when there is a bad address, illegal_insn only occurs if the actual instruction is illegal, faults are not considered, mal_l occurs for a bad address and read enable is high, mal_s occurs for a bad address and write enable is high
+  logic breakpoint, env_m, timer_int, soft_int, ext_int; // breakpoint within the code, env_m is an e-call instruction
+  logic insert_pc; // insert the pc either when an instruction is a ret instruction, or pipeline is clear and a proper instruction
+  logic swap, clr, set; // these signals will denote whether an instruction is an r-type and its 3rd function op is equal to CSRRW, CSRRC, and CSRRS respectively
+  logic valid_write, invalid_csr; // valid write occurs with an r type instruction that does not have any pipeline stalls; invalid_csr
+  logic instr_retired; // instruction is done (retired) when there is a write back enable and there is a proper instruction
 
   // RISC-MGMT 
   logic ex_rmgmt;
@@ -86,6 +88,10 @@ interface priv_1_11_internal_if;
   modport pipe_ctrl (
     input intr, ret, pipe_clear, xtvec, xepc_r,
     output insert_pc, priv_pc
+  );
+
+  modport tb (
+    output ext_int
   );
 
 endinterface

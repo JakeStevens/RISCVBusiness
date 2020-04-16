@@ -14,12 +14,12 @@
 *   limitations under the License.
 *
 *
-*   Filename:     basic_branch.S
+*   Filename:     basic_ext_interrupt.S
 *
-*   Created by:   Jacob R. Stevens
-*   Email:        steven69@purdue.edu
-*   Date Created: 07/01/2016
-*   Description:  Test of basic branching behavior
+*   Created by:   Enes Shaltami
+*   Email:        ashaltam@purdue.edu
+*   Date Created: 03/15/2020
+*   Description:  Test of external interrupts
 */
 
 #include "riscv_test.h"
@@ -34,7 +34,7 @@ RVTEST_CODE_BEGIN
 
 // xlen is 32 bits since each instruction has a size of 32 bits
 main:
-  # Define trap vector address
+  li TESTNUM, 1 // load the global test num value
   la t0, mtvec_handler # load in address of mtvec_handler
   csrw mtvec, t0 # encoded as csrrw x0, csr(mtvec), rs1(t0). write t0 into mtvec
 // mtvec stands for Machine Trap-Vector Base-Address Register
@@ -57,10 +57,11 @@ main:
 idle_loop: // infinite while loop to wait until interrupt passes
   //la x1, mcause
   //lw x2, 0(x1)
+  li TESTNUM, 0
   csrs mcause, x2
-
   srli x5, x2, 0x1F // obtain the MSB to determine if it was an interrupt instead of an exception
   andi x6, x2, 0xB // find the source which should be EXT_INT (or hex value of 0xB)
+  li TESTNUM, 1
   beq x5, x0, idle_loop // keep looping until an interrupt is received
 
   RVTEST_PASS // denote this as a passed test

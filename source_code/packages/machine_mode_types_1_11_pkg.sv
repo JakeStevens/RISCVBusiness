@@ -170,8 +170,12 @@ package machine_mode_types_1_11_pkg;
 
   /* mip and mie types */
 
-  typedef struct packed {
-    logic [23:0]  zero_2;
+  typedef struct packed { // total size for xlen (or mxlen) is 32 bits for our processor
+    logic [19:0]  zero_3;
+    logic         meip;
+    logic         heip;
+    logic         seip;
+    logic         zero_2;
     logic         mtip;
     logic         htip;
     logic         stip;
@@ -183,7 +187,11 @@ package machine_mode_types_1_11_pkg;
   } mip_t;
 
   typedef struct packed {
-    logic [23:0]  zero_2;
+    logic [19:0]  zero_3;
+    logic         meie;
+    logic	  heie;
+    logic         seie;
+    logic 	  zero_2;
     logic         mtie;
     logic         htie;
     logic         stie;

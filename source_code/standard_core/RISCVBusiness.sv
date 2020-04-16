@@ -28,9 +28,12 @@
 `include "risc_mgmt_if.vh"
 `include "cache_control_if.vh"
 
+`include "priv_1_11_internal_if.vh"
+
 module RISCVBusiness (
   input logic CLK, nRST,
   output logic halt,
+  priv_1_11_internal_if prv_intern_if,
 
   `ifdef BUS_INTERFACE_GENERIC_BUS
   generic_bus_if.cpu gen_bus_if
@@ -59,7 +62,7 @@ module RISCVBusiness (
     .halt(halt),
     .igen_bus_if(tspp_icache_gen_bus_if),
     .dgen_bus_if(tspp_dcache_gen_bus_if),
-    .prv_pipe_if(prv_pipe_if),
+    .prv_pipe_if(prv_pipe_if), // TODO: Look at the communications between pipeline_wrapper and priv_wrapper
     .predict_if(predict_if),
     .rm_if(rm_if),
     .cc_if(cc_if)
@@ -74,7 +77,8 @@ module RISCVBusiness (
   priv_wrapper priv_wrapper_i (
     .CLK(CLK),
     .nRST(nRST),
-    .prv_pipe_if(prv_pipe_if)
+    .prv_pipe_if(prv_pipe_if),
+    .prv_intern_if(prv_intern_if)
   );
 
   risc_mgmt_wrapper rmgmt (

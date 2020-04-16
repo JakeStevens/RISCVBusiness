@@ -27,8 +27,8 @@
 
 `timescale 1ns/100ps
 
-//`include "prv_pipeline_if.vh"
 `include "priv_1_11_internal_if.vh"
+`include "component_selection_defines.vh"
 
 `define OUTPUT_FILE_NAME "cpu.hex"
 `define STATS_FILE_NAME "stats.txt"
@@ -37,6 +37,8 @@
 module tb_priv_1_11_control ();
    
   parameter PERIOD = 20;
+  import rv32i_types_pkg::*;
+  import machine_mode_types_1_11_pkg::*;
  
   logic CLK, nRST;
   logic ram_control; // 1 -> CORE, 0 -> TB
@@ -44,8 +46,18 @@ module tb_priv_1_11_control ();
   logic [31:0] addr, data_temp, data;
   logic [63:0] hexdump_temp;
   logic [7:0] checksum;
-  integer fptr, stats_ptr;
-  //integer clk_count;
+  //integer fpt    output mip_rup, mtval_rup, mcause_rup, mepc_rup, mstatus_rup,r, stats_ptr;
+  
+
+  // Expected Outputs
+  logic tb_expected_mip_rup, tb_expected_mtval_rup, tb_expected_mcause_rup, tb_expected_mepc_rup, tb_expected_mstatus_rup, tb_expected_intr;
+
+  mip_t tb_expected_mip_next;
+  mcause_t tb_expected_mcause_next;
+  mepc_t tb_expected_mepc_next;
+  mstatus_t tb_expected_mstatus_next;
+  mtval_t tb_expected_mtval_next;
+  
 
   //Interface Instantiations
   priv_1_11_internal_if prv_internal_if();
@@ -56,70 +68,62 @@ module tb_priv_1_11_control ();
     .CLK(CLK),
     .nRST(nRST),
     .prv_intern_if(prv_internal_if)
-  ); // TODO: Figure out IO for the priv pipeline unit
+  ); // The modport is prv_control under the priv_1_11_internal_if.vh file
 
-  /*ram_wrapper ram (
-    .CLK(CLK),
-    .nRST(nRST),
-    .gen_bus_if(gen_bus_if)
-  );*/
 
- /* if (BUS_ENDIANNESS == "big")
-    endian_swapper swap(data_temp, data);
-  else if (BUS_ENDIANNESS == "little")
-    assign data = data_temp;
-  else ;//TODO:ERROR */
+  task reset_dut();
+    nRST = 1'b0;
+    @(posedge CLK);
+    @(posedge CLK);
 
- /* bind tspp_execute_stage cpu_tracker cpu_track1 (
-    .CLK(CLK),
-    .wb_stall(wb_stall),
-    .instr(fetch_ex_if.fetch_ex_reg.instr),
-    .pc(fetch_ex_if.fetch_ex_reg.pc),
-    .opcode(cu_if.opcode),
-    .funct3(funct3),
-    .funct12(funct12),
-    .rs1(rf_if.rs1),
-    .rs2(rf_if.rs2),
-    .rd(rf_if.rd),
-    .imm_S(cu_if.imm_S),
-    .imm_I(cu_if.imm_I),
-    .imm_U(cu_if.imm_U),
-    .imm_UJ(imm_UJ_ext),
-    .imm_SB(cu_if.imm_SB),
-    .instr_30(instr_30)
-    );
+    nRST = 1'b1;
 
-  bind branch_predictor_wrapper branch_tracker branch_perf(
-    .CLK(CLK),
-    .nRST(nRST),
-    .update_predictor(predict_if.update_predictor),
-    .prediction(predict_if.prediction),
-    .branch_result(predict_if.branch_result)
-  );
-    
-  //Ramif Mux
-  always_comb begin
-    if(ram_control) begin
-      // No actual bus, so directly connect ram to generic bus interface 
-      gen_bus_if.addr    =   rvb_gen_bus_if.addr;
-      gen_bus_if.ren     =   rvb_gen_bus_if.ren;
-      gen_bus_if.wen     =   rvb_gen_bus_if.wen;
-      gen_bus_if.wdata   =   rvb_gen_bus_if.wdata;
-      gen_bus_if.byte_en =   rvb_gen_bus_if.byte_en;
-    end else begin
-      gen_bus_if.addr    =   tb_gen_bus_if.addr;
-      gen_bus_if.ren     =   tb_gen_bus_if.ren;
-      gen_bus_if.wen     =   tb_gen_bus_if.wen;
-      gen_bus_if.wdata   =   tb_gen_bus_if.wdata;
-      gen_bus_if.byte_en = tb_gen_bus_if.byte_en;
-    end
-  end */
+   // Resetting all of the inputs for the priv_block unit
+    prv_internal_if.pipe_clear = '0;
+    prv_internal_if.ret = '0;
+    prv_internal_if.epc = '0;
 
-  /* No actual bus, so directly connect ram to generic bus interface */
-  /*assign rvb_gen_bus_if.rdata  = gen_bus_if.rdata;
-  assign rvb_gen_bus_if.busy   = gen_bus_if.busy;
-  assign tb_gen_bus_if.rdata   = gen_bus_if.rdata;
-  assign tb_gen_bus_if.busy    = gen_bus_if.busy; */
+    // control signals for the exception combinational logic
+    prv_internal_if.fault_insn = 1'b0;
+    prv_internal_if.mal_insn = 1'b0;
+    prv_internal_if.illegal_insn = 1'b0;
+    prv_internal_if.fault_l = 1'b0;
+    prv_internal_if.mal_l = 1'b0;
+    prv_internal_if.fault_s = 1'b0;
+    prv_internal_if.mal_s = 1'b0;
+    prv_internal_if.breakpoint = 1'b0;
+    prv_internal_if.env_m = 1'b0;
+
+    prv_internal_if.mepc = mepc_t'(32'h0);
+    prv_internal_if.mie = mie_t'(32'h0); // defined as a struct
+    prv_internal_if.mip = mip_t'(32'h0); // defined as a struct
+    prv_internal_if.mcause = mcause_t'(32'h0);
+    prv_internal_if.mstatus = mstatus_t'(32'h0);
+    prv_internal_if.clear_timer_int = 1'b0;
+    prv_internal_if.timer_int = 1'b0;
+    prv_internal_if.soft_int = 1'b0;
+    prv_internal_if.ext_int = 1'b0;
+    prv_internal_if.mtval = word_t'(32'h0);
+
+    prv_internal_if.ex_rmgmt = 1'b0;
+    prv_internal_if.ex_rmgmt_cause = '0;
+
+    // Expected Outputs
+    tb_expected_mcause_next.cause = ex_code_t'(31'h0); // INSN_MAL value
+    tb_expected_mcause_next.interrupt = 1'b0; // the source cannot be an interrupt
+    tb_expected_mip_rup = 1'b0;
+    tb_expected_mtval_rup = 1'b0;
+    tb_expected_mcause_rup = 1'b0; // neither an exception nor an interrupt occurred
+    tb_expected_mepc_rup = 1'b0;
+    tb_expected_mstatus_rup = 1'b0;
+    tb_expected_mip_next.mtip = 1'b0;
+    tb_expected_mip_next.msip = 1'b0;
+    tb_expected_mepc_next = 1'b0; // takes on value of epc
+    tb_expected_mstatus_next.ie = 1'b0;
+    tb_expected_mtval_next = 1'b0;
+    tb_expected_intr = 1'b0;
+
+   endtask
 
   //Clock generation
   initial begin : INIT
@@ -132,119 +136,62 @@ module tb_priv_1_11_control ();
 
   //Setup core and let it run
   initial begin : CORE_RUN
-    nRST = 0;
+    reset_dut();
 
-   // TODO: Write logic to control the inputs and see what outputs are!
-    /*prv_pipeline_if.pipe_clear = '0;
-    prv_pipeline_if.ret = '0;
-    prv_pipeline_if.epc = '0;
-    prv_pipeline_if.fault_insn = '0;
-    prv_pipeline_if.mal_insn = '0;
-    prv_pipeline_if.illegal_insn = '0;
-    prv_pipeline_if.falut_l = '0;
-    prv_pipeline_if.mal_l = '0;
-    prv_pipeline_if.fault_s = '0;
-    prv_pipeline_if.mal_s = '0;
-    prv_pipeline_if.breakpoint = '0;
-    prv_pipeline_if.env_m = '0;
-    prv_pipeline_if.badaddr = '0;
-    prv_pipeline_if.swap = '0;
-    prv_pipeline_if.clr = '0;
-    prv_pipeline_if.set = '0;
-    prv_pipeline_if.wdata = '0;
-    prv_pipeline_if.addr = '0;
-    prv_pipeline_if.valid_write = '0;
-    prv_pipeline_if.wb_enable = '0;
-    prv_pipeline_if.instr = '0;
-    prv_pipeline_if.ex_rmgmt = '0;
-    prv_pipeline_if.ex_rmgmt_cause = '0; */
-    
+  // TODO: Expected output signals: mip_rup, mtval_rup, mcause_rup, mepc_rup, mstatus_rup, mip_next, mcause_next, mepc_next, mstatus_next, mtval_next, intr
 
+    // Test Case #1: Check  mal instruction Exception
+    prv_internal_if.mal_insn = 1'b1;
+    prv_internal_if.breakpoint = 1'b1; // this will trigger an exception
+    tb_expected_mcause_next.cause = ex_code_t'(31'h0); // INSN_MAL value
+    tb_expected_mcause_next.interrupt = 1'b0; // the source cannot be an interrupt
+    tb_expected_intr = 1'b1;
+    tb_expected_mcause_rup = 1'b1;
+    tb_expected_mepc_rup = 1'b1;
+    tb_expected_mstatus_rup = 1'b1;
+    tb_expected_mtval_rup = 1'b1;
+
+
+
+    prv_internal_if.fault_insn = 1'b1;
+    reset_dut();
+    #(PERIOD * 2);
+    prv_internal_if.illegal_insn = 1'b1;
+    reset_dut();
+    #(PERIOD * 2);
+    prv_internal_if.fault_l = 1'b1;
+    reset_dut();
+    #(PERIOD * 2);
+    prv_internal_if.fault_s = 1'b1;
+    reset_dut();
+    #(PERIOD * 2);    
+    prv_internal_if.mal_s = 1'b1;
+    reset_dut();
+    #(PERIOD * 2);
+    prv_internal_if.mal_insn = 1'b1;
+    reset_dut();
+    #(PERIOD * 2);
+    prv_internal_if.ext_int = 1'b1;
+    reset_dut();
+    #(PERIOD * 2);
+    prv_internal_if.soft_int = 1'b1;
+    reset_dut();
+    #(PERIOD * 2);
+    prv_internal_if.timer_int = 1'b1;
 
    
-    
  
     @(posedge CLK);
     @(posedge CLK);
 
     nRST = 1;
     
-    /*while (halt == 0 && clk_count != `RVB_CLK_TIMEOUT) begin
-      @(posedge CLK);
-      clk_count++;
-      if (gen_bus_if.addr == 16'h0000 & !gen_bus_if.busy & gen_bus_if.wen)
-        $write("%c",gen_bus_if.wdata[31:24]);
-    end
 
-    #(1);
-
-    dump_stats();
-    dump_ram();
-
-    if (clk_count == `RVB_CLK_TIMEOUT) 
-      $display("ERROR: Test timed out"); */
 
     $finish;
 
   end : CORE_RUN
 
- /* task dump_stats();
-    integer instret, cycles;
-    instret = DUT.priv_wrapper_i.priv_block_i.csr_rfile_i.instretfull;
-    cycles  = DUT.priv_wrapper_i.priv_block_i.csr_rfile_i.cyclefull;
-    if (cycles != clk_count) $info("Cycles CSR != clk_count");
-    stats_ptr = $fopen(`STATS_FILE_NAME, "w");
-    $fwrite(stats_ptr, "Instructions retired: %2d\n", instret);
-    $fwrite(stats_ptr, "Cycles taken: %2d\n", cycles);
-    $fwrite(stats_ptr, "CPI: %5f\n", real'(cycles)/instret);
-    $fwrite(stats_ptr, "IPC: %5f\n", real'(instret)/cycles);
-    $fclose(stats_ptr);
-  endtask 
 
-  task dump_ram ();
-    ram_control = 0;
-    tb_gen_bus_if.addr = 0;
-    tb_gen_bus_if.ren = 0;
-    tb_gen_bus_if.wen = 0;
-    tb_gen_bus_if.wdata = 0;
-    tb_gen_bus_if.byte_en = 4'hf;
-
-    fptr = $fopen(`OUTPUT_FILE_NAME, "w");
-
-    for(addr = 32'h80000000; addr < 32'h80007000; addr+=4) begin
-      read_ram(addr, data_temp);
-      #(PERIOD/4);
-      hexdump_temp = {8'h04, addr[15:0]>>2, 8'h00, data};
-      checksum = calculate_crc(hexdump_temp);
-      if(data != 0)
-        $fwrite(fptr, ":%2h%4h00%8h%2h\n", 8'h4, addr[15:0]>>2, data, checksum);
-    end
-    // add the EOL entry to the file
-    $fwrite(fptr, ":00000001FF");  
-
-  endtask
-
-  task read_ram (input logic [31:0] raddr, output logic [31:0] rdata);
-    @(posedge CLK);
-    tb_gen_bus_if.addr = raddr;
-    tb_gen_bus_if.ren = 1;
-    @(posedge CLK);
-    while(tb_gen_bus_if.busy == 1) @(posedge CLK);
-    rdata = tb_gen_bus_if.rdata;
-    tb_gen_bus_if.ren = 0;
-  endtask
-
-  function [7:0] calculate_crc (logic [63:0] hex_line);
-    static logic [7:0] checksum = 0;
-    int i;
-
-    checksum = hex_line[7:0] + hex_line[15:8] + hex_line[23:16] +
-                hex_line[31:24] + hex_line[39:32] + hex_line[47:40] +
-                hex_line[55:48] + hex_line[63:56];
-    
-    //take two's complement
-    checksum = (~checksum) + 1;
-    return checksum;
-  endfunction */
 
 endmodule
