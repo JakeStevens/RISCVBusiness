@@ -91,6 +91,7 @@ module FPU_top_level
    reg        minus_carry_out;
    reg [7:0]  minus_exp_max;
    reg        cmp_out;
+   reg 	      cmp_out_det;
    reg        fp1_sign;
    reg [25:0] fp1_frac;
    reg        fp2_sign;
@@ -121,10 +122,30 @@ module FPU_top_level
    
    reg [37:0] step2_to_step3;
    reg [37:0] nxt_step2_to_step3;
-   
-   
+   reg exp_determine;
+   wire bothnegsub;
+   reg [25:0] fp1_frac_hold;
+   reg [25:0] fp2_frac_hold;
+   reg        fp1_sign_hold;
+   reg        fp2_sign_hold;
+   /*always_comb begin
+   	if (funct7 == SUB) begin
+		if ((floating_point1[31] == 1) && (floating_point2[31] == 1)) begin
+			floating_point2[31] = 1'b0;
+			funct7 = ADD;
+		end else begin
+			floating_point2[31] = 1'b1;
+			funct7 = SUB;
+		end
+   	end
+   end*/
    // right shift smaller fraction by difference in exponents
-
+ 	int_compare cmp_exponent (
+			      .exp1(floating_point1[30:23]), 
+			      .exp2(floating_point2[30:23]),
+			      .cmp_out(cmp_out_det)
+			      );
+	assign bothnegsub = floating_point1[31] && floating_point2[31] && cmp_out_det; //if both numbers are negative and first one is smaller than the second one
         ADD_step1 addStep1(
 			   .floating_point1_in(floating_point1),
 			   .floating_point2_in(floating_point2),
@@ -137,7 +158,9 @@ module FPU_top_level
 
         //get the original sign of two floating points
         SUB_step1 substep1(
+			   .bothnegsub(bothnegsub),
 		      	   .floating_point1_in(floating_point1),
+			   //.floating_point2_in({~floating_point2[31], floating_point2[30:0]}),
 			   .floating_point2_in(floating_point2),
 			   .sign_shifted(sign_shifted_minus),
 			   .frac_shifted(frac_shifted_minus),
@@ -181,21 +204,32 @@ module FPU_top_level
 	 end
       end
    end // block: check_for_invalid_op
+
+	// add signed fractions
+	always_comb begin: determine_exp
+	if (cmp_out == 0) begin //fp1 > fp2. Looking at mantassa
+		exp_determine = 1'b1;
+	end else if (cmp_out == 1) begin
+		exp_determine = 1'b0;
+	end
+	end
+
    //get the sign for two floating points
    always_comb begin: reorder_the_subtraction
-   if (cmp_out == 0) begin //if fp1 >= fp2
-      fp1_sign = sign_not_shifted_minus; //bigger one not shifted
-      fp1_frac = frac_not_shifted_minus;
-      fp2_sign = sign_shifted_minus;
-      fp2_frac = frac_shifted_minus;
-   end else begin //(cmp_out == 1)
-      fp1_sign = sign_shifted_minus; //0
-      fp1_frac = frac_shifted_minus; //1001 0110 0000 0000 0000 000 Mx
-      fp2_sign = sign_not_shifted_minus; //0
-      fp2_frac = frac_not_shifted_minus; //1001 1100 1000 0000 0000 000 My
+   //if (bothnegsub == 0) begin
+   	if (cmp_out == 0) begin //if fp1 >= fp2
+      		fp1_sign = sign_not_shifted_minus;
+      		fp1_frac = frac_not_shifted_minus;
+      		fp2_sign = sign_shifted_minus;
+      		fp2_frac = frac_shifted_minus;
+   	end else begin //(cmp_out == 1)
+      		fp1_sign = sign_shifted_minus;
+      		fp1_frac = frac_shifted_minus;
+      		fp2_sign = sign_not_shifted_minus;
+      		fp2_frac = frac_not_shifted_minus; 
+   	end
    end
-   end      
-	    
+
    always_comb begin : select_op_step1to2
       case(funct7)
 	ADD: begin
@@ -248,9 +282,8 @@ module FPU_top_level
          exp_max          <= nxt_exp_max;*/
       end
    end 
-
-   // add signed fractions
-
+	 //assign step1_to_step2[61] = bothnegsub ? ~step1_to_step2[61] : step1_to_step2[61];
+	 //assign step1_to_step2[34] = bothnegsub ? ~step1_to_step2[34] : step1_to_step2[34];
 	 ADD_step2 add_step2 (
 			      .frac1(step1_to_step2[60:35]),    // frac_shifted
 			      .sign1(step1_to_step2[61]),       // sign_shifted
@@ -263,6 +296,7 @@ module FPU_top_level
 			      .exp_max_out(add_exp_max)
 			      );
           SUB_step2 sub_step2 (
+		  	      .bothnegsub(bothnegsub),
 			      .frac1(step1_to_step2[60:35]),    // frac_shifted
 			      .sign1(step1_to_step2[61]),       // sign_shifted
 			      .frac2(step1_to_step2[33:8]),     // frac_not_shhifted
@@ -271,7 +305,8 @@ module FPU_top_level
 			      .sign_out(minus_sign_out),
 			      .sum(minus_sum),
 			      .carry_out(minus_carry_out),
-			      .exp_max_out(minus_exp_max)
+			      .exp_max_out(minus_exp_max),
+			      .exp_determine(exp_determine)
 			      );
    // add exponents and xor sign bits 
    
@@ -341,6 +376,7 @@ module FPU_top_level
    end
    
    ADD_step3 step3 (
+		    .bothnegsub(bothnegsub),
 		    .cmp_out(cmp_out),
 		    .floating_point1(floating_point1),
 		    .floating_point2(floating_point2),
