@@ -16,6 +16,7 @@
 
 module ADD_step3
   (
+   input 	 bothnegsub,
    input 	 cmp_out,
    input [31:0]  floating_point1,
    input [31:0]  floating_point2,
@@ -62,11 +63,12 @@ module ADD_step3
 			  .shifted_amount(shifted_amount)
 			  );
    
-   subtract SUBTRACT (
+   /*subtract SUBTRACT (
 		 .exp1(exponent_max_in),
 		 .shifted_amount(shifted_amount),
 		 .result(exp_minus_shift_amount)
-		 );
+		 );*/
+   assign exp_minus_shift_amount = exponent_max_in;
 
    
    reg [24:0] round_this;
@@ -88,7 +90,7 @@ module ADD_step3
       else begin
 	 round_this = shifted_frac[24:0];
 	 //temp_exp_out    = exp_minus_shift_amount;
-exp_out    = exp_minus_shift_amount;
+	exp_out    = exp_minus_shift_amount;
 	 if(({1'b0, exponent_max_in} < shifted_amount) && (~ovf_in)) unf = 1;
       end
       //temp_exp_value = temp_exp_out - 8'b0000010;
@@ -137,7 +139,7 @@ exp_out    = exp_minus_shift_amount;
       end
    end
 
-   assign floating_point_out = hold_value;
+   assign floating_point_out = bothnegsub? {~hold_value[31],hold_value[30:0]}: hold_value;
    //assign floating_point_out = dummy_floating_point_out;
    
    
