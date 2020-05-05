@@ -41,58 +41,89 @@ module tb_FPU_top_level();
 	 else              funct7 = 7'b0000010;
 	 frm       = $random() % 8;
 	 */
-	 //floating_point1 = $random();
-	 //floating_point2 = $random();
-	 
+	 //floating_point1 = $random(); //-2367.4
+	 //floating_point2 = $random(); //-46772.414
 	 //currently works if 1st number is less than second one(if both are positive)
 	 if (i == 0) begin
-	 floating_point1 = 32'b01000010000101100000000000000000; //37.5
-	 floating_point2 = 32'b01000010100111001000000000000000; //78.25
-	    end else if (i == 1) begin
+         floating_point1 = 32'b01000001000111000000000000000000; //9.75
+	 floating_point2 = 32'b00111111000100000000000000000000; //0.5625
+	 end else if (i == 1) begin
+         floating_point1 = 32'b01000010101110010110011001100110; //92.7
+	 floating_point2 = 32'b01000001110110110011001100110011; //27.4
+	 end else if (i == 2) begin
+	 floating_point1 = 32'b01000101100011110101110101100010; //4587.673
+         floating_point2 = 32'b01000011111100111101011000101011; //487.6732
+	 end else if (i == 3) begin
+	 floating_point1 = 32'b01001011000100110011000110001111; //9646479.12357
+         floating_point2 = 32'b01000111111100010010011111010110; //123471.6732
+	 end else if (i == 4) begin
+	 floating_point1 = 32'b01000111001101101011010001101010; //46772.414
+         floating_point2 = 32'b01000101000100111111011001100110; //2367.4
+	 end else if (i == 5) begin
+         floating_point1 = 32'b11000001000111000000000000000000; //-9.75
+	 floating_point2 = 32'b10111111000100000000000000000000; //-0.5625
+	 end else if (i == 6) begin
+         floating_point1 = 32'b11000010101110010110011001100110; //-92.7
+	 floating_point2 = 32'b11000001110110110011001100110011; //-27.4
+	 end else if (i == 7) begin
+	 floating_point1 = 32'b11000101100011110101110101100010; //-4587.673
+         floating_point2 = 32'b11000011111100111101011000101011; //-487.6732
+	 end else if (i == 8) begin
+	 floating_point1 = 32'b11001011000100110011000110001111; //-9646479.12357
+         floating_point2 = 32'b11000111111100010010011111010110; //-123471.6732
+	 end else if (i == 9) begin
+	 floating_point1 = 32'b11000111001101101011010001101010; //-46772.414
+         floating_point2 = 32'b11000101000100111111011001100110; //-2367.4
+	 end else if (i == 10) begin
+	 floating_point1 = 32'b00111111000100000000000000000000; //0.5625
+         floating_point2 = 32'b01000001000111000000000000000000; //9.75
+	 end else if (i == 11) begin
 	 floating_point1 = 32'b01000001110110110011001100110011; //27.4
-	 floating_point2 = 32'b01000010101110010110011001100110; //92.7
-	    end else if (i == 2) begin
-	 floating_point1 = 32'b01000010011010010111101011100001; //58.37
-	 floating_point2 = 32'b01000010101010101010111000010100; //85.34
-	    end else if (i == 3) begin
+         floating_point2 = 32'b01000010101110010110011001100110; //92.7
+	 end else if (i == 12) begin
          floating_point1 = 32'b01000011111100111101011000101011; //487.6732
 	 floating_point2 = 32'b01000101100011110101110101100010; //4587.673
-	    end else if (i == 4) begin
-         floating_point1 = 32'b01000011111100111101011000101011; //487.6732
-	 floating_point2 = 32'b01000101100011110101110101100010; //4587.673
-	    end else if (i == 5) begin
+	 end else if (i == 13) begin
          floating_point1 = 32'b01000111111100010010011111010110; //123471.6732
 	 floating_point2 = 32'b01001011000100110011000110001111; //9646479.12357
-	    end else if (i == 6) begin
+	 end else if (i == 14) begin
          floating_point1 = 32'b01000101000100111111011001100110; //2367.4
 	 floating_point2 = 32'b01000111001101101011010001101010; //46772.414
-	    end else if (i == 7) begin
-         floating_point1 = 32'b01000010100111001000000000000000; //78.25
-	 floating_point2 = 32'b01000010000101100000000000000000; //37.5
-	 //Error: expected = 0 10000100 01000110000000000000000, 
-	 //     calculated = 0 01111111 10100000000000000000000
-	    end else if (i == 8) begin
-	 floating_point1 = 32'b01000010101110010110011001100110; //92.7
-	 floating_point2 = 32'b01000001110110110011001100110011; //27.4
-	 //Error: expected = 0 10000101 00000101001100110011001, 
-	 //     calculated = 0 10000011 00101111001100110011001
-	    end else if (i == 9) begin
-	 floating_point1 = 32'b01000010101010101010111000010100; //85.34
-	 floating_point2 = 32'b01000010011010010111101011100001; //58.37
-	//Error: expected = 0 10000011 10101111100001010001110, 
-	//     calculated = 0 10000010 11110110011001100110100
-	    end else if (i == 10) begin
-	 floating_point1 = 32'b11000000101010101110000101001000; //-5.34
-	 floating_point2 = 32'b11000000010111001100110011001101; //-3.45
-	       end
-	//Error: expected = 1 01111111 11100011110101110000110, 
-	//     calculated = 1 10000001 11001110000101000111110
-	 
+	 end else if (i == 15) begin
+	 floating_point1 = 32'b10111111000100000000000000000000; //-0.5625
+         floating_point2 = 32'b11000001000111000000000000000000; //-9.75
+	 end else if (i == 16) begin
+	 floating_point1 = 32'b11000001110110110011001100110011; //-27.4
+         floating_point2 = 32'b11000010101110010110011001100110; //-92.7
+	 end else if (i == 17) begin
+	 floating_point1 = 32'b11000101000100100011011001100110; //-2367.3999
+	 floating_point2 = 32'b11000111001110101011010101101010; //-46773.4141
+	 end else if (i == 18) begin
+         floating_point1 = 32'b11000010100100011111111101111101; //-72.999
+	 floating_point2 = 32'b11001110001100100110011001001001; //-748261946.14893
+	 end else if (i == 19) begin
+	 floating_point1 = 32'b11000010110101101101011100001010; //-107.42
+	 floating_point2 = 32'b11000111101110111110011110001110; //-96207.111
+	 end else if (i == 20) begin
+         floating_point1 = 32'b11000000011001011011001000101101; //-3.589 //3
+	 floating_point2 = 32'b11000001000001101001001100001100; //-8.4109 //8
+	 //Error: expected = 0 10000001 00110100100110100000001, 
+	 //	calculated = 0 10000010 10011010010011010000001
+	 end else if (i == 21) begin
+	 floating_point1 = 32'b11000010000011111000111101011100; //-45.89
+	 floating_point2 = 32'b11000010101010000011011111001111; //-94.109
+	 //Error: expected = 0 10000100 10000001110000001000010, 
+	 //     calculated = 0 10000101 11000000111000000100001
+	 end
 	 funct7 = 7'b0100100; //subtraction
 	 //funct7 = 7'b0100000; //addition
 	 //funct7 = 7'b0000010; //multiplication
 	 //funct7 = 7'b0001000; //division
 	 frm = funct7 % 8;
+
+	//error message
+	//Error: expected = 0 10000001 00010010101111010000001, 
+	     //calculated = 0 10000001 01110110101000011000000
 
 	 if(floating_point1[30:23] == 8'b11111111) 
 	   floating_point1[30:23] = 8'b11111110;
@@ -232,11 +263,14 @@ initial begin
    nrst = 1;
    i = 0;
    
-   while(i <= 10) begin
+   while(i <= 19) begin
       random_check();
       i = i + 1;
       //break;
       end
+  /*while (1) begin
+	random_check();
+  end*/
 end
    
 endmodule // tb_FPU_top_level
