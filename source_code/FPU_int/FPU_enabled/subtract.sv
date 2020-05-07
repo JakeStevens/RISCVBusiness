@@ -7,6 +7,11 @@ module subtract
  output [7:0] result
 );
 
+logic [8:0] u_exp1, u_shifted_amount, u_result;
+assign u_exp1 = {1'b0, exp1};
+assign u_shifted_amount = {1'b0, shifted_amount};
+assign u_result = u_exp1 - u_shifted_amount; 
+/*
    reg [8:0]  u_exp1 = {1'b0, exp1};
    reg [8:0]  u_shifted_amount = {1'b0,shifted_amount};
    reg [8:0]  u_result;
@@ -16,6 +21,6 @@ always_comb   begin
    u_shifted_amount = {1'b0,shifted_amount};
    u_result         = u_exp1 - u_shifted_amount;
 end
-
+*/
    assign result = u_result[7:0];
 endmodule // subtract

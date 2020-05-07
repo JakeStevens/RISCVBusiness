@@ -41,9 +41,7 @@ interface f_register_file_if();
     output f_rs1_data, f_rs2_data, f_frm_out, f_flags
   );
 
-  modport cu (
-    output f_rs1, f_rs2, f_rd
-  );
+
 
 endinterface
 

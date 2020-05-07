@@ -43,6 +43,9 @@ interface control_unit_if;
   load_t load_type;
   branch_t branch_type;
   opcode_t opcode; 
+  logic F_LW, F_SW;
+  logic [6:0] fpu_op;
+  logic [2:0] f_rd, f_rs1, f_rs2, f_frm;
 
   // Privilege control signals
   logic fault_insn, illegal_insn, ret_insn, breakpoint, ecall_insn;
@@ -57,7 +60,7 @@ interface control_unit_if;
     imm_I, imm_S, imm_SB, imm_UJ, imm_U, imm_shamt_sel, alu_op, 
     opcode, halt, wen, fault_insn, illegal_insn, ret_insn, breakpoint, 
     ecall_insn, csr_swap, csr_set, csr_clr, csr_imm, csr_rw_valid,
-    csr_addr, zimm, ifence
+    csr_addr, zimm, ifence, F_LW, F_SW, fpu_op, f_rd, f_rs1, f_rs2, f_frm
   );
 
 endinterface

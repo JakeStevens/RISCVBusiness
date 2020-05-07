@@ -43,17 +43,17 @@ module f_register_file (
       frm <= '0;
     end else if (frf_if.f_wen && frf_if.f_rd) begin
       registers[frf_if.f_rd] <= frf_if.f_w_data;
-      frm <= frf.f_frm_in;
+      frm <= frf_if.f_frm_in;
     end else begin
-      frm <= frf.f_frm_in;
+      frm <= frf_if.f_frm_in;
     end
   end 
 
   assign frf_if.f_rs1_data = registers[frf_if.f_rs1];
   assign frf_if.f_rs2_data = registers[frf_if.f_rs2];
 
-  assign frf.f_frm_out = frm;
-  assign frf.f_flags = {frf.f_NV, frf.f_DZ, frf.f_OF, frf.f_UF, frf.f_NX};
+  assign frf_if.f_frm_out = frm;
+  assign frf_if.f_flags = {frf_if.f_NV, frf_if.f_DZ, frf_if.f_OF, frf_if.f_UF, frf_if.f_NX};
 
 
 endmodule

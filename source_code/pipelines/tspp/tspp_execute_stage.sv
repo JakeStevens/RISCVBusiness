@@ -76,7 +76,16 @@ module tspp_execute_stage(
     .br_if(branch_if)
   ); 
 
-  FPU_all FPU(
+assign fp_if.f_rd = cu_if.f_rd;
+assign fp_if.f_rs1 = cu_if.f_rs1;
+assign fp_if.f_rs2 = cu_if.f_rs2;
+assign fp_if.frm = cu_if.f_frm;
+assign fp_if.f_LW = cu_if.F_LW;
+assign fp_if.f_wen = 1;			//TODO: set to 1 for now, fix logic
+assign fp_if.f_funct_7 = cu_if.fpu_op;
+assign fp_if.f_LW_data = 31'd2;
+
+  FPU_wrapper FPU(
     .CLK(CLK),
     .nRST(nRST),
     .fpif(fp_if)
