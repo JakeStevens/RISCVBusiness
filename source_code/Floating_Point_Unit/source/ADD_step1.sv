@@ -1,5 +1,6 @@
 //By            : Joe Nasti
-//Last updated  : 7/23/18
+//edited by     : Xinlue Liu
+//Last updated  : 6/1/20
 //
 //Module summary:
 //    First step for addition operation in three-step pipline.
@@ -31,16 +32,21 @@ module ADD_step1
    wire [31:0] 	 floating_point_not_shift;
    reg  [31:0] 	 shifted_floating_point;
    
+   //compare the exponents of two floating points
    int_compare cmp_exponents (
 			      .exp1(floating_point1_in[30:23]), 
 			      .exp2(floating_point2_in[30:23]),
 			      .u_diff(unsigned_exp_diff),
 			      .cmp_out(cmp_out)
 			      );
+   //determine which one to shift
+   //shift the smaller exponent
    assign floating_point_shift = cmp_out ? floating_point1_in : floating_point2_in;
    assign floating_point_not_shift = cmp_out ? floating_point2_in : floating_point1_in;
+   //set the result exponent to the bigger exponent between X and Y
    assign exp_max = cmp_out ? floating_point2_in[30:23] : floating_point1_in[30:23];
    
+   //right shift the smaller fp the amount of the difference of two fps.
    right_shift shift_frac_with_smaller_exp (
 	       .fraction({1'b1, floating_point_shift[22:0], 2'b0}),
 	       .shift_amount(unsigned_exp_diff),
