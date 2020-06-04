@@ -43,9 +43,16 @@ module SUB_step2
 			    .frac_signed(frac2_signed)
 			    );
    
+   //change the floating points to its two's complement
    c_to_cp change_to_complement(
 				.frac2_input(frac2),
 				.frac2_signedin(frac2_signed),
+<<<<<<< HEAD
+				.frac2_output(frac2_complement), //unsigned output
+				.frac2_signedout(frac2_signedout) //signed output
+				);
+   //perform subtraction
+=======
 				.frac2_output(frac2_complement),
 				.frac2_signedout(frac2_signedout)
 				);
@@ -56,6 +63,7 @@ module SUB_step2
 				//.frac2_signedout(frac2_signedout)
 				);*/
    
+>>>>>>> fa4bb25b0b7f0da1f3fd01824f72305558abd74b
    sub_26b sub_signed_fracs(
 			     .exp_determine(exp_determine),
 			     .frac1({1'b0,frac1[25:0]}),
@@ -74,7 +82,7 @@ module SUB_step2
   //assign sum = {sum_signed[24:0],1'b0};
   //assign sign_out = sum_signed[26];
 
-   s_to_u change_to_unsigned(
+   s_to_u_new change_to_unsigned_new(
 			     .frac_signed(sum_signed),
 			     .sign(sign_out),
 			     .frac_unsigned(sum),
