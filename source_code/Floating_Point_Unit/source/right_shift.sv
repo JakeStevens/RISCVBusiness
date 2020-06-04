@@ -48,4 +48,3 @@ module right_shift(
 	        endcase
 	end
 endmodule
-
