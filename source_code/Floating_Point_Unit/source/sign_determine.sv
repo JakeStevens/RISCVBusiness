@@ -39,4 +39,3 @@ module sign_determine
    assign floating_point_out[31:0] = {dummy, temp_result[30:0]};
    
 endmodule // sign_determine
-
