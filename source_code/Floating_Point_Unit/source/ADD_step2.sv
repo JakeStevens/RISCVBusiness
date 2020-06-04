@@ -36,9 +36,7 @@ module ADD_step2
       if(sum_signed == 0) exp_max_out = 8'b00000000;
       else exp_max_out = exp_max_in;
    end
-   
-
-   
+   //change unsigned number to signed number
    u_to_s change_to_signed1(
 			    .sign(sign1),
 			    .frac_unsigned(frac1),
@@ -50,14 +48,14 @@ module ADD_step2
 			    .frac_unsigned(frac2),
 			    .frac_signed(frac2_signed)
 			    );
-   
-  adder_26b add_signed_fracs(
+   //perform addition
+   adder_26b add_signed_fracs(
 			     .frac1(frac1_signed),
 			     .frac2(frac2_signed),
 			     .sum(sum_signed),
 			     .ovf(carry_out)
 			     );
-
+   //change signed to unsigned number
    s_to_u change_to_unsigned(
 			     .frac_signed(sum_signed),
 			     .sign(sign_out),
