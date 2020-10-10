@@ -145,7 +145,7 @@ module tb_RISCVBusiness ();
 
     nRST = 1;
     
-    while (halt == 0 && clk_count != `RVB_CLK_TIMEOUT) begin
+    while (DUT.halt == 0 && clk_count != `RVB_CLK_TIMEOUT) begin
       @(posedge CLK);
       clk_count++;
       if (gen_bus_if.addr == 16'h0000 & !gen_bus_if.busy & gen_bus_if.wen)
