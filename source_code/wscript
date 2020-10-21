@@ -19,6 +19,14 @@ def configure(ctx):
       tb = 'tb_RISCVBusiness_self_test',
       tb_includes = ['include']
     )
+    ctx.SFFUnits.add('RISCVBusiness_self_test_plic',
+        includes = ['include'],
+        src_dir = rvb_srcs,
+        use = ['RISCVBusiness_packages'],
+        tb_use = ['RISCVBusiness_packages'],
+        tb = 'tb_RISCVBusiness_self_test_plic',
+        tb_includes = ['include']
+    )
     ctx.SFFUnits.add('alu', 
       includes = ['include'],
       src_dir = ['standard_core'],
@@ -75,6 +83,24 @@ def configure(ctx):
       tb = 'tb_caches',
       tb_includes = ['include']
     )
+
+    ctx.SFFUnits.add('priv_1_11_block',
+    includes = ['include'],
+    src_dir = ['privs/priv_1_11'],
+    use = ['RISCVBusiness_packages'],
+    tb_use = ['RISCVBusiness_packages'],
+    tb = 'tb_priv_1_11_block',
+    tb_includes = ['include']
+    )
+    ctx.SFFUnits.add('priv_1_11_control',
+    includes = ['include'],
+    src_dir = ['privs/priv_1_11'],
+    use = ['RISCVBusiness_packages'],
+    tb_use = ['RISCVBusiness_packages'],
+    tb = 'tb_priv_1_11_control',
+    tb_includes = ['include']
+    )
+
     ctx.SFFUnits.add('sparce_svc',
       includes = ['include'],
       src_dir = ['sparce'], 

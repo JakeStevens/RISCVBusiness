@@ -44,7 +44,7 @@ TEST_TYPE = ""
 # Change this variable to the filename (minus extension)
 # of the top level file for your project. This should
 # match the file name given in the top level wscript
-TOP_LEVEL = "RISCVBusiness" 
+TOP_LEVEL = "RISCVBusiness" # NOTE: Adjust this module name to adjust what top level is needed for the Cadence simulation 
 
 def parse_arguments():
     global ARCH, FILE_NAME, SUPPORTED_ARCHS, TEST_TYPE
@@ -601,7 +601,7 @@ def run_selfasm():
     print "Starting self tests..."
     for f in files:
         # TODO: Fix timer error
-        if 'timer' in f: continue
+        #if 'timer2' in f: continue
 
         if 'asicfab' in os.environ['HOSTNAME']:
             # Do work remotely

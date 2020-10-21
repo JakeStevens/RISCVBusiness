@@ -30,9 +30,11 @@
 `include "sparce_pipeline_if.vh"
 `include "tspp_fetch_execute_if.vh"
 `include "tspp_hazard_unit_if.vh"
+`include "core_interrupt_if.vh"
 
 module RISCVBusiness (
   input logic CLK, nRST,
+  core_interrupt_if.core interrupt_if,
   `ifdef BUS_INTERFACE_GENERIC_BUS
   generic_bus_if.cpu gen_bus_if
   `elsif BUS_INTERFACE_AHB
@@ -67,7 +69,7 @@ module RISCVBusiness (
     .halt(halt),
     .igen_bus_if(tspp_icache_gen_bus_if),
     .dgen_bus_if(tspp_dcache_gen_bus_if),
-    .prv_pipe_if(prv_pipe_if),
+    .prv_pipe_if(prv_pipe_if), // TODO: Look at the communications between pipeline_wrapper and priv_wrapper
     .predict_if(predict_if),
     .rm_if(rm_if),
     .cc_if(cc_if),
@@ -115,7 +117,8 @@ module RISCVBusiness (
   priv_wrapper priv_wrapper_i (
     .CLK(CLK),
     .nRST(nRST),
-    .prv_pipe_if(prv_pipe_if)
+    .prv_pipe_if(prv_pipe_if),
+    .interrupt_if
   );
 
   risc_mgmt_wrapper rmgmt (

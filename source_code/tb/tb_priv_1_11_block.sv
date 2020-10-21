@@ -23,16 +23,18 @@
 *                 A hexdump of memory will occur after the halt condition.
 */
 
+// Note: Figure out whether or not I need to change the name to Enes Shaltami.
+
 `timescale 1ns/100ps
 
-`include "generic_bus_if.vh"
-`include "component_selection_defines.vh"
+`include "prv_pipeline_if.vh"
+`include "priv_1_11_internal_if.vh"
 
 `define OUTPUT_FILE_NAME "cpu.hex"
 `define STATS_FILE_NAME "stats.txt"
 `define RVB_CLK_TIMEOUT 10000
 
-module tb_RISCVBusiness ();
+module tb_priv_1_11_block ();
    
   parameter PERIOD = 20;
  
@@ -43,95 +45,18 @@ module tb_RISCVBusiness ();
   logic [63:0] hexdump_temp;
   logic [7:0] checksum;
   integer fptr, stats_ptr;
-  integer clk_count;
+  //integer clk_count;
 
   //Interface Instantiations
-  generic_bus_if gen_bus_if();
-  generic_bus_if rvb_gen_bus_if();
-  generic_bus_if tb_gen_bus_if();
-  core_interrupt_if interrupt_if();
-
-    assign interrupt_if.timer_int = '0;
-    assign interrupt_if.timer_int_clear = '0;
-    assign interrupt_if.ext_int = '0;
-    assign interrupt_if.ext_int_clear = '0;
-    assign interrupt_if.soft_int = '0;
-    assign interrupt_if.soft_int_clear = '0;
+  prv_pipeline_if prv_pipeline_if();
 
   //Module Instantiations
 
-  RISCVBusiness DUT (
+  priv_1_11_block DUT (
     .CLK(CLK),
     .nRST(nRST),
-    .gen_bus_if(rvb_gen_bus_if),
-    .interrupt_if
-  );
-
-  ram_wrapper ram (
-    .CLK(CLK),
-    .nRST(nRST),
-    .gen_bus_if(gen_bus_if)
-  );
-
-  if (BUS_ENDIANNESS == "big")
-    endian_swapper swap(data_temp, data);
-  else if (BUS_ENDIANNESS == "little")
-    assign data = data_temp;
-  else ;//TODO:ERROR
-
-  bind tspp_execute_stage cpu_tracker cpu_track1 (
-    .CLK(CLK),
-    .wb_stall(wb_stall),
-    .instr(fetch_ex_if.fetch_ex_reg.instr),
-    .pc(fetch_ex_if.fetch_ex_reg.pc),
-    .opcode(cu_if.opcode),
-    .funct3(funct3),
-    .funct12(funct12),
-    .rs1(rf_if.rs1),
-    .rs2(rf_if.rs2),
-    .rd(rf_if.rd),
-    .imm_S(cu_if.imm_S),
-    .imm_I(cu_if.imm_I),
-    .imm_U(cu_if.imm_U),
-    .imm_UJ(imm_UJ_ext),
-    .imm_SB(cu_if.imm_SB),
-    .instr_30(instr_30)
-    );
-
-  bind branch_predictor_wrapper branch_tracker branch_perf(
-    .CLK(CLK),
-    .nRST(nRST),
-    .update_predictor(predict_if.update_predictor),
-    .prediction(predict_if.prediction),
-    .branch_result(predict_if.branch_result)
-  );
-     
-
-  
-
-  //Ramif Mux
-  always_comb begin
-    if(ram_control) begin
-      /* No actual bus, so directly connect ram to generic bus interface */
-      gen_bus_if.addr    =   rvb_gen_bus_if.addr;
-      gen_bus_if.ren     =   rvb_gen_bus_if.ren;
-      gen_bus_if.wen     =   rvb_gen_bus_if.wen;
-      gen_bus_if.wdata   =   rvb_gen_bus_if.wdata;
-      gen_bus_if.byte_en =   rvb_gen_bus_if.byte_en;
-    end else begin
-      gen_bus_if.addr    =   tb_gen_bus_if.addr;
-      gen_bus_if.ren     =   tb_gen_bus_if.ren;
-      gen_bus_if.wen     =   tb_gen_bus_if.wen;
-      gen_bus_if.wdata   =   tb_gen_bus_if.wdata;
-      gen_bus_if.byte_en = tb_gen_bus_if.byte_en;
-    end
-  end
-
-  /* No actual bus, so directly connect ram to generic bus interface */
-  assign rvb_gen_bus_if.rdata  = gen_bus_if.rdata;
-  assign rvb_gen_bus_if.busy   = gen_bus_if.busy;
-  assign tb_gen_bus_if.rdata   = gen_bus_if.rdata;
-  assign tb_gen_bus_if.busy    = gen_bus_if.busy;
+    .prv_pipe_if(prv_pipeline_if) // using the "priv_block" modport of the prv_pieline_if.vh file
+  ); // TODO: Figure out IO for the priv pipeline unit
 
   //Clock generation
   initial begin : INIT
@@ -145,15 +70,57 @@ module tb_RISCVBusiness ();
   //Setup core and let it run
   initial begin : CORE_RUN
     nRST = 0;
-    ram_control = 1;
-    clk_count = 0;
+
+   // TODO: Expected output signals: ex_src, exception, 
+
+
+/*
+   // Resetting all of the inputs for the priv_block unit
+    prv_pipeline_if.pipe_clear = '0;
+    prv_pipeline_if.ret = '0;
+    prv_pipeline_if.epc = '0;
+
+    // control signals for the exception combinational logic
+    prv_pipeline_if.fault_insn = 1'b0;
+    prv_pipeline_if.mal_insn = 1'b0;
+    prv_pipeline_if.illegal_insn = 1'b0;
+    prv_pipeline_if.fault_l = 1'b0;
+    prv_pipeline_if.mal_l = 1'b0;
+    prv_pipeline_if.fault_s = 1'b0;
+    prv_pipeline_if.mal_s = 1'b0;
+    prv_pipeline_if.breakpoint = 1'b0;
+    prv_pipeline_if.env_m = 1'b0;
+
+
+    prv_pipeline_if.badaddr = '0; // TODO: Below signal is not being used!!!
+    prv_pipeline_if.wdata = '0; 
+    prv_pipeline_if.addr = '0;
+    prv_pipeline_if.valid_write = '0;
+    prv_pipeline_if.wb_enable = '0;
+    prv_pipeline_if.instr = '0;
+
+    // TODO: SIGNALS ARE NOT BEING USED!!! Below 3 signals will check the funct3 op code for an R-type instruction. Output of control unit, but not used in the priv unit
+    prv_pipeline_if.swap = '0; // CSRRW field which means to atomically swap values in the CSRs and integer registers
+    prv_pipeline_if.clr = '0; // CSRRC field which means to perform an atomic read and clear the bit in CSR
+    prv_pipeline_if.set = '0; // CSRRS where the instruction reads the value of the CSR, and writes it to integer register rd
+
+    prv_pipeline_if.ex_rmgmt = '0;
+    prv_pipeline_if.ex_rmgmt_cause = '0;
+    
+
+
+   
+    prv_pipeline_if.mal_insn = 1'b1;
+    prv_pipeline_if.breakpoint = 1'b1;
+   // tb_expected_ex_src = BREAKPOINT;
+    tb_expected_exception = 1'b1; */
  
     @(posedge CLK);
     @(posedge CLK);
 
     nRST = 1;
     
-    while (DUT.halt == 0 && clk_count != `RVB_CLK_TIMEOUT) begin
+    /*while (halt == 0 && clk_count != `RVB_CLK_TIMEOUT) begin
       @(posedge CLK);
       clk_count++;
       if (gen_bus_if.addr == 16'h0000 & !gen_bus_if.busy & gen_bus_if.wen)
@@ -166,13 +133,13 @@ module tb_RISCVBusiness ();
     dump_ram();
 
     if (clk_count == `RVB_CLK_TIMEOUT) 
-      $display("ERROR: Test timed out");
+      $display("ERROR: Test timed out"); */
 
     $finish;
 
   end : CORE_RUN
 
-  task dump_stats();
+ /* task dump_stats();
     integer instret, cycles;
     instret = DUT.priv_wrapper_i.priv_block_i.csr_rfile_i.instretfull;
     cycles  = DUT.priv_wrapper_i.priv_block_i.csr_rfile_i.cyclefull;
@@ -229,6 +196,6 @@ module tb_RISCVBusiness ();
     //take two's complement
     checksum = (~checksum) + 1;
     return checksum;
-  endfunction
+  endfunction */
 
 endmodule
