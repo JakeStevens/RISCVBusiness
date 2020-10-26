@@ -36,7 +36,7 @@ module priv_1_11_control (
   
   int_code_t intr_src;
   logic interrupt, clear_interrupt;
-  logic interrupt_reg, interrupt_fired;
+  logic interrupt_reg, interrupt_fired, update_mie;
 
   always_comb begin // determine the source of the interrupt to be stored in the mcause register
     interrupt = 1'b1;
@@ -155,8 +155,8 @@ module priv_1_11_control (
   always_comb begin
     prv_intern_if.mstatus_next.mie = prv_intern_if.mstatus.mie;
     prv_intern_if.mstatus_next.mpie = prv_intern_if.mstatus.mpie;
-
-    if (prv_intern_if.intr) begin // interrupt has truly been registered and it is time to go to the vector table
+	//changed from intr
+    if (update_mie) begin // interrupt has truly been registered and it is time to go to the vector table
       prv_intern_if.mstatus_next.mpie = prv_intern_if.mstatus.mie; // when a trap is taken mpie is set to the current mie
       prv_intern_if.mstatus_next.mie = 1'b0; // disable the interrupt once it enters the handler
 
@@ -183,10 +183,21 @@ module priv_1_11_control (
   always_ff @ (posedge CLK, negedge nRST) begin
     if (!nRST)
       interrupt_reg <= '0;
-    else if (interrupt_fired)
+    else if (interrupt_fired) 
       interrupt_reg <= 1'b1;
     else if (prv_intern_if.pipe_clear)
-      interrupt_reg <= '0;
+      interrupt_reg <= '0;			
+  end 
+
+  always_ff @(posedge CLK, negedge nRST) begin
+    if(!nRST)
+      update_mie <= '0;
+    else if(interrupt_fired && ~update_mie) 
+      update_mie <= 1'b1;
+    else if (prv_intern_if.pipe_clear)
+      update_mie <= '0;
+    else 
+      update_mie <= '0;
   end 
 
 endmodule
