@@ -189,6 +189,17 @@ module priv_1_11_control (
       interrupt_reg <= '0;			
   end 
 
+  /*
+   * Fix for MIE/MPIE issue. This used to be the same as 'interrupt_reg' above,
+   * but the above stays high for 2+ cycles (i.e. waiting for pipe_clear).
+   * This caused MPIE to update twice; the first update would set MPIE to 1,
+   * and the second would cause MPIE to return to 0. Then, after an MRET,
+   * MIE would not be restored since MPIE was lost. Additionally, shortening
+   * interrupt_reg was not an option since pipe_clear must be asserted for the
+   * PC to be inserted into the pipeline from the priv unit, so creating this
+   * extra register was the cleanest solution to ensuring MPIE updates exactly
+   * once.
+   */
   always_ff @(posedge CLK, negedge nRST) begin
     if(!nRST)
       update_mie <= '0;
