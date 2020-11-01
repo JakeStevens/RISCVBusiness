@@ -88,7 +88,7 @@ module memory_controller (
       INSTR_REQ: begin
         if(!i_gen_bus_if.ren) // Abort request, received an interrupt
           next_state = IDLE;
-        if(d_gen_bus_if.ren || d_gen_bus_if.wen) 
+        else if(d_gen_bus_if.ren || d_gen_bus_if.wen) 
           next_state = INSTR_DATA_REQ;
         else 
           next_state = INSTR_WAIT; 

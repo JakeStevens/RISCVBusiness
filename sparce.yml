@@ -19,6 +19,9 @@ microarch_params:
   # Sparisty Optimizations
   sparce_enabled : "enabled"
 
+  # Halt
+  infinite_loop_halts : "true"
+
 # RISC-MGMT Extension Configuration
 risc_mgmt_params:
   standard_extensions:
