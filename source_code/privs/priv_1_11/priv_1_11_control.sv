@@ -167,8 +167,13 @@ module priv_1_11_control (
   end
 
 
-  // Update EPC as soon as interrupt or exception is found 
-  assign prv_intern_if.mepc_rup = exception | interrupt; // TODO: Change to interrupt
+  // Update EPC as soon as interrupt or exception is found
+  // Note: mepc cannot update immediately, as if the processor is in an interrupt already,
+  // the MEPC captured will be within the interrupt (and nested interrupts are not supported).
+  // Interrupt fired notes when an interrupt is seen by the processor, i.e. when mstatus.mie is high again.
+  // The signal is 2 cycles long, so the update_mie signal is used to clip it down to 1 to prevent MEPC
+  // double update which results in skipping an instruction.
+  assign prv_intern_if.mepc_rup = exception | (interrupt_fired & ~update_mie); // TODO: Change to interrupt
   assign prv_intern_if.mepc_next = prv_intern_if.epc;
 
   assign prv_intern_if.mtval_rup = (prv_intern_if.mal_l | prv_intern_if.fault_l | prv_intern_if.mal_s | prv_intern_if.fault_s | 
