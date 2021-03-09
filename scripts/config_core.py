@@ -46,7 +46,9 @@ UARCH_PARAMS = \
     'bus_endianness' : ['big', 'little'],
     'bus_interface_type' : ['ahb_if', 'generic_bus_if'],
     # Sparisty Optimizations
-    'sparce_enabled' : [ 'enabled', 'disabled' ]
+    'sparce_enabled' : [ 'enabled', 'disabled' ],
+    # Halt Enable -- Good for testing, not for tapeout
+    'infinite_loop_halts' : ['true', 'false']
   }
 
 RISC_MGMT_PARAMS = \
