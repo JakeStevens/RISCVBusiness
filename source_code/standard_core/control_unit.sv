@@ -26,6 +26,7 @@
 `include "control_unit_if.vh"
 `include "rv32i_reg_file_if.vh"
 `include "risc_mgmt_if.vh"
+`include "decompressor_if.vh"
 
 module control_unit 
 (

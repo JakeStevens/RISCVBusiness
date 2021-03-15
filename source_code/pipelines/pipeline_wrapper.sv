@@ -29,6 +29,7 @@
 `include "cache_control_if.vh"
 `include "component_selection_defines.vh"
 `include "sparce_pipeline_if.vh"
+`include "rv32c_if.vh"
 
 module pipeline_wrapper (
   input logic CLK, nRST,

@@ -33,7 +33,7 @@
 `include "prv_pipeline_if.vh"
 `include "risc_mgmt_if.vh"
 `include "cache_control_if.vh"
-
+`include "rv32c_if.vh"
 
 module tspp_execute_stage(
   input logic CLK, nRST,
@@ -45,7 +45,8 @@ module tspp_execute_stage(
   output logic halt,
   risc_mgmt_if.ts_execute rm_if,
   cache_control_if.pipeline cc_if,
-  sparce_pipeline_if.pipe_execute sparce_if
+  sparce_pipeline_if.pipe_execute sparce_if,
+  rv32c_if.execute rv32cif
 );
 
   import rv32i_types_pkg::*;
@@ -99,7 +100,7 @@ module tspp_execute_stage(
   assign rm_if.rdata_s_1 = rf_if.rs2_data;
 
 
-  /*******************************************************
+  /********************************************************
   *** Choose the Endianness Coming into the processor
   *******************************************************/
   generate
@@ -114,8 +115,13 @@ module tspp_execute_stage(
     end
   endgenerate
 
-  assign cu_if.instr = fetch_ex_if.fetch_ex_reg.instr;
-  assign rm_if.insn  = fetch_ex_if.fetch_ex_reg.instr;
+  //RV32C 
+  assign rv32cif.inst16 = fetch_ex_if.fetch_ex_reg.instr[15:0];
+  assign rv32cif.halt = cu_if.halt;
+  assign rv32cif.ex_busy = cu_if.dren | cu_if.dwen | rm_if.risc_mgmt_start;
+  assign cu_if.instr = rv32cif.c_ena ? rv32cif.inst32 : fetch_ex_if.fetch_ex_reg.instr; 
+  assign rm_if.insn  = rv32cif.c_ena ? rv32cif.inst32 : fetch_ex_if.fetch_ex_reg.instr; 
+
 
   /*******************************************************
   *** Sign Extensions 
@@ -182,7 +188,7 @@ module tspp_execute_stage(
     end
   end
 
-  assign rf_if.wen = (cu_if.wen | (rm_if.req_reg_w & rm_if.reg_w)) & (~hazard_if.if_ex_stall | hazard_if.npc_sel) & 
+  assign rf_if.wen = (cu_if.wen | (rm_if.req_reg_w & rm_if.reg_w)) & (~hazard_if.if_ex_stall | hazard_if.npc_sel | rv32cif.done_earlier) & 
                     ~(cu_if.dren & mal_addr); 
   /*******************************************************
   *** Branch Target Resolution and Associated Logic 

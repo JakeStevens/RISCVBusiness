@@ -47,6 +47,8 @@ UARCH_PARAMS = \
     'bus_interface_type' : ['ahb_if', 'generic_bus_if'],
     # Sparisty Optimizations
     'sparce_enabled' : [ 'enabled', 'disabled' ],
+    # RV32C
+    'rv32c_enabled' : [ 'enabled', 'disabled' ]
     # Halt Enable -- Good for testing, not for tapeout
     'infinite_loop_halts' : ['true', 'false']
   }

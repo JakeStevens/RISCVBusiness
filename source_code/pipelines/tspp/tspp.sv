@@ -30,6 +30,7 @@
 `include "risc_mgmt_if.vh"
 `include "cache_control_if.vh"
 `include "sparce_pipeline_if.vh"
+`include "rv32c_if.vh"
 
 module tspp (
   input logic CLK, nRST,
