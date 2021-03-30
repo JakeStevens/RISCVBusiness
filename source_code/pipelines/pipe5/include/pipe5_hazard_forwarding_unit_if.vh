@@ -15,7 +15,7 @@ interface pipe5_hazard_forwarding_unit_if();
 
     // Pipeline status signals
     logic f_busy, x_busy, m_busy;
-    logic dren, dwen;
+    logic d_dren, d_dwen, d_csr_access, m_dren, m_dwen;
     logic fence_stall;
     logic branch_taken, prediction, jump, branch,
           mispredict, halt, ret;
@@ -25,15 +25,15 @@ interface pipe5_hazard_forwarding_unit_if();
     logic fault_insn, mal_insn, illegal_insn, 
           fault_ld, mal_ld, fault_st, mal_st,
           breakpoint, env_m;
-    // TODO: Exception handling: Do we force it to wait for memory?
-    word_t epc_f, epc_m, badaddr_f, badaddr_m;
+    // Exception handling exclusively in mem stage, only single epc/bad addr collection point
+    word_t epc, badaddr;
 
     // Priv unit status signals
     word_t priv_pc;
     logic insert_priv_pc;
 
     // Dependency Tracking Signals
-    logic [4:0] rs1_x, rs2_x, rd_m, rd_w;
+    pipe5_types_pkg::rsel_t rs1_d, rs2_d, rs1_x, rs2_x, rd_x, rd_m, rd_w;
     logic regWEN_m, regWEN_w;
 
     // Forwarding control
@@ -65,14 +65,15 @@ interface pipe5_hazard_forwarding_unit_if();
     );
 
     modport decode(
-        input   dx_stall, dx_flush
+        input   dx_stall, dx_flush,
+        output  rs1_d, rs2_d, d_dren, d_dwen, d_csr_access
     );
 
     modport execute(
         input   xm_stall, xm_flush, x_busy, bypass_a, bypass_b,
-                bypass_rs1, bypass_rs2, rs1_x, rs2_x,
+                bypass_rs1, bypass_rs2,
 
-        output  rs1_x, rs2_x
+        output  rs1_x, rs2_x, rd_x
     );
 
     modport memory(
@@ -85,6 +86,7 @@ interface pipe5_hazard_forwarding_unit_if();
     );
 
     modport writeback(
+        input mw_stall, mw_flush,
         output rd_w, regWEN_w
     );
 
