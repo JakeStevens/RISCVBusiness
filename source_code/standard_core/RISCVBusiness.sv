@@ -35,6 +35,7 @@
 
 module RISCVBusiness (
   input logic CLK, nRST,
+  output logic wfi,
   core_interrupt_if.core interrupt_if,
   `ifdef BUS_INTERFACE_GENERIC_BUS
   generic_bus_if.cpu gen_bus_if
@@ -87,7 +88,8 @@ module RISCVBusiness (
     .predict_if(predict_if),
     .igen_bus_if(tspp_icache_gen_bus_if),
     .sparce_if(sparce_if),
-    .rv32cif(rv32cif)
+    .rv32cif(rv32cif),
+    .wfi(wfi)
   );
 
   tspp_execute_stage execute_stage_i (

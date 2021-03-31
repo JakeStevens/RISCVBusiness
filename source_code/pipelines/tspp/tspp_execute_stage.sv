@@ -46,7 +46,8 @@ module tspp_execute_stage(
   risc_mgmt_if.ts_execute rm_if,
   cache_control_if.pipeline cc_if,
   sparce_pipeline_if.pipe_execute sparce_if,
-  rv32c_if.execute rv32cif
+  rv32c_if.execute rv32cif,
+  output logic wfi
 );
 
   import rv32i_types_pkg::*;
@@ -74,7 +75,7 @@ module tspp_execute_stage(
   //         "RV32E": rv32e_reg_file rf (CLK, nRST, rf_if);
   //     endcase
   // endgenerate
-
+  assign wfi = cu_if.wfi; //Added by rkannank
   generate
     if (BASE_ISA == "RV32E") begin: REG_FILE_SEL
         rv32e_reg_file rf (CLK, nRST, rf_if);

@@ -85,7 +85,7 @@ module control_unit
   assign cu_if.jump       = (cu_if.opcode == JAL || cu_if.opcode == JALR);
   assign cu_if.ex_pc_sel  = (cu_if.opcode == JAL || cu_if.opcode == JALR);
   assign cu_if.j_sel      = (cu_if.opcode == JAL);
-
+  assign cu_if.wfi        = (cu_if.opcode == WFI); //Added by rkannank
   // Assign alu operands
   always_comb begin
     case(cu_if.opcode)
