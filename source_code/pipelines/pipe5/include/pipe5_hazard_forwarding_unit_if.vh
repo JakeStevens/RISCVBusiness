@@ -57,12 +57,18 @@ interface pipe5_hazard_forwarding_unit_if();
                 bypass_a, bypass_b, bypass_rs1, bypass_rs2
     );
 
-    modport fetch(
+    modport fetch1(
         input   pc_en, npc_sel, fd_stall, fd_flush, 
-                iren, priv_pc, insert_priv_pc,
-
-        output  f_busy, fault_insn, mal_insn, epc_f, badaddr_f
+                priv_pc, insert_priv_pc
     );
+
+    modport fetch2(
+        input   pc_en, fd_stall, fd_flush, 
+                iren, 
+
+        output  f_busy, fault_insn, mal_insn, epc_f, badaddr_f //f_busy doesn't do anything
+    );
+
 
     modport decode(
         input   dx_stall, dx_flush,

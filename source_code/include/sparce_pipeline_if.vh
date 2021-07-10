@@ -44,10 +44,15 @@ interface sparce_pipeline_if;
     output pc, wb_data, wb_en, sasa_data, sasa_addr, sasa_wen, rd, if_ex_enable, rdata
   );
 
-  modport pipe_fetch (
+  modport pipe_fetch1 (
     input sparce_target, skipping,
+  );
+
+  modport pipe_fetch2 (
     output pc, rdata
   );
+
+  modport pipe_execute (
 
   modport pipe_execute (
     input sparce_target, skipping,

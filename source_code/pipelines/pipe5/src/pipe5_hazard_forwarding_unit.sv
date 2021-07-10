@@ -22,6 +22,7 @@ module pipe5_hazard_forwarding_unit(
 
     // IRQ/Exception hazard signals
     logic exception;
+
     assign prv_pipe_if.ret = hazard_if.ret;
     assign exception =    hazard_if.fault_insn 
                        || hazard_if.mal_insn 

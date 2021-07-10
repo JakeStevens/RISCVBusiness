@@ -28,11 +28,16 @@
 interface jump_calc_if();
   import rv32i_types_pkg::word_t;
 
-  word_t base, offset, jal_addr, jalr_addr;
+  word_t base, offset, jump_addr;
+  logic j_sel;
+  // jsel =1 JAL otherwise JALR
 
-  modport jump_calc (
-    input base, offset,
-    output jal_addr, jalr_addr
+  modport decode_input (
+    input base, offset, j_sel
+  );
+  
+  modport memory_resolution (
+    output jump_addr
   );
 
 endinterface

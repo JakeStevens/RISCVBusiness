@@ -31,10 +31,9 @@ module jump_calc
 
   import rv32i_types_pkg::*;
 
-  word_t jump_addr;
-  assign jump_addr = jump_if.base + jump_if.offset;
+  word_t j_addr;
+  assign j_addr = jump_if.base + jump_if.offset;
 
-  assign jump_if.jal_addr = jump_addr;
-  assign jump_if.jalr_addr = {jump_addr[31:1], 1'b0};
+  assign jump_if.jump_addr = (jump_if.j_sel) ? j_addr : {jump_addr[31:1], 1'b0};
 
 endmodule
