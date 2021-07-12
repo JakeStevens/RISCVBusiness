@@ -32,8 +32,9 @@ interface jump_calc_if();
   logic j_sel;
   // jsel =1 JAL otherwise JALR
 
-  modport decode_input (
-    input base, offset, j_sel
+  modport jump_calc (
+    input  base, offset, j_sel,
+    output jump_addr
   );
   
   modport memory_resolution (
