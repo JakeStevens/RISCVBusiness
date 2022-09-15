@@ -35,7 +35,7 @@
 
 module RISCVBusiness (
   input logic CLK, nRST,
-  output logic wfi,
+  output logic wfi, halt,
   core_interrupt_if.core interrupt_if,
   `ifdef BUS_INTERFACE_GENERIC_BUS
   generic_bus_if.cpu gen_bus_if
@@ -43,6 +43,8 @@ module RISCVBusiness (
   ahb_if.ahb_m ahb_master
   `endif
 );
+
+  parameter RESET_PC = 32'h80000000;
 
   // Interface instantiations
 
@@ -62,8 +64,6 @@ module RISCVBusiness (
   tspp_fetch_execute_if      fetch_ex_if();
   tspp_hazard_unit_if        hazard_if();
 
-  logic halt;    //JOHN CHANGED THIS
-
   // Module Instantiations
 /*
   pipeline_wrapper pipeline (
@@ -80,7 +80,9 @@ module RISCVBusiness (
   );
 */
 
-  tspp_fetch_stage fetch_stage_i (
+  tspp_fetch_stage #(
+    .RESET_PC(RESET_PC)
+  ) fetch_stage_i (
     .CLK(CLK),
     .nRST(nRST),
     .fetch_ex_if(fetch_ex_if),
