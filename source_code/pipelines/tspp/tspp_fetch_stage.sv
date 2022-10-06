@@ -76,6 +76,8 @@ module tspp_fetch_stage (
   assign igen_bus_if.wen          = 1'b0;
   assign igen_bus_if.byte_en      = 4'b1111;
   assign igen_bus_if.wdata        = '0;
+
+  assign hazard_if.rv32c_ready = rv32cif.done_earlier;
   
   //Fetch Execute Pipeline Signals
   word_t instr_to_ex;

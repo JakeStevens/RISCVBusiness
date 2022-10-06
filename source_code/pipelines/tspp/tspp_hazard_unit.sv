@@ -57,7 +57,7 @@ module tspp_hazard_unit
   assign dmem_access = (hazard_if.dren || hazard_if.dwen);
   assign branch_jump = hazard_if.jump || 
                         (hazard_if.branch && hazard_if.mispredict);
-  assign wait_for_imem = hazard_if.iren & hazard_if.i_mem_busy;
+  assign wait_for_imem = hazard_if.iren & hazard_if.i_mem_busy & ~hazard_if.rv32c_ready;
   assign wait_for_dmem = dmem_access & hazard_if.d_mem_busy;  
   
   assign hazard_if.npc_sel = branch_jump;
@@ -69,11 +69,10 @@ module tspp_hazard_unit
                                  (wait_for_imem & dmem_access &
                                     ~hazard_if.d_mem_busy);
 
-  assign hazard_if.if_ex_stall = (wait_for_dmem ||
-                                 (wait_for_imem & ~dmem_access) ||
-                                 hazard_if.halt) & (~ex_flush_hazard | e_ex_stage) || 
-                                 hazard_if.fence_stall ||
-                                 rm_if.execute_stall;
+  assign hazard_if.if_ex_stall = (wait_for_dmem || (wait_for_imem & ~dmem_access) || hazard_if.halt) 
+                                 & (~ex_flush_hazard | e_ex_stage)
+                                 || hazard_if.fence_stall
+                                 || rm_if.execute_stall;
 
   /* Hazards due to Interrupts/Exceptions */
   assign prv_pipe_if.ret = hazard_if.ret;

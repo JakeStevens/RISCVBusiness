@@ -44,18 +44,21 @@ interface tspp_hazard_unit_if();
   // Pipeline Tokens 
   logic token_ex;
 
+  // RV32C
+  logic rv32c_ready;
+
   modport hazard_unit (
     input i_mem_busy, d_mem_busy, dren, dwen, jump,
           branch, mispredict, halt, pc,fault_insn, mal_insn, 
           illegal_insn, fault_l, 
           mal_l, fault_s, mal_s, breakpoint, env_m, ret,
-          epc_f, epc_e, badaddr_f, badaddr_e, token_ex, fence_stall,
+          epc_f, epc_e, badaddr_f, badaddr_e, token_ex, fence_stall, rv32c_ready,
     output pc_en, npc_sel, if_ex_stall, if_ex_flush, priv_pc, insert_priv_pc, iren
   );
 
   modport fetch (
     input pc_en, npc_sel, if_ex_stall, if_ex_flush, priv_pc, insert_priv_pc, iren,
-    output i_mem_busy, fault_insn, mal_insn, epc_f, badaddr_f
+    output i_mem_busy, fault_insn, mal_insn, epc_f, badaddr_f, rv32c_ready
   );
 
   modport execute (
