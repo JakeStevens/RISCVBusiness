@@ -1,12 +1,12 @@
 /*
 *   Copyright 2016 Purdue University
-*   
+*
 *   Licensed under the Apache License, Version 2.0 (the "License");
 *   you may not use this file except in compliance with the License.
 *   You may obtain a copy of the License at
-*   
+*
 *       http://www.apache.org/licenses/LICENSE-2.0
-*   
+*
 *   Unless required by applicable law or agreed to in writing, software
 *   distributed under the License is distributed on an "AS IS" BASIS,
 *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,7 @@
 *   Created by:   John Skubic
 *   Email:        jskubic@purdue.edu
 *   Date Created: 05/18/2017
-*   Description:  Top level wrapper for the priv ISA implementation. 
+*   Description:  Top level wrapper for the priv ISA implementation.
 */
 
 `include "prv_pipeline_if.vh"
@@ -31,7 +31,6 @@ module priv_wrapper (
   core_interrupt_if.core interrupt_if
 );
 
-  //TODO: Select different priv blocks for backwards compatibility
-  priv_1_11_block priv_block_i(.*);
+  priv_1_12_block priv_block_i(.*);
 
 endmodule
