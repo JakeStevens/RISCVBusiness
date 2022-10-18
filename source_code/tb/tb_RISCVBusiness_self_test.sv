@@ -1,27 +1,27 @@
 /*
 *   Copyright 2016 Purdue University
-*   
+*
 *   Licensed under the Apache License, Version 2.0 (the "License");
 *   you may not use this file except in compliance with the License.
 *   You may obtain a copy of the License at
-*   
+*
 *       http://www.apache.org/licenses/LICENSE-2.0
-*   
+*
 *   Unless required by applicable law or agreed to in writing, software
 *   distributed under the License is distributed on an "AS IS" BASIS,
 *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
-*   
-*   
-*   Filename:		  tb_RISCVBusiness_self_test.sv	
-*   
+*
+*
+*   Filename:		  tb_RISCVBusiness_self_test.sv
+*
 *   Created by:		John Skubic
 *   Email:				jskubic@purdue.edu
 *   Date Created:	06/01/2016
 *   Description:	Testbench for running RISCVBusiness until a halt condition.
 *                 The test bench monitors memory location 0x1000 and prints
-*                 the char representation of what is written.   
+*                 the char representation of what is written.
 */
 
 `timescale 1ns/100ps
@@ -34,9 +34,9 @@
 `define RVBSELF_CLK_TIMEOUT 5000000
 
 module tb_RISCVBusiness_self_test ();
-   
+
   parameter PERIOD = 20;
- 
+
   logic CLK, nRST;
   logic ram_control; // 1 -> CORE, 0 -> TB
   logic halt;
@@ -51,7 +51,7 @@ module tb_RISCVBusiness_self_test ();
   generic_bus_if rvb_gen_bus_if();
   generic_bus_if tb_gen_bus_if();
   core_interrupt_if interrupt_if();
-    
+
     assign interrupt_if.timer_int = '0;
     assign interrupt_if.timer_int_clear = '0;
     assign interrupt_if.ext_int = '0;
@@ -105,7 +105,7 @@ module tb_RISCVBusiness_self_test ();
     .update_predictor(predict_if.update_predictor),
     .prediction(predict_if.prediction),
     .branch_result(predict_if.branch_result)
-  ); 
+  );
 
   //Ramif Mux
   always_comb begin
@@ -145,12 +145,12 @@ module tb_RISCVBusiness_self_test ();
     nRST = 0;
     ram_control = 1;
     clk_count = 0;
- 
+
     @(posedge CLK);
     @(posedge CLK);
 
     nRST = 1;
-    
+
     while (DUT.halt == 0 && clk_count != `RVBSELF_CLK_TIMEOUT) begin
       @(posedge CLK);
       clk_count++;
@@ -167,10 +167,10 @@ module tb_RISCVBusiness_self_test ();
     // Check Register 28 to see if test passed or failed
     if (clk_count == `RVBSELF_CLK_TIMEOUT)
       $display("ERROR: Test timed out");
-    else if(DUT.execute_stage_i.REG_FILE_SEL.rf.registers[28] != 32'h1)
+    else if(DUT.execute_stage_i.g_rfile_select.rf.registers[28] != 32'h1)
       $display("ERROR: Test %0d did not pass",
-                (DUT.execute_stage_i.REG_FILE_SEL.rf.registers[28] - 1)/2);
-    else 
+                (DUT.execute_stage_i.g_rfile_select.rf.registers[28] - 1)/2);
+    else
       $display("SUCCESS");
     $finish;
 
@@ -178,8 +178,8 @@ module tb_RISCVBusiness_self_test ();
 
   task dump_stats();
     logic [63:0] instret, cycles;
-    instret = DUT.priv_wrapper_i.priv_block_i.csr_rfile_i.instretfull;
-    cycles  = DUT.priv_wrapper_i.priv_block_i.csr_rfile_i.cyclefull;
+    instret = DUT.priv_wrapper_i.priv_block_i.csr.instret_full;
+    cycles  = DUT.priv_wrapper_i.priv_block_i.csr.cycles_full;
     if (cycles != clk_count) $info("Cycles CSR (%0d) != clk_count (%0d)", cycles, clk_count);
     stats_ptr = $fopen(`STATS_FILE_NAME, "w");
     $fwrite(stats_ptr, "Instructions retired: %2d\n", instret);
@@ -208,7 +208,7 @@ module tb_RISCVBusiness_self_test ();
         $fwrite(fptr, ":%2h%4h00%8h%2h\n", 8'h4, addr[15:0]>>2, data, checksum);
     end
     // add the EOL entry to the file
-    $fwrite(fptr, ":00000001FF");  
+    $fwrite(fptr, ":00000001FF");
 
   endtask
 
@@ -229,11 +229,10 @@ module tb_RISCVBusiness_self_test ();
     checksum = hex_line[7:0] + hex_line[15:8] + hex_line[23:16] +
                 hex_line[31:24] + hex_line[39:32] + hex_line[47:40] +
                 hex_line[55:48] + hex_line[63:56];
-    
+
     //take two's complement
     checksum = (~checksum) + 1;
     return checksum;
   endfunction
 
 endmodule
-

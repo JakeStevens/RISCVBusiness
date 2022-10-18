@@ -2,6 +2,7 @@
 build/
 sim_out/
 obj_dir/
+rvb_out/
 # ignore memory files from test cases
 *.hex
 meminit.ver
@@ -61,3 +62,7 @@ xrun.key
 waves.shm/
 
 open_files.sh
+
+# fusesoc
+fusesoc_libraries
+fusesoc.conf

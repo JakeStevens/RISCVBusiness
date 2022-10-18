@@ -4,11 +4,42 @@ Design documents and project information for the RISC-V Business project can be 
 [RISCV-Business Documentation](https://wiki.itap.purdue.edu/display/RISC/RISCV-Business)
 
 **Current User-Level ISA Spec :** v2.1
-**Current Privileged ISA Spec :** v1.11
+**Current Privileged ISA Spec :** v1.12
 
 # Getting Started
 
 Getting started with RISCV Business consists of three steps: setting up the RISCV tool-chain, setting up the WAF build system, and finally interacting with the RISCV Business project itself. 
+
+## Fusesoc
+This project uses the [Fusesoc](http://fusesoc.net/) build system.  Use the following commands to get started...
+
+```bash
+# install project dependencies &
+# setup git pre-commit hook
+./setup.sh
+
+# For ease of use, use the makefile to run FuseSoC tests
+make # shows all build targets available
+
+# configure the RISC-V core
+make config 
+# or python3 scripts/config_core.py <custom>.yml
+#   if you want to use a config other than example.yml
+
+make verilate # build with Verilator, or...
+make xcelium # build with Xcelium
+```
+
+> Congrats! All dependencies are now set up.  Now you can run simulations/tests:
+
+
+```bash
+# Run ISA tests
+run_tests_verilator.py
+
+# Run specify binary on Verliator core simulation
+./rvb_out/sim-verilator/Vtop_core meminit.bin
+```
 
 ## Generating RISC-V tool-chain
 
@@ -35,14 +66,6 @@ Then run after setting the environment variable "RISCV" to your install location
 ~~~
 ./build.sh
 ~~~
-
-## Installing the build environment
-
-RISCVBusiness uses SoCFoundationFlow, built off of the waf build system.  The following repository contains the source for waf:
-
-[SoCFoundationFlow](https://github.com/mattaw/SoCFoundationFlow)
-
-Refer to SoCFoundationFlow for installation instructions.
 
 ## Setup and Run RISCV Business
 
