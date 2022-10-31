@@ -25,6 +25,7 @@
 `include "prv_pipeline_if.vh"
 `include "priv_1_12_internal_if.vh"
 `include "core_interrupt_if.vh"
+`include "priv_ext_if.vh"
 
 module priv_1_12_block (
     input logic CLK, nRST,
@@ -35,10 +36,12 @@ module priv_1_12_block (
     import machine_mode_types_1_12_pkg::*;
 
     priv_1_12_internal_if prv_intern_if();
+    priv_ext_if priv_ext_pma_if();
 
-    priv_1_12_csr csr (.CLK(CLK), .nRST(nRST), .prv_intern_if(prv_intern_if));
+    priv_1_12_csr csr (.CLK(CLK), .nRST(nRST), .prv_intern_if(prv_intern_if), .priv_ext_pma_if(priv_ext_pma_if));
     priv_1_12_int_ex_handler int_ex_handler (.CLK(CLK), .nRST(nRST), .prv_intern_if(prv_intern_if));
     priv_1_12_pipe_control pipe_ctrl (.prv_intern_if(prv_intern_if));
+    priv_1_12_pma pma (.CLK(CLK), .nRST(nRST), .prv_intern_if(prv_intern_if), .priv_ext_if(priv_ext_pma_if));
 
     priv_level_t curr_priv;
 
@@ -108,5 +111,17 @@ module priv_1_12_block (
     assign prv_pipe_if.priv_pc     = prv_intern_if.priv_pc;
     assign prv_pipe_if.insert_pc   = prv_intern_if.insert_pc;
     assign prv_pipe_if.intr        = prv_intern_if.intr;
+
+    // Memory protection signals
+    assign prv_intern_if.daddr = prv_pipe_if.daddr;
+    assign prv_intern_if.iaddr = prv_pipe_if.iaddr;
+    assign prv_intern_if.d_acc_width = prv_pipe_if.d_acc_width;
+    assign prv_intern_if.i_acc_width = prv_pipe_if.i_acc_width;
+    assign prv_intern_if.ren = prv_pipe_if.dren;
+    assign prv_intern_if.wen = prv_pipe_if.dwen;
+    assign prv_intern_if.xen = prv_pipe_if.iren;
+    assign prv_pipe_if.prot_fault_i = prv_intern_if.pma_i_fault;
+    assign prv_pipe_if.prot_fault_l = prv_intern_if.pma_l_fault;
+    assign prv_pipe_if.prot_fault_s = prv_intern_if.pma_s_fault;
 
 endmodule

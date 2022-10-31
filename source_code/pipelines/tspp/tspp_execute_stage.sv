@@ -52,6 +52,7 @@ module tspp_execute_stage (
 );
 
     import rv32i_types_pkg::*;
+    import pma_types_1_12_pkg::*;
 
     // Interface declarations
     control_unit_if cu_if ();
@@ -243,8 +244,8 @@ module tspp_execute_stage (
     // RISC-MGMT connection
     assign rm_if.mem_load       = dgen_bus_if.rdata;
 
-    assign dgen_bus_if.ren      = rm_if.req_mem ? rm_if.mem_ren : cu_if.dren & ~mal_addr;
-    assign dgen_bus_if.wen      = rm_if.req_mem ? rm_if.mem_wen : cu_if.dwen & ~mal_addr;
+    assign dgen_bus_if.ren      = rm_if.req_mem ? rm_if.mem_ren : cu_if.dren & ~mal_addr & ~prv_pipe_if.prot_fault_l;
+    assign dgen_bus_if.wen      = rm_if.req_mem ? rm_if.mem_wen : cu_if.dwen & ~mal_addr & ~prv_pipe_if.prot_fault_s;
     assign byte_en_temp         = rm_if.req_mem ? rm_if.mem_byte_en : byte_en_standard;
     assign dgen_bus_if.byte_en  = byte_en;
     assign dgen_bus_if.addr     = rm_if.req_mem ? rm_if.mem_addr : alu_if.port_out;
@@ -388,6 +389,13 @@ module tspp_execute_stage (
 
     assign hazard_if.epc_e = fetch_ex_if.fetch_ex_reg.pc;
     assign hazard_if.token_ex = fetch_ex_if.fetch_ex_reg.token;
+
+    // setup signals for memory protection
+    //  not considering risc-mgmt here TODO
+    assign prv_pipe_if.dren  = cu_if.dren & ~mal_addr;
+    assign prv_pipe_if.dwen  = cu_if.dwen & ~mal_addr;
+    assign prv_pipe_if.daddr = alu_if.port_out;
+    assign prv_pipe_if.d_acc_width = WordAcc;
 
     /*********************************************************
   *** Branch Predictor Logic

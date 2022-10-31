@@ -29,6 +29,7 @@
 
 interface priv_1_12_internal_if;
     import machine_mode_types_1_12_pkg::*;
+    import pma_types_1_12_pkg::*;
     import rv32i_types_pkg::*;
 
     // RISC-MGMT?
@@ -77,7 +78,13 @@ interface priv_1_12_internal_if;
     logic mret, sret, uret; // returning from a trap instruction
     logic intr; // Did something trigger an interrupt?
 
+    // Addresses and memory access info for memory protection
+    logic [RAM_ADDR_SIZE-1:0] daddr, iaddr; // Address to check
+    logic ren, wen, xen; // RWX access type
 
+    // PMA comm variables
+    pma_accwidth_t d_acc_width, i_acc_width; // Width of memory access
+    logic pma_s_fault, pma_l_fault, pma_i_fault; // PMA store fault, load fault, instruction fault
 
     modport csr (
         input csr_addr, curr_priv, csr_write, csr_set, csr_clear, new_csr_val, inst_ret, valid_write,
@@ -100,6 +107,11 @@ interface priv_1_12_internal_if;
     modport pipe_ctrl (
         input intr, pipe_clear, mret, sret, uret, curr_mtvec, curr_mcause, curr_mepc,
         output insert_pc, priv_pc
+    );
+
+    modport pma (
+        input iaddr, daddr, ren, wen, xen, d_acc_width, i_acc_width,
+        output pma_s_fault, pma_i_fault, pma_l_fault
     );
 
 endinterface
