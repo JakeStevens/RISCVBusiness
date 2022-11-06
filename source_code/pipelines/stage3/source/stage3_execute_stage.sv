@@ -269,24 +269,31 @@ module stage3_execute_stage (
             // PS: Does it even matter? Synth. tools may be able to merge regs.
             if(!hazard_if.ex_mem_flush && !hazard_if.ex_mem_stall) begin
                 // TODO: Handle case of exceptions earlier in the pipe being passed on to handle in the last stage
-                // Single bit control signals
-                ex_mem_if.ex_mem_reg.branch         <= cu_if.branch;
-                ex_mem_if.ex_mem_reg.prediction     <= fetch_ex_if.fetch_ex_reg.prediction;
-                ex_mem_if.ex_mem_reg.branch_taken   <= branch_if.branch_taken;
-                ex_mem_if.ex_mem_reg.dren           <= cu_if.dren;
-                ex_mem_if.ex_mem_reg.dwen           <= cu_if.dwen;
-                ex_mem_if.ex_mem_reg.reg_write      <= cu_if.wen;
-                ex_mem_if.ex_mem_reg.ifence         <= cu_if.ifence;
-                ex_mem_if.ex_mem_reg.jump           <= cu_if.jump;
-                ex_mem_if.ex_mem_reg.halt           <= cu_if.halt;
-                ex_mem_if.ex_mem_reg.csr_swap       <= cu_if.csr_swap;
-                ex_mem_if.ex_mem_reg.csr_clr        <= cu_if.csr_clr;
-                ex_mem_if.ex_mem_reg.csr_set        <= cu_if.csr_set;
-                ex_mem_if.ex_mem_reg.csr_imm        <= cu_if.csr_imm;
-                ex_mem_if.ex_mem_reg.breakpoint     <= cu_if.breakpoint;
-                ex_mem_if.ex_mem_reg.ecall_insn     <= cu_if.ecall_insn;
-                ex_mem_if.ex_mem_reg.ret_insn       <= cu_if.ret_insn;
-                ex_mem_if.ex_mem_reg.was_compressed <= 1'b0; // TODO: RV32C support
+                // Single bit control signals -- squash these if we have an exception
+                // Only need to check illegal since it's the only "new" exception we have
+                if(!cu_if.illegal_insn) begin
+                    ex_mem_if.ex_mem_reg.branch         <= cu_if.branch;
+                    ex_mem_if.ex_mem_reg.prediction     <= fetch_ex_if.fetch_ex_reg.prediction;
+                    ex_mem_if.ex_mem_reg.branch_taken   <= branch_if.branch_taken;
+                    ex_mem_if.ex_mem_reg.dren           <= cu_if.dren;
+                    ex_mem_if.ex_mem_reg.dwen           <= cu_if.dwen;
+                    ex_mem_if.ex_mem_reg.reg_write      <= cu_if.wen;
+                    ex_mem_if.ex_mem_reg.ifence         <= cu_if.ifence;
+                    ex_mem_if.ex_mem_reg.jump           <= cu_if.jump;
+                    ex_mem_if.ex_mem_reg.halt           <= cu_if.halt;
+                    ex_mem_if.ex_mem_reg.csr_swap       <= cu_if.csr_swap;
+                    ex_mem_if.ex_mem_reg.csr_clr        <= cu_if.csr_clr;
+                    ex_mem_if.ex_mem_reg.csr_set        <= cu_if.csr_set;
+                    ex_mem_if.ex_mem_reg.csr_imm        <= cu_if.csr_imm;
+                    ex_mem_if.ex_mem_reg.breakpoint     <= cu_if.breakpoint;
+                    ex_mem_if.ex_mem_reg.ecall_insn     <= cu_if.ecall_insn;
+                    ex_mem_if.ex_mem_reg.ret_insn       <= cu_if.ret_insn;
+                    ex_mem_if.ex_mem_reg.was_compressed <= 1'b0; // TODO: RV32C support
+                end
+                ex_mem_if.ex_mem_reg.illegal_insn              <= cu_if.illegal_insn;
+                ex_mem_if.ex_mem_reg.badaddr                   <= fetch_ex_if.fetch_ex_reg.badaddr;
+                ex_mem_if.ex_mem_reg.mal_insn                  <= fetch_ex_if.fetch_ex_reg.mal_insn;
+                ex_mem_if.ex_mem_reg.fault_insn                <= fetch_ex_if.fetch_ex_reg.fault_insn;
 
                 // Bit vectors
                 ex_mem_if.ex_mem_reg.w_sel      <= cu_if.w_sel;

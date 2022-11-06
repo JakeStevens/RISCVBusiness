@@ -45,8 +45,8 @@ module stage3_mem_stage(
 
 
     // TODO: RISC-MGMT
-    assign dgen_bus_if.ren = ex_mem_if.ex_mem_reg.dren & ~mal_addr & ~prv_pipe_if.prot_fault_l;
-    assign dgen_bus_if.wen = ex_mem_if.ex_mem_reg.dwen & ~mal_addr & ~prv_pipe_if.prot_fault_s;
+    assign dgen_bus_if.ren = ex_mem_if.ex_mem_reg.dren && !hazard_if.suppress_data;
+    assign dgen_bus_if.wen = ex_mem_if.ex_mem_reg.dwen && !hazard_if.suppress_data;
     assign dgen_bus_if.byte_en = byte_en;
     assign dgen_bus_if.addr = ex_mem_if.ex_mem_reg.port_out;
     assign byte_offset = ex_mem_if.ex_mem_reg.port_out[1:0];
@@ -181,6 +181,9 @@ module stage3_mem_stage(
                                         | prv_pipe_if.set) & ~hazard_if.ex_mem_stall;
     assign prv_pipe_if.instr = (ex_mem_if.ex_mem_reg.instr != '0);
 
+    assign hazard_if.fault_insn = ex_mem_if.ex_mem_reg.fault_insn;
+    assign hazard_if.mal_insn = ex_mem_if.ex_mem_reg.mal_insn;
+    assign hazard_if.illegal_insn = ex_mem_if.ex_mem_reg.illegal_insn;
     assign hazard_if.fault_l = 1'b0;
     assign hazard_if.mal_l = ex_mem_if.ex_mem_reg.dren & mal_addr;
     assign hazard_if.fault_s = 1'b0;
@@ -188,14 +191,14 @@ module stage3_mem_stage(
     assign hazard_if.breakpoint = ex_mem_if.ex_mem_reg.breakpoint;
     assign hazard_if.env_m = ex_mem_if.ex_mem_reg.ecall_insn;
     assign hazard_if.ret = ex_mem_if.ex_mem_reg.ret_insn;
-    assign hazard_if.badaddr = dgen_bus_if.addr;
+    assign hazard_if.badaddr = (hazard_if.fault_insn || hazard_if.mal_insn) ? ex_mem_if.ex_mem_reg.badaddr : dgen_bus_if.addr;
 
     // NEW
     assign hazard_if.epc = ex_mem_if.ex_mem_reg.pc;
     
     // Memory protection (doesn't consider RISC-MGMT)
-    assign prv_pipe_if.dren  = ex_mem_if.ex_mem_reg.dren & ~mal_addr;
-    assign prv_pipe_if.dwen  = ex_mem_if.ex_mem_reg.dwen & ~mal_addr;
+    assign prv_pipe_if.dren  = ex_mem_if.ex_mem_reg.dren;
+    assign prv_pipe_if.dwen  = ex_mem_if.ex_mem_reg.dwen;
     assign prv_pipe_if.daddr = ex_mem_if.ex_mem_reg.port_out;
     assign prv_pipe_if.d_acc_width = WordAcc;
 

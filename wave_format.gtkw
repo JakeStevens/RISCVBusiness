@@ -1,24 +1,26 @@
 [*]
 [*] GTKWave Analyzer v3.3.111 (w)1999-2020 BSI
-[*] Sat Nov  5 21:49:30 2022
+[*] Sun Nov  6 02:28:56 2022
 [*]
 [dumpfile] "/home/asicfab/a/socet46/RISCVBusiness/waveform.fst"
-[dumpfile_mtime] "Sat Nov  5 21:33:40 2022"
-[dumpfile_size] 28545
-[savefile] "/home/asicfab/a/socet46/RISCVBusiness/restore.gtkw"
+[dumpfile_mtime] "Sun Nov  6 02:11:18 2022"
+[dumpfile_size] 85451
+[savefile] "/home/asicfab/a/socet46/RISCVBusiness/wave_format.gtkw"
 [timestart] 0
-[size] 1000 600
-[pos] 930 20
-*-4.008905 42 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[size] 3440 1371
+[pos] -39 -39
+*-3.008905 52 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.top_core.
 [treeopen] TOP.top_core.CORE.
 [treeopen] TOP.top_core.CORE.pipeline.
 [treeopen] TOP.top_core.CORE.pipeline.execute_stage_i.g_rfile_select.rf.
+[treeopen] TOP.top_core.CORE.pipeline.mem_pipe_if.
+[treeopen] TOP.top_core.CORE.pipeline.mem_pipe_if.ex_mem_reg.
 [sst_width] 293
 [signals_width] 275
 [sst_expanded] 1
-[sst_vpaned_height] 143
+[sst_vpaned_height] 411
 @28
 [color] 3
 TOP.CLK
@@ -44,6 +46,8 @@ TOP.top_core.CORE.pipeline.mem_pipe_if.brj_addr[31:0]
 @200
 -
 -EXECUTE STAGE
+@22
+TOP.top_core.CORE.pipeline.fetch_ex_if.fetch_ex_reg.pc[31:0]
 @100000028
 TOP.top_core.CORE.pipeline.execute_stage_i.cu_if.opcode[6:0]
 TOP.top_core.CORE.pipeline.execute_stage_i.cu_if.branch_type[2:0]
@@ -75,7 +79,9 @@ TOP.top_core.CORE.pipeline.execute_stage_i.ex_mem_if.reg_write
 -MEM STAGE
 @22
 TOP.top_core.CORE.pipeline.mem_stage_i.ex_mem_if.ex_mem_reg.pc[31:0]
-@23
+@100000029
+TOP.top_core.CORE.pipeline.mem_pipe_if.ex_mem_reg.tracker_signals.opcode[6:0]
+@22
 TOP.top_core.CORE.pipeline.mem_stage_i.dgen_bus_if.addr[31:0]
 @28
 TOP.top_core.CORE.pipeline.mem_stage_i.dgen_bus_if.busy

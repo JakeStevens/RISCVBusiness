@@ -32,7 +32,7 @@ interface stage3_hazard_unit_if();
   // Pipeline status signals (inputs)
   logic [4:0] rs1_e, rs2_e, rd_m;
   logic reg_write, csr_read;
-  logic i_mem_busy, d_mem_busy, dren, dwen, ret;
+  logic i_mem_busy, d_mem_busy, dren, dwen, ret, suppress_data;
   logic jump, branch, fence_stall;
   logic mispredict, halt;
   word_t pc;
@@ -41,7 +41,7 @@ interface stage3_hazard_unit_if();
   logic pc_en, npc_sel;
   logic if_ex_flush, ex_mem_flush;
   logic if_ex_stall, ex_mem_stall;
-  logic iren;
+  logic iren, suppress_iren;
 
   // xTVEC Insertion
   word_t priv_pc;
@@ -70,11 +70,11 @@ interface stage3_hazard_unit_if();
     output  pc_en, npc_sel, 
             if_ex_flush, ex_mem_flush,
             if_ex_stall, ex_mem_stall,
-            priv_pc, insert_priv_pc, iren
+            priv_pc, insert_priv_pc, iren, suppress_iren, suppress_data
   );
 
   modport fetch (
-    input   pc_en, npc_sel, if_ex_stall, if_ex_flush, priv_pc, insert_priv_pc, iren,
+    input   pc_en, npc_sel, if_ex_stall, if_ex_flush, priv_pc, insert_priv_pc, iren, suppress_iren,
     output  i_mem_busy, rv32c_ready
   );
 
@@ -84,7 +84,7 @@ interface stage3_hazard_unit_if();
   );
 
   modport mem (
-    input   ex_mem_stall, ex_mem_flush,
+    input   ex_mem_stall, ex_mem_flush, suppress_data,
     output  rd_m, reg_write, csr_read,
             d_mem_busy, dren, dwen, ret, 
             jump, branch, fence_stall, mispredict, halt, pc,

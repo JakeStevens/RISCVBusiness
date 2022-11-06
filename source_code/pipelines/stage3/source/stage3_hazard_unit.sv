@@ -67,8 +67,8 @@ module stage3_hazard_unit (
 
     assign dmem_access = (hazard_if.dren || hazard_if.dwen);
     assign branch_jump = hazard_if.jump || (hazard_if.branch && hazard_if.mispredict);
-    assign wait_for_imem = hazard_if.iren & hazard_if.i_mem_busy;
-    assign wait_for_dmem = dmem_access & hazard_if.d_mem_busy;
+    assign wait_for_imem = hazard_if.iren && hazard_if.i_mem_busy && !hazard_if.suppress_data;
+    assign wait_for_dmem = dmem_access && hazard_if.d_mem_busy && !hazard_if.suppress_iren;
     assign mem_use_stall = hazard_if.reg_write && cannot_forward && (rs1_match || rs2_match);
 
     assign hazard_if.npc_sel = branch_jump;
@@ -92,7 +92,9 @@ module stage3_hazard_unit (
     assign hazard_if.insert_priv_pc = prv_pipe_if.insert_pc;
     assign hazard_if.priv_pc = prv_pipe_if.priv_pc;
 
-    assign hazard_if.iren = !intr && !branch_jump;  // prevents a false instruction request from being sent
+    assign hazard_if.iren = 1'b1;
+    assign hazard_if.suppress_iren = intr || branch_jump || exception || prv_pipe_if.ret;  // prevents a false instruction request from being sent when pipeline flush imminent
+    assign hazard_if.suppress_data = intr || exception; // suppress data transfer on interrupt/exception. Exception case: prevent read/write of faulting location. Interrupt: make symmetric with exceptions for ease
 
     /* Send Exception notifications to Prv Block */
     // TODO: Correct execution of exceptions
@@ -150,6 +152,7 @@ module stage3_hazard_unit (
                                   || hazard_if.halt;
                                   //|| branch_jump && wait_for_imem; // This can be removed once there is I$. Solves problem where
                                                                    // stale I-request returns after PC is redirected
+    // TODO: Enforce mutual exclusivity of these signals with assertion
 
     /*********************************************************
   *** SparCE Module Logic

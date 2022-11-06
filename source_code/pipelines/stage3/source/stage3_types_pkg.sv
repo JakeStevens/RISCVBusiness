@@ -47,6 +47,9 @@ package stage3_types_pkg;
         logic [3:0] byte_en; // TODO: Where should this be generated?
         logic [4:0] zimm;
         logic [4:0] rd_m;
+        logic mal_insn;
+        logic fault_insn;
+        logic illegal_insn;
         load_t load_type;
         csr_addr_t csr_addr;
         word_t brj_addr;
@@ -57,6 +60,7 @@ package stage3_types_pkg;
         word_t pc;
         word_t pc4;
         word_t imm_U;
+        word_t badaddr;
         tracker_ex_mem_t tracker_signals;
         // TODO: imm_U? Maybe needed
     } ex_mem_t;

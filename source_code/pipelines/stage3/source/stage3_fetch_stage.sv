@@ -85,7 +85,7 @@ module stage3_fetch_stage (
     //Instruction Access logic
     assign hazard_if.i_mem_busy = igen_bus_if.busy;
     assign igen_bus_if.addr = rv32cif.rv32c_ena ? rv32cif.imem_pc : pc;
-    assign igen_bus_if.ren = hazard_if.iren & !rv32cif.done_earlier;
+    assign igen_bus_if.ren = hazard_if.iren && !rv32cif.done_earlier && !hazard_if.suppress_iren;
     assign igen_bus_if.wen = 1'b0;
     assign igen_bus_if.byte_en = 4'b1111;
     assign igen_bus_if.wdata = '0;
@@ -99,7 +99,7 @@ module stage3_fetch_stage (
     assign mal_addr = (igen_bus_if.addr[1:0] != 2'b00);
     assign fault_insn = 1'b0;
     assign mal_insn = mal_addr;
-    assign badaddr_f = igen_bus_if.addr;
+    assign badaddr = igen_bus_if.addr;
 
 
     //Fetch Execute Pipeline Signals
@@ -123,7 +123,7 @@ module stage3_fetch_stage (
 
 
     // Send memory protection signals
-    assign prv_pipe_if.iren = igen_bus_if.ren;
+    assign prv_pipe_if.iren = hazard_if.iren;
     assign prv_pipe_if.iaddr = igen_bus_if.addr;
     assign prv_pipe_if.i_acc_width = WordAcc;
 
