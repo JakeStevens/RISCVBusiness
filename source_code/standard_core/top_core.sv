@@ -51,11 +51,11 @@ module top_core #(
         .rs1(ex_mem_if.ex_mem_reg.instr[19:15]),
         .rs2(ex_mem_if.ex_mem_reg.instr[24:20]),
         .rd(ex_mem_if.ex_mem_reg.rd_m),
-        .imm_S('0), // TODO: Extract constants. Maybe we could pass these in the pipeline and they'd be removed by synthesis?
-        .imm_I('0),
-        .imm_U('0),
-        .imm_UJ('0),
-        .imm_SB('0),
+        .imm_S(ex_mem_if.ex_mem_reg.tracker_signals.imm_S), // TODO: Extract constants. Maybe we could pass these in the pipeline and they'd be removed by synthesis?
+        .imm_I(ex_mem_if.ex_mem_reg.tracker_signals.imm_I),
+        .imm_U(ex_mem_if.ex_mem_reg.tracker_signals.imm_U),
+        .imm_UJ(ex_mem_if.ex_mem_reg.tracker_signals.imm_UJ),
+        .imm_SB(ex_mem_if.ex_mem_reg.tracker_signals.imm_SB),
         .instr_30(instr_30)
     );
 

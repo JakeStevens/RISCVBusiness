@@ -15,6 +15,15 @@ package stage3_types_pkg;
         word_t badaddr;
     } fetch_ex_t;
 
+    typedef struct packed {
+        opcode_t opcode;
+        logic [12:0] imm_SB;
+        logic [11:0] imm_S;
+        logic [11:0] imm_I;
+        logic [20:0] imm_UJ;
+        logic [31:0] imm_U;
+    } tracker_ex_mem_t;
+
     // TODO: Instructions?
     typedef struct packed {
         logic branch;
@@ -48,6 +57,7 @@ package stage3_types_pkg;
         word_t pc;
         word_t pc4;
         word_t imm_U;
+        tracker_ex_mem_t tracker_signals;
         // TODO: imm_U? Maybe needed
     } ex_mem_t;
 

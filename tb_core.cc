@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <map>
+#include <csignal>
 
 #include "verilated.h"
 #include "verilated_fst_c.h"
@@ -25,6 +26,8 @@
 
 // doubles as mtime counter
 vluint64_t sim_time = 0;
+Vtop_core *dut_ptr;
+VerilatedFstC *trace_ptr;
 
 /*
  *  Emulate memory-mapped CSRs
@@ -35,7 +38,12 @@ uint32_t msip = 0;
 // Interrupt signals
 bool ext_int = false;
 
-
+void signal_handler(int signum) {
+    std::cout << "Got signal " << signum << std::endl;
+    dut_ptr->final();
+    trace_ptr->close();
+    exit(1);
+}
 
 class MemoryMap {
 private:
@@ -169,10 +177,10 @@ public:
         for(auto p : mmap) {
             if(p.second != 0) {
                 char buf[80];
-                snprintf(buf, 80, "%08x : %02x%02x%02x%02x", p.first, 
-                        (p.second & 0xFF000000) >> 24, 
-                        (p.second & 0x00FF0000) >> 16, 
-                        (p.second & 0x0000FF00) >> 8, 
+                snprintf(buf, 80, "%08x : %02x%02x%02x%02x", p.first,
+                        (p.second & 0xFF000000) >> 24,
+                        (p.second & 0x00FF0000) >> 16,
+                        (p.second & 0x0000FF00) >> 8,
                         p.second & 0x000000FF);
                 outfile << buf << std::endl;
             }
@@ -221,7 +229,7 @@ void tick(Vtop_core& dut, VerilatedFstC& trace) {
 }
 
 void reset(Vtop_core& dut, VerilatedFstC& trace) {
-    // Initialize signals 
+    // Initialize signals
     dut.CLK = 0;
     dut.nRST = 0;
     dut.ext_int = 0;
@@ -263,6 +271,13 @@ int main(int argc, char **argv) {
     m_trace.open("waveform.fst");
 
     mtimecmp = 0xFFFFFFFFFFFFFFFF; // Default to a massive value
+
+
+    dut_ptr = &dut;
+    trace_ptr = &m_trace;
+
+    signal(SIGINT, signal_handler);
+
 
     reset(dut, m_trace);
     while(!dut.halt && sim_time < 100000) {

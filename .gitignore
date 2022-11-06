@@ -68,4 +68,5 @@ fusesoc_libraries
 fusesoc.conf
 
 # synthesis scripts
-desflow/**
+desflow1/
+.vscode/

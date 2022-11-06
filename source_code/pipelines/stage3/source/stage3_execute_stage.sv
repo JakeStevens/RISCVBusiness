@@ -305,6 +305,14 @@ module stage3_execute_stage (
                 ex_mem_if.ex_mem_reg.pc4        <= fetch_ex_if.fetch_ex_reg.pc4;
                 ex_mem_if.ex_mem_reg.imm_U      <= cu_if.imm_U;
 
+                // CPU Tracker
+                ex_mem_if.ex_mem_reg.tracker_signals.opcode <= cu_if.opcode;
+                ex_mem_if.ex_mem_reg.tracker_signals.imm_SB <= cu_if.imm_SB;
+                ex_mem_if.ex_mem_reg.tracker_signals.imm_S  <= cu_if.imm_S;
+                ex_mem_if.ex_mem_reg.tracker_signals.imm_I  <= cu_if.imm_I;
+                ex_mem_if.ex_mem_reg.tracker_signals.imm_UJ <= cu_if.imm_UJ;
+                ex_mem_if.ex_mem_reg.tracker_signals.imm_U  <= cu_if.imm_U;
+
             end else if(hazard_if.ex_mem_flush && !hazard_if.ex_mem_stall) begin
                 ex_mem_if.ex_mem_reg <= '{default: '0};
             end
