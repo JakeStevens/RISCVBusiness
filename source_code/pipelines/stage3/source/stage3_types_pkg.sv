@@ -5,7 +5,8 @@ package stage3_types_pkg;
     import machine_mode_types_1_12_pkg::*;
 
     typedef struct packed {
-        logic  token;
+        logic valid;
+        logic token;
         logic mal_insn;
         logic fault_insn;
         word_t pc;
@@ -26,6 +27,7 @@ package stage3_types_pkg;
 
     // TODO: Instructions?
     typedef struct packed {
+        logic valid;
         logic branch;
         logic prediction;
         logic branch_taken;

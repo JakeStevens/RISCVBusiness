@@ -35,7 +35,8 @@ interface stage3_hazard_unit_if();
   logic i_mem_busy, d_mem_busy, dren, dwen, ret, suppress_data;
   logic jump, branch, fence_stall;
   logic mispredict, halt;
-  word_t pc;
+  word_t pc_f, pc_e, pc_m;
+  logic valid_e, valid_m; // f always valid since it's the PC
 
   // Control (outputs)
   logic pc_en, npc_sel;
@@ -50,7 +51,7 @@ interface stage3_hazard_unit_if();
   //Pipeline Exceptions (inputs)
   logic fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s,
         breakpoint, env_m;
-  word_t epc, badaddr;
+  word_t badaddr;
 
   // Pipeline Tokens 
   logic token_ex;
@@ -63,10 +64,11 @@ interface stage3_hazard_unit_if();
     input   rs1_e, rs2_e, rd_m,
             reg_write, csr_read,
             i_mem_busy, d_mem_busy, dren, dwen, ret,
-            jump, branch, fence_stall, mispredict, halt, pc,
+            jump, branch, fence_stall, mispredict, halt, pc_f, pc_e, pc_m,
             fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s, breakpoint, env_m,
-            epc, badaddr, 
+            badaddr, 
             token_ex, token_mem, rv32c_ready,
+            valid_e, valid_m,
     output  pc_en, npc_sel, 
             if_ex_flush, ex_mem_flush,
             if_ex_stall, ex_mem_stall,
@@ -75,21 +77,21 @@ interface stage3_hazard_unit_if();
 
   modport fetch (
     input   pc_en, npc_sel, if_ex_stall, if_ex_flush, priv_pc, insert_priv_pc, iren, suppress_iren,
-    output  i_mem_busy, rv32c_ready
+    output  i_mem_busy, rv32c_ready, pc_f
   );
 
   modport execute (
     input  ex_mem_stall, ex_mem_flush, npc_sel,
-    output rs1_e, rs2_e, token_ex
+    output rs1_e, rs2_e, token_ex, pc_e, valid_e
   );
 
   modport mem (
     input   ex_mem_stall, ex_mem_flush, suppress_data,
     output  rd_m, reg_write, csr_read,
             d_mem_busy, dren, dwen, ret, 
-            jump, branch, fence_stall, mispredict, halt, pc,
+            jump, branch, fence_stall, mispredict, halt, pc_m, valid_m,
             fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s, breakpoint, env_m, 
-            epc, badaddr,
+            badaddr,
             token_mem
   );
  

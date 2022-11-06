@@ -100,6 +100,7 @@ module stage3_fetch_stage (
     assign fault_insn = 1'b0;
     assign mal_insn = mal_addr;
     assign badaddr = igen_bus_if.addr;
+    assign hazard_if.pc_f = pc;
 
 
     //Fetch Execute Pipeline Signals
@@ -110,6 +111,7 @@ module stage3_fetch_stage (
         else if (hazard_if.if_ex_flush && !hazard_if.if_ex_stall) fetch_ex_if.fetch_ex_reg <= '0;
         else if (((rv32cif.done | rv32cif.done_earlier) & rv32cif.rv32c_ena)
                     | (!hazard_if.if_ex_stall & !rv32cif.rv32c_ena)) begin
+            fetch_ex_if.fetch_ex_reg.valid      <= 1'b1;
             fetch_ex_if.fetch_ex_reg.token      <= 1'b1;
             fetch_ex_if.fetch_ex_reg.mal_insn   <= mal_insn;
             fetch_ex_if.fetch_ex_reg.fault_insn <= fault_insn;

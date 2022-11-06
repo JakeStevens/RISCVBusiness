@@ -259,6 +259,8 @@ module stage3_execute_stage (
     assign fw_if.rs1_e = rf_if.rs1;
     assign fw_if.rs2_e = rf_if.rs2;
 
+    assign hazard_if.pc_e = fetch_ex_if.fetch_ex_reg.pc;
+
 
     // TODO: NEW
     always_ff @(posedge CLK, negedge nRST) begin
@@ -271,6 +273,7 @@ module stage3_execute_stage (
                 // TODO: Handle case of exceptions earlier in the pipe being passed on to handle in the last stage
                 // Single bit control signals -- squash these if we have an exception
                 // Only need to check illegal since it's the only "new" exception we have
+                ex_mem_if.ex_mem_reg.valid              <= fetch_ex_if.fetch_ex_reg.valid;
                 if(!cu_if.illegal_insn) begin
                     ex_mem_if.ex_mem_reg.branch         <= cu_if.branch;
                     ex_mem_if.ex_mem_reg.prediction     <= fetch_ex_if.fetch_ex_reg.prediction;

@@ -53,6 +53,7 @@ module stage3_hazard_unit (
     logic ex_flush_hazard;
     logic exception;
     logic intr;
+    word_t epc;
 
     // TODO: RISC-MGMT
     logic rmgmt_stall;
@@ -67,8 +68,8 @@ module stage3_hazard_unit (
 
     assign dmem_access = (hazard_if.dren || hazard_if.dwen);
     assign branch_jump = hazard_if.jump || (hazard_if.branch && hazard_if.mispredict);
-    assign wait_for_imem = hazard_if.iren && hazard_if.i_mem_busy && !hazard_if.suppress_data;
-    assign wait_for_dmem = dmem_access && hazard_if.d_mem_busy && !hazard_if.suppress_iren;
+    assign wait_for_imem = hazard_if.iren && hazard_if.i_mem_busy && !hazard_if.suppress_iren;
+    assign wait_for_dmem = dmem_access && hazard_if.d_mem_busy && !hazard_if.suppress_data;
     assign mem_use_stall = hazard_if.reg_write && cannot_forward && (rs1_match || rs2_match);
 
     assign hazard_if.npc_sel = branch_jump;
@@ -93,8 +94,13 @@ module stage3_hazard_unit (
     assign hazard_if.priv_pc = prv_pipe_if.priv_pc;
 
     assign hazard_if.iren = 1'b1;
-    assign hazard_if.suppress_iren = intr || branch_jump || exception || prv_pipe_if.ret;  // prevents a false instruction request from being sent when pipeline flush imminent
-    assign hazard_if.suppress_data = intr || exception; // suppress data transfer on interrupt/exception. Exception case: prevent read/write of faulting location. Interrupt: make symmetric with exceptions for ease
+    // TODO: Removed intr as cause of suppression -- is this OK?
+    assign hazard_if.suppress_iren = branch_jump || exception || prv_pipe_if.ret;  // prevents a false instruction request from being sent when pipeline flush imminent
+    assign hazard_if.suppress_data = exception; // suppress data transfer on interrupt/exception. Exception case: prevent read/write of faulting location. Interrupt: make symmetric with exceptions for ease
+
+    // EPC priority logic
+    assign epc = hazard_if.valid_m ? hazard_if.pc_m :
+                (hazard_if.valid_e ? hazard_if.pc_e : hazard_if.pc_f);
 
     /* Send Exception notifications to Prv Block */
     // TODO: Correct execution of exceptions
@@ -114,14 +120,15 @@ module stage3_hazard_unit (
     assign prv_pipe_if.ex_rmgmt = rm_if.exception;
 
     assign prv_pipe_if.ex_rmgmt_cause = rm_if.ex_cause;
-    assign prv_pipe_if.epc = hazard_if.epc;
+    assign prv_pipe_if.epc = epc;
     assign prv_pipe_if.badaddr = hazard_if.badaddr;
 
 
     /*
     * Pipeline control signals
     *
-    * Control hazard (Ex, Int, Jump, Mispredict): F/E -> Flush, E/M -> Flush
+    * Control hazard (Exception, Jump, Mispredict): F/E -> Flush, E/M -> Flush
+    *     - Special case: interrupt. Async, don't know where the oldest insn is. Interrupts must assume the memory op will go through, so flush only I/F
     * Data hazard (unforwardable, load/CSR read): F/E -> Stall, E/M -> Flush
     * Waiting (i.e. slow dmem access, fence, etc.):
     *     - If fetch stage slow, flush if_ex so in-flight instructions may finish (insert bubbles)
@@ -145,9 +152,9 @@ module stage3_hazard_unit (
                                   // || (wait_for_imem && !dmem_access) // ???
                                   //& (~ex_flush_hazard | e_ex_stage) // ???
                                   || rm_if.execute_stall // 
-                                  || mem_use_stall; // Data hazard -- stall until stall clears (from E/M flush after writeback)
+                                  || mem_use_stall; // Data hazard -- stall until dependency clears (from E/M flush after writeback)
      // TODO: Exceptions
-    assign hazard_if.ex_mem_stall = wait_for_dmem
+    assign hazard_if.ex_mem_stall = wait_for_dmem // Second clause ensures we finish memory op on interrupt condition
                                   || hazard_if.fence_stall
                                   || hazard_if.halt;
                                   //|| branch_jump && wait_for_imem; // This can be removed once there is I$. Solves problem where

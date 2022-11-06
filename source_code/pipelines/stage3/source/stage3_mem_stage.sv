@@ -164,7 +164,7 @@ module stage3_mem_stage(
     assign hazard_if.csr_read = prv_pipe_if.valid_write;
     assign hazard_if.token_mem = 0; // TODO: RISC-MGMT
     assign hazard_if.mispredict = ex_mem_if.ex_mem_reg.prediction ^ ex_mem_if.ex_mem_reg.branch_taken;
-    assign hazard_if.pc = ex_mem_if.ex_mem_reg.pc;
+    //assign hazard_if.pc = ex_mem_if.ex_mem_reg.pc;
 
     assign halt = ex_mem_if.ex_mem_reg.halt;
 
@@ -194,7 +194,8 @@ module stage3_mem_stage(
     assign hazard_if.badaddr = (hazard_if.fault_insn || hazard_if.mal_insn) ? ex_mem_if.ex_mem_reg.badaddr : dgen_bus_if.addr;
 
     // NEW
-    assign hazard_if.epc = ex_mem_if.ex_mem_reg.pc;
+    assign hazard_if.pc_m = ex_mem_if.ex_mem_reg.pc;
+    assign hazard_if.valid_m = ex_mem_if.ex_mem_reg.valid;
     
     // Memory protection (doesn't consider RISC-MGMT)
     assign prv_pipe_if.dren  = ex_mem_if.ex_mem_reg.dren;
