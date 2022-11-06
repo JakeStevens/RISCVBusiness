@@ -1,5 +1,6 @@
 `include "core_interrupt_if.vh"
 `include "generic_bus_if.vh"
+`include "component_selection_defines.vh"
 
 module top_core #(
     parameter logic [31:0] RESET_PC = 32'h80000000
@@ -21,6 +22,8 @@ module top_core #(
     // ahb if case
 `elsif BUS_INTERFACE_AHB
     // TODO
+`else
+
 `endif
     // core_interrupt_if
     input ext_int,
@@ -34,28 +37,27 @@ module top_core #(
 
     function [31:0] get_x28;
         // verilator public
-        get_x28 = CORE.execute_stage_i.g_rfile_select.rf.registers[28];
+        get_x28 = CORE.pipeline.execute_stage_i.g_rfile_select.rf.registers[28];
     endfunction
 
-    /*
-    bind tspp_execute_stage cpu_tracker cpu_track1 (
+    bind stage3_mem_stage cpu_tracker cpu_track1 (
         .CLK(CLK),
         .wb_stall(wb_stall),
-        .instr(fetch_ex_if.fetch_ex_reg.instr),
-        .pc(fetch_ex_if.fetch_ex_reg.pc),
-        .opcode(cu_if.opcode),
+        .instr(ex_mem_if.ex_mem_reg.instr),
+        .pc(ex_mem_if.ex_mem_reg.pc),
+        .opcode(rv32i_types_pkg::opcode_t'(ex_mem_if.ex_mem_reg.instr[6:0])),
         .funct3(funct3),
         .funct12(funct12),
-        .rs1(rf_if.rs1),
-        .rs2(rf_if.rs2),
-        .rd(rf_if.rd),
-        .imm_S(cu_if.imm_S),
-        .imm_I(cu_if.imm_I),
-        .imm_U(cu_if.imm_U),
-        .imm_UJ(imm_UJ_ext),
-        .imm_SB(cu_if.imm_SB),
+        .rs1(ex_mem_if.ex_mem_reg.instr[19:15]),
+        .rs2(ex_mem_if.ex_mem_reg.instr[24:20]),
+        .rd(ex_mem_if.ex_mem_reg.rd_m),
+        .imm_S('0), // TODO: Extract constants. Maybe we could pass these in the pipeline and they'd be removed by synthesis?
+        .imm_I('0),
+        .imm_U('0),
+        .imm_UJ('0),
+        .imm_SB('0),
         .instr_30(instr_30)
-    );*/
+    );
 
 
 
@@ -82,6 +84,8 @@ module top_core #(
 
 `elsif BUS_INTERFACE_APB
     apb_if apb_requester (CLK, nRST);
+`else
+
 `endif
 
 

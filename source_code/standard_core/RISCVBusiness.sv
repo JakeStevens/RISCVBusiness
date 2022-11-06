@@ -68,6 +68,12 @@ module RISCVBusiness (
     tspp_fetch_execute_if fetch_ex_if ();
     tspp_hazard_unit_if hazard_if ();
 
+    stage3 #(.RESET_PC(RESET_PC)) pipeline(
+        .igen_bus_if(tspp_icache_gen_bus_if),
+        .dgen_bus_if(tspp_dcache_gen_bus_if),
+        .*
+    );
+
     // Module Instantiations
     /*
   pipeline_wrapper pipeline (
@@ -84,6 +90,7 @@ module RISCVBusiness (
   );
 */
 
+/*
     tspp_fetch_stage #(
         .RESET_PC(RESET_PC)
     ) fetch_stage_i (
@@ -120,7 +127,7 @@ module RISCVBusiness (
         .rm_if(rm_if),
         .sparce_if(sparce_if)
     );
-
+*/
 
     branch_predictor_wrapper branch_predictor_i (
         .CLK(CLK),
