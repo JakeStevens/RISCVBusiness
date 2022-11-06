@@ -206,6 +206,7 @@ module tspp_execute_stage (
         end
     end
 
+    assign rf_if.rd = cu_if.rd; // Change to accommodate tspp and stage3
     assign rf_if.wen = (cu_if.wen | (rm_if.req_reg_w & rm_if.reg_w))
                        & (~hazard_if.if_ex_stall | hazard_if.npc_sel | rv32cif.done_earlier)
                        & ~(cu_if.dren & mal_addr);

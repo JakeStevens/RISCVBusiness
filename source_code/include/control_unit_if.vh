@@ -36,6 +36,7 @@ interface control_unit_if;
   logic [1:0] alu_a_sel, alu_b_sel;
   logic [2:0] w_sel;
   logic [4:0] shamt;
+  logic [4:0] rd;
   logic [11:0] imm_I, imm_S;
   logic [20:0] imm_UJ;
   logic [12:0] imm_SB;
@@ -57,7 +58,7 @@ interface control_unit_if;
     imm_I, imm_S, imm_SB, imm_UJ, imm_U, imm_shamt_sel, alu_op,
     opcode, halt, wen, fault_insn, illegal_insn, ret_insn, breakpoint,
     ecall_insn, csr_swap, csr_set, csr_clr, csr_imm, csr_rw_valid,
-    csr_addr, zimm, ifence, wfi
+    csr_addr, zimm, ifence, wfi, rd
   );
 
 endinterface
