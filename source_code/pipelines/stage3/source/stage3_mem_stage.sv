@@ -148,9 +148,9 @@ module stage3_mem_stage(
     assign iflushed_next = ifence_pulse ? 1'b0 : cc_if.iflush_done;
     assign dflushed_next = ifence_pulse ? 1'b0 : cc_if.dflush_done;
 
-    /*************
-    * Hazard Unit
-    **************/
+    /************************
+    * Hazard/Forwarding Unit
+    *************************/
     // Note: Some hazard unit signals are assigned below in the CSR section
     assign hazard_if.d_mem_busy = dgen_bus_if.busy;
     assign hazard_if.fence_stall = ex_mem_if.ex_mem_reg.ifence && (!dflushed || !iflushed);
@@ -167,6 +167,9 @@ module stage3_mem_stage(
     //assign hazard_if.pc = ex_mem_if.ex_mem_reg.pc;
 
     assign halt = ex_mem_if.ex_mem_reg.halt;
+    assign fw_if.rd_m = ex_mem_if.ex_mem_reg.rd_m;
+    assign fw_if.rd_mem_data = ex_mem_if.reg_wdata; // forwarded data should be same as what we're outputting to register file
+    assign fw_if.reg_write = ex_mem_if.reg_write;
 
 
     /******

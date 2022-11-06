@@ -101,6 +101,7 @@ module stage3_fetch_stage (
     assign mal_insn = mal_addr;
     assign badaddr = igen_bus_if.addr;
     assign hazard_if.pc_f = pc;
+    assign hazard_if.rv32c_ready = rv32cif.done_earlier && rv32cif.rv32c_ena; // TODO: Is rv32cif.done needed? Seems like it coincides with busy = 0
 
 
     //Fetch Execute Pipeline Signals
@@ -109,8 +110,7 @@ module stage3_fetch_stage (
     always_ff @(posedge CLK, negedge nRST) begin
         if (!nRST) fetch_ex_if.fetch_ex_reg <= '0;
         else if (hazard_if.if_ex_flush && !hazard_if.if_ex_stall) fetch_ex_if.fetch_ex_reg <= '0;
-        else if (((rv32cif.done | rv32cif.done_earlier) & rv32cif.rv32c_ena)
-                    | (!hazard_if.if_ex_stall & !rv32cif.rv32c_ena)) begin
+        else if (!hazard_if.if_ex_stall) begin
             fetch_ex_if.fetch_ex_reg.valid      <= 1'b1;
             fetch_ex_if.fetch_ex_reg.token      <= 1'b1;
             fetch_ex_if.fetch_ex_reg.mal_insn   <= mal_insn;

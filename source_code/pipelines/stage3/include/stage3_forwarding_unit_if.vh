@@ -3,10 +3,10 @@
 
 interface stage3_forwarding_unit_if();
    
-    logic [4:0] rd_mem;
+    logic [4:0] rd_m;
     logic [4:0] rs1_e;
     logic [4:0] rs2_e;
-    logic regWEN;
+    logic reg_write;
     logic load;
     logic fwd_rs1;
     logic fwd_rs2;
@@ -18,11 +18,11 @@ interface stage3_forwarding_unit_if();
     );
 
     modport mem(
-        output rd_mem, rd_mem_data, regWEN, load
+        output rd_m, rd_mem_data, reg_write, load
     );
 
     modport fw_unit(
-        input rs1_e, rs2_e, rd_mem, regWEN, load,
+        input rs1_e, rs2_e, rd_m, reg_write, load,
         output fwd_rs1, fwd_rs2
     );
 
