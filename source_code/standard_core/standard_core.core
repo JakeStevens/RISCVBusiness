@@ -13,8 +13,8 @@ filesets:
             - control_unit.sv
             - jump_calc.sv
             - rv32i_reg_file.sv
-            - RISCVBusiness_no_memory.sv
-            - top_core_no_memory.sv
+            - RISCVBusiness.sv
+            - top_core.sv
         file_type: systemVerilogSource
 
 targets:

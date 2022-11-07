@@ -49,8 +49,13 @@ filesets:
             
     verilator_tb:
         files:
-            - tb_core_no_memory.cc : {fileType: cppSource} 
-        file_type: systemVerilogSource    
+            - tb_core.cc : {fileType: cppSource} 
+        file_type: systemVerilogSource
+
+    no_memory_tb:
+        files:
+            - tb_core_no_memory.cc : {fileType: cppSource}
+        file_type: systemVerilogSource
 
     tb:
         files:
@@ -90,8 +95,21 @@ targets:
                     - -t ps
 
             verilator:
-                verilator_options: ["-Wno-UNOPTFLAT", "-Wno-SYMRSVDWORD", "-Wno-lint", "--trace", "--trace-fst", "--trace-structs"]
+                verilator_options: ["-Wno-SYMRSVDWORD", "-Wno-lint", "--trace", "--trace-fst", "--trace-structs"]
                 #verilator_options: ["-Wno-lint", "--trace", "--trace-fst", "--trace-structs"]
+
+    no_mc:
+        <<: *default
+        description: Simulate w/TB, no memory controller
+        default_tool: verilator
+        filesets_append:
+            #- trackers
+            - "tool_verilator? (no_memory_tb)"
+        toplevel:
+            - "tool_verilator? (top_core)"
+        tools:
+            verilator:
+                verilator_options: ["-Wno-SYMRSVDWORD", "-Wno-lint", "--trace", "--trace-fst", "--trace-structs"]
 
     fpga:
         <<: *default

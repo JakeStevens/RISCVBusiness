@@ -11,6 +11,7 @@ module stage3_mem_stage(
     input nRST,
     stage3_mem_pipe_if.mem ex_mem_if,
     stage3_hazard_unit_if.mem hazard_if,
+    stage3_forwarding_unit_if.mem fw_if,
     generic_bus_if.cpu dgen_bus_if,
     prv_pipeline_if.pipe prv_pipe_if,
     cache_control_if.pipeline cc_if,
@@ -200,7 +201,7 @@ module stage3_mem_stage(
     // NEW
     assign hazard_if.pc_m = ex_mem_if.ex_mem_reg.pc;
     assign hazard_if.valid_m = ex_mem_if.ex_mem_reg.valid;
-    assign mem_pipe_if.pc4 = ex_mem_if.ex_mem_reg.pc4;
+    assign ex_mem_if.pc4 = ex_mem_if.ex_mem_reg.pc4;
     
     // Memory protection (doesn't consider RISC-MGMT)
     assign prv_pipe_if.dren  = ex_mem_if.ex_mem_reg.dren;

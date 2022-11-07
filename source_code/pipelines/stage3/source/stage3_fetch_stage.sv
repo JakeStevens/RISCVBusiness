@@ -67,7 +67,7 @@ module stage3_fetch_stage (
                               | hazard_if.npc_sel | predict_if.predict_taken;
     assign rv32cif.pc_update = hazard_if.pc_en;
     assign rv32cif.reset_pc = hazard_if.insert_priv_pc  ? hazard_if.priv_pc
-                            : (hazard_if.rollback        ? mem_pipe_if.pc4
+                            : (hazard_if.rollback        ? mem_fetch_if.pc4
                             : (sparce_if.skipping       ? sparce_if.sparce_target
                             : (hazard_if.npc_sel        ? mem_fetch_if.brj_addr
                             : (predict_if.predict_taken ? predict_if.target_addr
@@ -77,7 +77,7 @@ module stage3_fetch_stage (
     assign pc4or2 = (rv32cif.rv32c_ena & (rv32cif.result[1:0] != 2'b11)) ? (pc + 2) : (pc + 4);
     assign predict_if.current_pc = pc;
     assign npc = hazard_if.insert_priv_pc    ? hazard_if.priv_pc
-                 : (hazard_if.rollback        ? mem_pipe_if.pc4
+                 : (hazard_if.rollback        ? mem_fetch_if.pc4
                  : (sparce_if.skipping       ? sparce_if.sparce_target
                  : (hazard_if.npc_sel        ? mem_fetch_if.brj_addr
                  : (predict_if.predict_taken ? predict_if.target_addr

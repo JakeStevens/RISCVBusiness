@@ -25,7 +25,7 @@ interface stage3_mem_pipe_if();
 
     modport mem(
         input ex_mem_reg,
-        output brj_addr, reg_wdata, reg_write, rd_m
+        output brj_addr, reg_wdata, reg_write, rd_m, pc4
     );
 
 endinterface

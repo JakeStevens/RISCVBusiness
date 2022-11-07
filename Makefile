@@ -63,6 +63,13 @@ verilate: config
 	@echo "to the build directory created by FuseSoC and using the Makefile there."
 	@echo "------------------------------------------------------------------"
 
+no_mem: config
+	@fusesoc --cores-root . run --setup --build --build-root rvb_out --target no_mc --tool verilator socet:riscv:RISCVBusiness --make_options='-j'
+	@echo "------------------------------------------------------------------"
+	@echo "Build finished, you can run with 'fusesoc run', or by navigating"
+	@echo "to the build directory created by FuseSoC and using the Makefile there."
+	@echo "------------------------------------------------------------------"
+
 xcelium: config
 	@fusesoc --cores-root . run --setup --build --build-root rvb_out --target sim --tool xcelium socet:riscv:RISCVBusiness
 	@echo "Build finished, you can run with 'fusesoc run', or by navigating"
