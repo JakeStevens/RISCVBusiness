@@ -73,9 +73,7 @@ module stage3_hazard_unit (
     assign mem_use_stall = hazard_if.reg_write && cannot_forward && (rs1_match || rs2_match);
 
     assign hazard_if.npc_sel = branch_jump;
-    assign hazard_if.pc_en = (~wait_for_dmem & ~wait_for_imem & ~hazard_if.halt & ~ex_flush_hazard
-                                    & ~rmgmt_stall & ~hazard_if.fence_stall)
-                             | branch_jump | prv_pipe_if.insert_pc | prv_pipe_if.ret;
+
 
 
     /* Hazards due to Interrupts/Exceptions */
@@ -88,7 +86,7 @@ module stage3_hazard_unit (
     assign intr = ~exception & prv_pipe_if.intr;
 
     assign prv_pipe_if.pipe_clear = exception | ~(hazard_if.token_ex | rm_if.active_insn);
-    assign ex_flush_hazard = ((intr | exception) & ~wait_for_dmem) | exception | prv_pipe_if.ret; //TODO: Check this
+    assign ex_flush_hazard = ((intr || exception) && !wait_for_dmem) || exception || prv_pipe_if.ret || (hazard_if.ifence && !hazard_if.fence_stall); // I-fence must flush to force re-fetch of in-flight instructions. Flush will happen after stallling for cache response.
 
     assign hazard_if.insert_priv_pc = prv_pipe_if.insert_pc;
     assign hazard_if.priv_pc = prv_pipe_if.priv_pc;
@@ -97,6 +95,8 @@ module stage3_hazard_unit (
     // TODO: Removed intr as cause of suppression -- is this OK?
     assign hazard_if.suppress_iren = branch_jump || exception || prv_pipe_if.ret;  // prevents a false instruction request from being sent when pipeline flush imminent
     assign hazard_if.suppress_data = exception; // suppress data transfer on interrupt/exception. Exception case: prevent read/write of faulting location. Interrupt: make symmetric with exceptions for ease
+
+    assign hazard_if.rollback = (hazard_if.ifence && !hazard_if.fence_stall); // TODO: more cases for CSRs that affect I-fetch (PMA/PMP registers)
 
     // EPC priority logic
     assign epc = hazard_if.valid_m ? hazard_if.pc_m :
@@ -136,7 +136,22 @@ module stage3_hazard_unit (
     *     - If mem stage slow, stall everyone
     *     - Halt - stall everyone
     * Note: Stall of later stage implies stall of earlier stage.
+    * PC should not update if:
+    *   - fetch_if is stalling (can't pass instruction on)
+    * PC should update if:
+    *   - fetch is not stalling
+    *   - there is a forced redirect
     */
+
+    /*assign hazard_if.pc_en = (~wait_for_dmem & ~wait_for_imem & ~hazard_if.halt & ~ex_flush_hazard
+                                & ~rmgmt_stall & ~hazard_if.fence_stall)
+                          | branch_jump | prv_pipe_if.insert_pc | prv_pipe_if.ret | hazard_if.rollback;*/
+    // Unforunately, pc_en is negative logic of stalling
+    assign hazard_if.pc_en = (!hazard_if.if_ex_stall && !wait_for_imem) // Normal case: next stage free, not waiting for instruction
+                            || branch_jump
+                            || ex_flush_hazard
+                            || prv_pipe_if.insert_pc
+                            || prv_pipe_if.ret;
 
     assign hazard_if.if_ex_flush  = ex_flush_hazard // control hazard
                                   || branch_jump    // control hazard

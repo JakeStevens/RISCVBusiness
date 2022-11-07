@@ -37,12 +37,14 @@ interface stage3_hazard_unit_if();
   logic mispredict, halt;
   word_t pc_f, pc_e, pc_m;
   logic valid_e, valid_m; // f always valid since it's the PC
+  logic ifence;
 
   // Control (outputs)
   logic pc_en, npc_sel;
   logic if_ex_flush, ex_mem_flush;
   logic if_ex_stall, ex_mem_stall;
   logic iren, suppress_iren;
+  logic rollback; // signal for rolling back fetched instructions after instruction in mem stage, for certain CSR and ifence instructions
 
   // xTVEC Insertion
   word_t priv_pc;
@@ -66,17 +68,17 @@ interface stage3_hazard_unit_if();
             i_mem_busy, d_mem_busy, dren, dwen, ret,
             jump, branch, fence_stall, mispredict, halt, pc_f, pc_e, pc_m,
             fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s, breakpoint, env_m,
-            badaddr, 
+            badaddr, ifence,
             token_ex, token_mem, rv32c_ready,
             valid_e, valid_m,
     output  pc_en, npc_sel, 
             if_ex_flush, ex_mem_flush,
             if_ex_stall, ex_mem_stall,
-            priv_pc, insert_priv_pc, iren, suppress_iren, suppress_data
+            priv_pc, insert_priv_pc, iren, suppress_iren, suppress_data, rollback
   );
 
   modport fetch (
-    input   pc_en, npc_sel, if_ex_stall, if_ex_flush, priv_pc, insert_priv_pc, iren, suppress_iren,
+    input   pc_en, npc_sel, if_ex_stall, if_ex_flush, priv_pc, insert_priv_pc, iren, suppress_iren, rollback,
     output  i_mem_busy, rv32c_ready, pc_f
   );
 
@@ -91,7 +93,7 @@ interface stage3_hazard_unit_if();
             d_mem_busy, dren, dwen, ret, 
             jump, branch, fence_stall, mispredict, halt, pc_m, valid_m,
             fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s, breakpoint, env_m, 
-            badaddr,
+            badaddr, ifence,
             token_mem
   );
  

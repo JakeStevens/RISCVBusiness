@@ -153,6 +153,7 @@ module stage3_mem_stage(
     *************************/
     // Note: Some hazard unit signals are assigned below in the CSR section
     assign hazard_if.d_mem_busy = dgen_bus_if.busy;
+    assign hazard_if.ifence = ex_mem_if.ex_mem_reg.ifence;
     assign hazard_if.fence_stall = ex_mem_if.ex_mem_reg.ifence && (!dflushed || !iflushed);
     assign hazard_if.dren = ex_mem_if.ex_mem_reg.dren;
     assign hazard_if.dwen = ex_mem_if.ex_mem_reg.dwen;
@@ -199,6 +200,7 @@ module stage3_mem_stage(
     // NEW
     assign hazard_if.pc_m = ex_mem_if.ex_mem_reg.pc;
     assign hazard_if.valid_m = ex_mem_if.ex_mem_reg.valid;
+    assign mem_pipe_if.pc4 = ex_mem_if.ex_mem_reg.pc4;
     
     // Memory protection (doesn't consider RISC-MGMT)
     assign prv_pipe_if.dren  = ex_mem_if.ex_mem_reg.dren;
