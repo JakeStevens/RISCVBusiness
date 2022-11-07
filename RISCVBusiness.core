@@ -49,7 +49,7 @@ filesets:
             
     verilator_tb:
         files:
-            - tb_core.cc : {fileType: cppSource} 
+            - tb_core_no_memory.cc : {fileType: cppSource} 
         file_type: systemVerilogSource    
 
     tb:
@@ -91,6 +91,7 @@ targets:
 
             verilator:
                 verilator_options: ["-Wno-UNOPTFLAT", "-Wno-SYMRSVDWORD", "-Wno-lint", "--trace", "--trace-fst", "--trace-structs"]
+                #verilator_options: ["-Wno-lint", "--trace", "--trace-fst", "--trace-structs"]
 
     fpga:
         <<: *default
