@@ -170,7 +170,6 @@ module stage3_mem_stage(
 
     assign halt = ex_mem_if.ex_mem_reg.halt;
     assign fw_if.rd_m = ex_mem_if.ex_mem_reg.rd_m;
-    assign fw_if.rd_mem_data = ex_mem_if.reg_wdata; // forwarded data should be same as what we're outputting to register file
     assign fw_if.reg_write = ex_mem_if.reg_write;
 
 
@@ -227,6 +226,15 @@ module stage3_mem_stage(
             3'd3:    ex_mem_if.reg_wdata = ex_mem_if.ex_mem_reg.port_out;
             3'd4:    ex_mem_if.reg_wdata = prv_pipe_if.rdata;
             default: ex_mem_if.reg_wdata = '0;
+        endcase
+
+        // Forwarding unit
+        case (ex_mem_if.ex_mem_reg.w_sel)
+            3'd1:    fw_if.rd_mem_data = ex_mem_if.ex_mem_reg.pc4;
+            3'd2:    fw_if.rd_mem_data = ex_mem_if.ex_mem_reg.imm_U;
+            3'd3:    fw_if.rd_mem_data = ex_mem_if.ex_mem_reg.port_out;
+            3'd4:    fw_if.rd_mem_data = prv_pipe_if.rdata;
+            default: fw_if.rd_mem_data = '0;
         endcase
     end
 

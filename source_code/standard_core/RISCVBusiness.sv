@@ -143,12 +143,13 @@ module RISCVBusiness (
         .mtime(mtime)
     );
 
+/* TODO: Adding back RISC-MGMT to 3-stage pipeline
     risc_mgmt_wrapper rmgmt (
         .CLK  (CLK),
         .nRST (nRST),
         .rm_if(rm_if)
     );
-
+*/
     /*
   caches_wrapper caches (
     .CLK(CLK),

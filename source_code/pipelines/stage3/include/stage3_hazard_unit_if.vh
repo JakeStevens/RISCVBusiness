@@ -38,6 +38,7 @@ interface stage3_hazard_unit_if();
   word_t pc_f, pc_e, pc_m;
   logic valid_e, valid_m; // f always valid since it's the PC
   logic ifence;
+  logic ex_busy;
 
   // Control (outputs)
   logic pc_en, npc_sel;
@@ -70,7 +71,7 @@ interface stage3_hazard_unit_if();
             fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s, breakpoint, env_m,
             badaddr, ifence,
             token_ex, token_mem, rv32c_ready,
-            valid_e, valid_m,
+            valid_e, valid_m, ex_busy,
     output  pc_en, npc_sel, 
             if_ex_flush, ex_mem_flush,
             if_ex_stall, ex_mem_stall,
@@ -84,7 +85,7 @@ interface stage3_hazard_unit_if();
 
   modport execute (
     input  ex_mem_stall, ex_mem_flush, npc_sel,
-    output rs1_e, rs2_e, token_ex, pc_e, valid_e
+    output rs1_e, rs2_e, token_ex, pc_e, valid_e, ex_busy
   );
 
   modport mem (

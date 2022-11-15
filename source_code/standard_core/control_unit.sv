@@ -27,6 +27,7 @@
 `include "rv32i_reg_file_if.vh"
 `include "risc_mgmt_if.vh"
 `include "decompressor_if.vh"
+`include "component_selection_defines.vh"
 
 module control_unit (
           control_unit_if.control_unit       cu_if,
@@ -40,6 +41,7 @@ module control_unit (
     import alu_types_pkg::*;
     import rv32i_types_pkg::*;
     import machine_mode_types_1_12_pkg::*;
+    import rv32m_pkg::*;
 
     stype_t  instr_s;
     itype_t  instr_i;
@@ -47,6 +49,12 @@ module control_unit (
     sbtype_t instr_sb;
     utype_t  instr_u;
     ujtype_t instr_uj;
+
+    // Set if base ISA doesn't have this instruction, but overriden by claim from extension
+    logic maybe_illegal;
+    logic claimed;
+    // Per-extension claim signals
+    logic rv32m_claim;
 
     assign instr_s = stype_t'(cu_if.instr);
     assign instr_i = itype_t'(cu_if.instr);
@@ -115,7 +123,7 @@ module control_unit (
             LOAD:                 cu_if.w_sel = 3'd0;
             JAL, JALR:            cu_if.w_sel = 3'd1;
             LUI:                  cu_if.w_sel = 3'd2;
-            IMMED, AUIPC, REGREG: cu_if.w_sel = 3'd3;
+            IMMED, AUIPC, REGREG: cu_if.w_sel = 3'd3; // RV32M: Opcodes are REGREG, no change needed
             SYSTEM:               cu_if.w_sel = 3'd4;
             default:              cu_if.w_sel = 3'd0;
         endcase
@@ -190,12 +198,15 @@ module control_unit (
 
     always_comb begin
         case (cu_if.opcode)
-            REGREG: cu_if.illegal_insn = instr_r.funct7[0];
+            REGREG: maybe_illegal = instr_r.funct7[0];
             LUI, AUIPC, JAL, JALR, BRANCH, LOAD, STORE, IMMED, SYSTEM, MISCMEM, opcode_t'('0):
-            cu_if.illegal_insn = 1'b0;
-            default: cu_if.illegal_insn = 1'b1;
+            maybe_illegal = 1'b0;
+            default: maybe_illegal = 1'b1;
         endcase
     end
+
+    assign cu_if.illegal_insn = maybe_illegal && !claimed;
+    assign claimed = rv32m_claim; // Add OR conditions for new extensions
 
     //Decoding of System Priv Instructions
     always_comb begin
@@ -244,5 +255,17 @@ module control_unit (
 
     assign cu_if.csr_addr     = csr_addr_t'(instr_i.imm11_00);
     assign cu_if.zimm         = cu_if.instr[19:15];
+
+    // Extension decoding
+    `ifdef RV32M_SUPPORTED
+    rv32m_decode RV32M_DECODE(
+        .insn(cu_if.instr),
+        .claim(rv32m_claim),
+        .rv32m_control(cu_if.rv32m_control)
+    );
+    `else
+    assign cu_if.rv32m_control = {1'b0, rv32m_op_t'(0)};
+    assign rv32m_claim = 1'b0;
+    `endif // RV32M_SUPPORTED
 
 endmodule

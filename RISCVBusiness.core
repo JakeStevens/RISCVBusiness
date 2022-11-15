@@ -12,10 +12,11 @@ filesets:
             - "socet:riscv:stage3"
             - "socet:riscv:priv"
             - "socet:riscv:caches"
-            - "socet:riscv:risc_mgmt"
+            #- "socet:riscv:risc_mgmt"
             - "socet:riscv:riscv_standard"
             - "socet:riscv:riscv_include"
             - "socet:riscv:rv32c"
+            - "socet:riscv:rv32m"
         files:
             - source_code/branch_predictors/branch_predictor_wrapper.sv
             - source_code/branch_predictors/nottaken_predictor/nottaken_predictor.sv
@@ -42,10 +43,10 @@ filesets:
 
     fpga_wrapper:
         files:
-            - source_code/fpga/RISCVBusiness_fpga.sv
-            - source_code/ram/ram_sim_model.sv
-            - source_code/ram/ram_wrapper.sv
-        file_type: systemVerilogSource
+            - source_code/fpga/RISCVBusiness_fpga.sv : {file_type: systemVerilogSource}
+            - source_code/ram/ram_sim_model.sv : {file_type: systemVerilogSource}
+            - source_code/ram/ram_wrapper.sv : {file_type: systemVerilogSource}
+            - rvb.sdc : {file_type: SDC}
             
     verilator_tb:
         files:
@@ -54,7 +55,7 @@ filesets:
 
     no_memory_tb:
         files:
-            - tb_core_no_memory.cc : {fileType: cppSource}
+            - tb_core_no_memory.cc : {file_type: cppSource}
         file_type: systemVerilogSource
 
     tb:
@@ -64,7 +65,6 @@ filesets:
             - source_code/ram/ram_sim_model.sv
             - source_code/ram/ram_wrapper.sv
         file_type: systemVerilogSource
-
 
 targets:
     default: &default
