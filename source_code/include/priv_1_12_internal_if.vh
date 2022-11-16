@@ -37,9 +37,10 @@ interface priv_1_12_internal_if;
     logic ex_rmgmt;
     logic [$clog2(`NUM_EXTENSIONS)-1:0] ex_rmgmt_cause;
 
+    priv_level_t curr_priv; // Current process privilege
+
     // CSR block values
     csr_addr_t csr_addr; // CSR address to read
-    priv_level_t curr_priv; // Current process privilege
     logic csr_write, csr_set, csr_clear; // Is the CSR currently being modified?
     logic invalid_csr; // Bad CSR address
     logic inst_ret; // signal when an instruction is retired
@@ -86,6 +87,9 @@ interface priv_1_12_internal_if;
     pma_accwidth_t d_acc_width, i_acc_width; // Width of memory access
     logic pma_s_fault, pma_l_fault, pma_i_fault; // PMA store fault, load fault, instruction fault
 
+    // PMP variables
+    logic pmp_s_fault, pmp_l_fault, pmp_i_fault; // PMP store fault, load fault, instruction fault
+
     modport csr (
         input csr_addr, curr_priv, csr_write, csr_set, csr_clear, new_csr_val, inst_ret, valid_write,
             inject_mcause, inject_mepc, inject_mie, inject_mip, inject_mstatus, inject_mtval,
@@ -112,6 +116,11 @@ interface priv_1_12_internal_if;
     modport pma (
         input iaddr, daddr, ren, wen, xen, d_acc_width, i_acc_width,
         output pma_s_fault, pma_i_fault, pma_l_fault
+    );
+
+    modport pmp (
+        input iaddr, daddr, ren, wen, xen, curr_priv, curr_mstatus,
+        output pmp_s_fault, pmp_i_fault, pmp_l_fault
     );
 
 endinterface

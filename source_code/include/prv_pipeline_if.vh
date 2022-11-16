@@ -20,9 +20,6 @@
 *   Email:        jskubic@purdue.edu
 *   Date Created: 08/24/2016
 *   Description:  Interface connecting the priv block to the pipeline.
-*                 Contains connections between modules inside the priv block.
-*                 TODO: These two functionalities should be split into two
-*                 separate interfaces.
 */
 
 `ifndef PRV_PIPELINE_IF_VH
@@ -67,7 +64,7 @@ interface prv_pipeline_if();
   logic prot_fault_s, prot_fault_l, prot_fault_i;
 
   modport hazard (
-    input priv_pc, insert_pc, intr, prot_fault_s, prot_fault_l, prot_fault_i,
+    input priv_pc, insert_pc, intr,
     output pipe_clear, ret, epc, fault_insn, mal_insn,
             illegal_insn, fault_l, mal_l, fault_s, mal_s,
             breakpoint, env_m, badaddr, wb_enable,
@@ -80,6 +77,7 @@ interface prv_pipeline_if();
   );
 
   modport fetch (
+    input prot_fault_i,
     output iren, iaddr, i_acc_width
   );
 
