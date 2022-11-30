@@ -232,6 +232,7 @@ void reset(Vtop_core& dut, VerilatedFstC& trace) {
     dut.timer_int_clear = 0;
     dut.busy = 1;
     dut.rdata = 0;
+    dut.mtime = 0;
 
     tick(dut, trace);
     dut.nRST = 0;
@@ -261,6 +262,7 @@ int main(int argc, char **argv) {
     dut.trace(&m_trace, 5);
     m_trace.open("waveform.fst");
 
+    mtimecmp = 0xFFFFFFFFFFFFFFFF; // Default to a massive value
 
     reset(dut, m_trace);
     while(!dut.halt && sim_time < 100000) {
@@ -287,6 +289,8 @@ int main(int argc, char **argv) {
         } else if(!dut.busy) {
             dut.busy = 1;
         }
+
+        dut.mtime = sim_time;
 
         tick(dut, m_trace);
         update_interrupt_signals(dut);

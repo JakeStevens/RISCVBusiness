@@ -32,16 +32,15 @@ module priv_1_12_pipe_control (
     import machine_mode_types_1_12_pkg::*;
     import rv32i_types_pkg::*;
 
-    assign prv_intern_if.insert_pc = prv_intern_if.mret | prv_intern_if.sret | prv_intern_if.uret |
-        (prv_intern_if.pipe_clear & prv_intern_if.intr);
+    assign prv_intern_if.insert_pc = prv_intern_if.mret | prv_intern_if.sret | prv_intern_if.intr;
 
     always_comb begin
         prv_intern_if.priv_pc = '0;
 
         if (prv_intern_if.intr) begin
-            if (prv_intern_if.curr_mtvec.mode == VECTORED & prv_intern_if.curr_mcause.interrupt) begin
+            if (prv_intern_if.curr_mtvec.mode == VECTORED & prv_intern_if.next_mcause.interrupt) begin
                 prv_intern_if.priv_pc = (prv_intern_if.curr_mtvec.base << 2)
-                                            + (prv_intern_if.curr_mcause.cause << 2);
+                                            + (prv_intern_if.next_mcause.cause << 2);
             end else begin
                 prv_intern_if.priv_pc = prv_intern_if.curr_mtvec.base << 2;
             end
