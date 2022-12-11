@@ -112,14 +112,14 @@ module stage3_mem_stage(
             default: dgen_bus_if.wdata = '0;
         endcase
     end : STORE_TYPE
-    
+
     // Endianness
     generate
         if(BUS_ENDIANNESS == "big") begin : g_data_bus_be
             assign byte_en = byte_en_temp;
         end else if(BUS_ENDIANNESS == "little") begin : g_data_bus_le
             assign byte_en = ex_mem_if.ex_mem_reg.dren ? byte_en_temp
-                                                    : {byte_en_temp[0], byte_en_temp[1], 
+                                                    : {byte_en_temp[0], byte_en_temp[1],
                                                        byte_en_temp[2], byte_en_temp[3]};
         end
     endgenerate
@@ -179,6 +179,7 @@ module stage3_mem_stage(
     assign prv_pipe_if.swap = ex_mem_if.ex_mem_reg.csr_swap;
     assign prv_pipe_if.clr = ex_mem_if.ex_mem_reg.csr_clr;
     assign prv_pipe_if.set = ex_mem_if.ex_mem_reg.csr_set;
+    assign prv_pipe_if.read_only = ex_mem_if.ex_mem_reg.csr_read_only;
     assign prv_pipe_if.wdata = ex_mem_if.ex_mem_reg.csr_imm ? {27'h0, ex_mem_if.ex_mem_reg.zimm} : ex_mem_if.ex_mem_reg.rs1_data;
     assign prv_pipe_if.csr_addr = ex_mem_if.ex_mem_reg.csr_addr;
     assign prv_pipe_if.valid_write = (prv_pipe_if.swap | prv_pipe_if.clr
@@ -187,21 +188,22 @@ module stage3_mem_stage(
 
     assign hazard_if.fault_insn = ex_mem_if.ex_mem_reg.fault_insn;
     assign hazard_if.mal_insn = ex_mem_if.ex_mem_reg.mal_insn;
-    assign hazard_if.illegal_insn = ex_mem_if.ex_mem_reg.illegal_insn;
+    assign hazard_if.illegal_insn = ex_mem_if.ex_mem_reg.illegal_insn || prv_pipe_if.invalid_priv_isn;
     assign hazard_if.fault_l = 1'b0;
     assign hazard_if.mal_l = ex_mem_if.ex_mem_reg.dren & mal_addr;
     assign hazard_if.fault_s = 1'b0;
     assign hazard_if.mal_s = ex_mem_if.ex_mem_reg.dwen & mal_addr;
     assign hazard_if.breakpoint = ex_mem_if.ex_mem_reg.breakpoint;
-    assign hazard_if.env_m = ex_mem_if.ex_mem_reg.ecall_insn;
+    assign hazard_if.env = ex_mem_if.ex_mem_reg.ecall_insn;
     assign hazard_if.ret = ex_mem_if.ex_mem_reg.ret_insn;
+    assign hazard_if.wfi = ex_mem_if.ex_mem_reg.wfi_insn;
     assign hazard_if.badaddr = (hazard_if.fault_insn || hazard_if.mal_insn) ? ex_mem_if.ex_mem_reg.badaddr : dgen_bus_if.addr;
 
     // NEW
     assign hazard_if.pc_m = ex_mem_if.ex_mem_reg.pc;
     assign hazard_if.valid_m = ex_mem_if.ex_mem_reg.valid;
     assign ex_mem_if.pc4 = ex_mem_if.ex_mem_reg.pc4;
-    
+
     // Memory protection (doesn't consider RISC-MGMT)
     assign prv_pipe_if.dren  = ex_mem_if.ex_mem_reg.dren;
     assign prv_pipe_if.dwen  = ex_mem_if.ex_mem_reg.dwen;
@@ -218,7 +220,7 @@ module stage3_mem_stage(
     assign ex_mem_if.rd_m = ex_mem_if.ex_mem_reg.rd_m;
 
     always_comb begin
-        // TODO: RISC-MGMT    
+        // TODO: RISC-MGMT
         case (ex_mem_if.ex_mem_reg.w_sel)
             3'd0:    ex_mem_if.reg_wdata = dload_ext;
             3'd1:    ex_mem_if.reg_wdata = ex_mem_if.ex_mem_reg.pc4;
@@ -247,7 +249,7 @@ module stage3_mem_stage(
     logic instr_30;
 
     // TODO: Fix up hazard unit
-    assign funct3 = ex_mem_if.ex_mem_reg.instr[14:12]; 
+    assign funct3 = ex_mem_if.ex_mem_reg.instr[14:12];
     assign funct12 = ex_mem_if.ex_mem_reg.instr[31:20];
     assign instr_30 = ex_mem_if.ex_mem_reg.instr[30];
     assign wb_stall = hazard_if.ex_mem_stall & ~hazard_if.jump & ~hazard_if.branch; // TODO: Is this right?

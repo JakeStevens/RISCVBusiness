@@ -41,9 +41,11 @@ package stage3_types_pkg;
         logic csr_clr;
         logic csr_set;
         logic csr_imm;
+        logic csr_read_only;
         logic breakpoint;
         logic ecall_insn;
         logic ret_insn;
+        logic wfi_insn;
         logic was_compressed; // Determine if PC should advance by 4 or 2, avoid passing PC and PC + (2/4) through pipeline
         logic [2:0] w_sel;
         logic [3:0] byte_en; // TODO: Where should this be generated?

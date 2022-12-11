@@ -1,12 +1,12 @@
 /*
 *   Copyright 2016 Purdue University
-*   
+*
 *   Licensed under the Apache License, Version 2.0 (the "License");
 *   you may not use this file except in compliance with the License.
 *   You may obtain a copy of the License at
-*   
+*
 *       http://www.apache.org/licenses/LICENSE-2.0
-*   
+*
 *   Unless required by applicable law or agreed to in writing, software
 *   distributed under the License is distributed on an "AS IS" BASIS,
 *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,7 @@
 *   Created by:   Jacob R. Stevens
 *   Email:        steven69@purdue.edu
 *   Date Created: 06/15/2016
-*   Description:  Interface for the hazard unit of the two stage pipeline 
+*   Description:  Interface for the hazard unit of the two stage pipeline
 */
 
 `ifndef STAGE3_HAZARD_UNIT_IF_VH
@@ -53,10 +53,10 @@ interface stage3_hazard_unit_if();
 
   //Pipeline Exceptions (inputs)
   logic fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s,
-        breakpoint, env_m;
+        breakpoint, env, wfi;
   word_t badaddr;
 
-  // Pipeline Tokens 
+  // Pipeline Tokens
   logic token_ex;
   logic token_mem;
 
@@ -68,11 +68,11 @@ interface stage3_hazard_unit_if();
             reg_write, csr_read,
             i_mem_busy, d_mem_busy, dren, dwen, ret,
             jump, branch, fence_stall, mispredict, halt, pc_f, pc_e, pc_m,
-            fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s, breakpoint, env_m,
+            fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s, breakpoint, env, wfi,
             badaddr, ifence,
             token_ex, token_mem, rv32c_ready,
             valid_e, valid_m, ex_busy,
-    output  pc_en, npc_sel, 
+    output  pc_en, npc_sel,
             if_ex_flush, ex_mem_flush,
             if_ex_stall, ex_mem_stall,
             priv_pc, insert_priv_pc, iren, suppress_iren, suppress_data, rollback
@@ -91,13 +91,13 @@ interface stage3_hazard_unit_if();
   modport mem (
     input   ex_mem_stall, ex_mem_flush, suppress_data,
     output  rd_m, reg_write, csr_read,
-            d_mem_busy, dren, dwen, ret, 
+            d_mem_busy, dren, dwen, ret,
             jump, branch, fence_stall, mispredict, halt, pc_m, valid_m,
-            fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s, breakpoint, env_m, 
+            fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s, breakpoint, env,
             badaddr, ifence,
             token_mem
   );
- 
+
  endinterface
 
 `endif

@@ -81,7 +81,7 @@ module stage3_hazard_unit (
     assign exception  = hazard_if.fault_insn | hazard_if.mal_insn | prv_pipe_if.prot_fault_i
                       | hazard_if.illegal_insn | hazard_if.fault_l | hazard_if.mal_l
                       | hazard_if.fault_s | hazard_if.mal_s | hazard_if.breakpoint
-                      | hazard_if.env_m | prv_pipe_if.prot_fault_l | prv_pipe_if.prot_fault_s;
+                      | hazard_if.env | prv_pipe_if.prot_fault_l | prv_pipe_if.prot_fault_s;
 
     assign intr = ~exception & prv_pipe_if.intr;
 
@@ -116,7 +116,8 @@ module stage3_hazard_unit (
     assign prv_pipe_if.fault_s = hazard_if.fault_s | prv_pipe_if.prot_fault_s;
     assign prv_pipe_if.mal_s = hazard_if.mal_s;
     assign prv_pipe_if.breakpoint = hazard_if.breakpoint;
-    assign prv_pipe_if.env_m = hazard_if.env_m;
+    assign prv_pipe_if.env = hazard_if.env;
+    assign prv_pipe_if.wfi = hazard_if.wfi;
     assign prv_pipe_if.ex_rmgmt = 1'b0;//rm_if.exception;
 
     assign prv_pipe_if.ex_rmgmt_cause = '0;//rm_if.ex_cause;
@@ -156,7 +157,7 @@ module stage3_hazard_unit (
     assign hazard_if.if_ex_flush  = ex_flush_hazard // control hazard
                                   || branch_jump    // control hazard
                                   || (wait_for_imem && !hazard_if.ex_mem_stall); // Flush if fetch stage lagging, but ex/mem are moving
-    
+
     assign hazard_if.ex_mem_flush = ex_flush_hazard // Control hazard
                                   || branch_jump     // Control hazard
                                   //|| (mem_use_stall && !hazard_if.d_mem_busy) // Data hazard -- flush once data memory is no longer busy (request complete)

@@ -64,20 +64,19 @@ interface prv_pipeline_if();
   logic prot_fault_s, prot_fault_l, prot_fault_i;
 
   modport hazard (
-    input priv_pc, insert_pc, intr,
+    input priv_pc, insert_pc, intr, prot_fault_s, prot_fault_l, prot_fault_i,
     output pipe_clear, ret, epc, fault_insn, mal_insn,
             illegal_insn, fault_l, mal_l, fault_s, mal_s,
-            breakpoint, env, badaddr, wb_enable,
+            breakpoint, env, wfi, badaddr, wb_enable,
             ex_rmgmt, ex_rmgmt_cause
   );
 
   modport pipe (
-    output swap, clr, set, read_only, wdata, csr_addr, valid_write, instr, dren, dwen, daddr, d_acc_width, wfi,
-    input  rdata, invalid_priv_isn, prot_fault_s, prot_fault_l
+    output swap, clr, set, read_only, wdata, csr_addr, valid_write, instr, dren, dwen, daddr, d_acc_width,
+    input  rdata, invalid_priv_isn
   );
 
   modport fetch (
-    input prot_fault_i,
     output iren, iaddr, i_acc_width
   );
 
@@ -89,7 +88,7 @@ interface prv_pipeline_if();
           ex_rmgmt, ex_rmgmt_cause,
           daddr, iaddr, dren, dwen, iren,
           d_acc_width, i_acc_width,
-    output priv_pc, insert_pc, intr, rdata, invalid_priv_isn, 
+    output priv_pc, insert_pc, intr, rdata, invalid_priv_isn,
             prot_fault_s, prot_fault_l, prot_fault_i
   );
 

@@ -40,7 +40,6 @@ module stage3_execute_stage (
     stage3_mem_pipe_if.execute ex_mem_if,
     stage3_hazard_unit_if.execute hazard_if,
     stage3_forwarding_unit_if.execute fw_if,
-    //prv_pipeline_if.pipe prv_pipe_if,
     //risc_mgmt_if.ts_execute rm_if,
     sparce_pipeline_if.pipe_execute sparce_if,
     rv32c_if.execute rv32cif
@@ -113,7 +112,7 @@ module stage3_execute_stage (
     alu alu (.*);
     jump_calc jump_calc (.*);
     branch_res branch_res (.br_if(branch_if));
-    
+
     rv32m_wrapper RV32M_FU (
         .CLK,
         .nRST,
@@ -130,7 +129,7 @@ module stage3_execute_stage (
     word_t rs1_post_fwd, rs2_post_fwd;
     assign rs1_post_fwd = fw_if.fwd_rs1 ? fw_if.rd_mem_data : rf_if.rs1_data;
     assign rs2_post_fwd = fw_if.fwd_rs2 ? fw_if.rd_mem_data : rf_if.rs2_data;
-    
+
 
     /******************
     * Sign Extensions
@@ -194,7 +193,7 @@ module stage3_execute_stage (
     assign rf_if.w_data = ex_mem_if.reg_wdata;
     assign rf_if.rd = ex_mem_if.rd_m;
     assign rf_if.wen = ex_mem_if.reg_write && !hazard_if.ex_mem_stall; // TODO: The second signal only matters for some miniscule power reduction by not writing each cycle. This is correct with only the wen signal due to no loop from reg read to reg write
-    
+
     /***********************************************
     * Branch Target Resolution and Associated Logic
     ***********************************************/
@@ -237,7 +236,7 @@ module stage3_execute_stage (
     // TODO: NEW
     always_ff @(posedge CLK, negedge nRST) begin
         if(!nRST) begin
-            ex_mem_if.ex_mem_reg <= '{default: '0}; 
+            ex_mem_if.ex_mem_reg <= '{default: '0};
         end else begin
             // TODO: This register is ~180b. Not awful, but can it be smaller?
             // PS: Does it even matter? Synth. tools may be able to merge regs.
@@ -260,9 +259,11 @@ module stage3_execute_stage (
                     ex_mem_if.ex_mem_reg.csr_clr        <= cu_if.csr_clr;
                     ex_mem_if.ex_mem_reg.csr_set        <= cu_if.csr_set;
                     ex_mem_if.ex_mem_reg.csr_imm        <= cu_if.csr_imm;
+                    ex_mem_if.ex_mem_reg.csr_read_only  <= (rf_if.rs1 == '0) || (cu_if.zimm == '0);
                     ex_mem_if.ex_mem_reg.breakpoint     <= cu_if.breakpoint;
                     ex_mem_if.ex_mem_reg.ecall_insn     <= cu_if.ecall_insn;
                     ex_mem_if.ex_mem_reg.ret_insn       <= cu_if.ret_insn;
+                    ex_mem_if.ex_mem_reg.wfi_insn       <= cu_if.wfi;
                     ex_mem_if.ex_mem_reg.was_compressed <= 1'b0; // TODO: RV32C support
                 end
                 ex_mem_if.ex_mem_reg.illegal_insn              <= cu_if.illegal_insn;
