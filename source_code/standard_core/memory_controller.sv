@@ -109,6 +109,7 @@ module memory_controller (
                     if (d_gen_bus_if.ren || d_gen_bus_if.wen) next_state = DATA_REQ;
                     else next_state = IDLE;
                 end else if (d_gen_bus_if.ren || d_gen_bus_if.wen) next_state = INSTR_DATA_REQ;
+                else if(!i_gen_bus_if.ren) next_state = IDLE;
                 else next_state = INSTR_WAIT;
             end
 

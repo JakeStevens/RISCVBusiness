@@ -94,7 +94,7 @@ interface stage3_hazard_unit_if();
             d_mem_busy, dren, dwen, ret,
             jump, branch, fence_stall, mispredict, halt, pc_m, valid_m,
             fault_insn, mal_insn, illegal_insn, fault_l, mal_l, fault_s, mal_s, breakpoint, env,
-            badaddr, ifence,
+            badaddr, ifence, wfi,
             token_mem
   );
 
