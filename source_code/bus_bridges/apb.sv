@@ -34,7 +34,7 @@ module apb (
     always_comb begin
         request_n = request;
         if(state == IDLE || (state == DATA && apbif.PREADY)) begin
-            request_n.addr = out_gen_bus_if.addr;
+            request_n.addr = {out_gen_bus_if.addr[31:2], 2'b00};
             request_n.wdata = out_gen_bus_if.wdata;
             request_n.wen = out_gen_bus_if.wen;
             request_n.strobe = out_gen_bus_if.byte_en;
