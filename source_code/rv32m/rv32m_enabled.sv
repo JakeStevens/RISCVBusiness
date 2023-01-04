@@ -30,8 +30,8 @@ module rv32m_enabled (
     input rv32m_pkg::rv32m_op_t operation,
     input [31:0] rv32m_a,
     input [31:0] rv32m_b,
-    output rv32m_busy,
-    output [31:0] rv32m_out
+    output logic rv32m_busy,
+    output logic [31:0] rv32m_out
 );
 
     import rv32m_pkg::*;
@@ -72,7 +72,7 @@ module rv32m_enabled (
             op_a_save      <= '0;
             op_b_save      <= '0;
             //is_signed_save <= '0;
-            operation_save <= '0;
+            operation_save <= MUL;
         end else if (operand_diff) begin
             op_a_save      <= rv32m_a;
             op_b_save      <= rv32m_b;

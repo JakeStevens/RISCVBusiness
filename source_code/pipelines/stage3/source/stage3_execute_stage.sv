@@ -71,11 +71,11 @@ module stage3_execute_stage (
     control_unit cu (
         .cu_if(cu_if),
         .rf_if(rf_if),
-        .rmgmt_rsel_s_0(),
-        .rmgmt_rsel_s_1(),
-        .rmgmt_rsel_d(),
-        .rmgmt_req_reg_r(),
-        .rmgmt_req_reg_w()
+        .rmgmt_rsel_s_0('0),
+        .rmgmt_rsel_s_1('0),
+        .rmgmt_rsel_d('0),
+        .rmgmt_req_reg_r('0),
+        .rmgmt_req_reg_w('0)
         //.rmgmt_rsel_s_0(rm_if.rsel_s_0),
         //.rmgmt_rsel_s_1(rm_if.rsel_s_1),
         //.rmgmt_rsel_d(rm_if.rsel_d),
@@ -108,6 +108,7 @@ module stage3_execute_stage (
     logic rv32m_busy;
     word_t rv32m_out;
     word_t ex_out;
+    word_t rs1_post_fwd, rs2_post_fwd;
 
     alu alu (.*);
     jump_calc jump_calc (.*);
@@ -126,7 +127,6 @@ module stage3_execute_stage (
 
     // Forwarding
     // These rs*_post_fwd values should be used in place of rs1/rs2 anywhere they are used
-    word_t rs1_post_fwd, rs2_post_fwd;
     assign rs1_post_fwd = fw_if.fwd_rs1 ? fw_if.rd_mem_data : rf_if.rs1_data;
     assign rs2_post_fwd = fw_if.fwd_rs2 ? fw_if.rd_mem_data : rf_if.rs2_data;
 
