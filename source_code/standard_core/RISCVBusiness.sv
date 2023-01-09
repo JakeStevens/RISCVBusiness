@@ -41,7 +41,7 @@ module RISCVBusiness (
 `ifdef BUS_INTERFACE_GENERIC_BUS
     generic_bus_if.cpu gen_bus_if
 `elsif BUS_INTERFACE_AHB
-    ahb_if.manager ahb_master
+    ahb_if.manager ahb_manager
 `elsif BUS_INTERFACE_APB
     apb_if.requester apb_requester
 `endif
@@ -216,7 +216,7 @@ module RISCVBusiness (
                     .CLK(CLK),
                     .nRST(nRST),
                     .out_gen_bus_if(pipeline_trans_if),
-                    .ahb_m(ahb_master)
+                    .ahb_m(ahb_manager)
                 );
             end
             "apb_if": begin : g_apb_if
