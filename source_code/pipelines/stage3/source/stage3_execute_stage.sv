@@ -231,6 +231,7 @@ module stage3_execute_stage (
 
     assign hazard_if.pc_e = fetch_ex_if.fetch_ex_reg.pc;
     assign hazard_if.ex_busy = rv32m_busy; // Add & conditions here for other FUs that can stall
+    assign hazard_if.valid_e = fetch_ex_if.fetch_ex_reg.valid;
 
 
     // TODO: NEW
