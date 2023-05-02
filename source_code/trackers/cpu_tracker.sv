@@ -179,9 +179,10 @@ module cpu_tracker (
                             ECALL:  instr_mnemonic = "ecall";
                             EBREAK: instr_mnemonic = "ebreak";
                             MRET:   instr_mnemonic = "mret";
+                            WFI:    instr_mnemonic = "wfi";
                             default: begin
-                                instr_mnemonic = "errr";
-                                $display("%b", priv_insn_t'(funct12));
+                                instr_mnemonic = "unknown system op";
+                                //$display("%b", priv_insn_t'(funct12));
                             end
                         endcase
                     end
