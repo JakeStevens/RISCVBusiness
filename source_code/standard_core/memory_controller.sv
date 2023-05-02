@@ -43,7 +43,8 @@ module memory_controller (
         INSTR_WAIT,
         DATA_REQ,
         DATA_INSTR_REQ,
-        DATA_WAIT
+        DATA_WAIT,
+        CANCEL_REQ_WAIT
     } state_t;
 
     state_t current_state, next_state;
@@ -109,7 +110,7 @@ module memory_controller (
                     if (d_gen_bus_if.ren || d_gen_bus_if.wen) next_state = DATA_REQ;
                     else next_state = IDLE;
                 end else if (d_gen_bus_if.ren || d_gen_bus_if.wen) next_state = INSTR_DATA_REQ;
-                else if(!i_gen_bus_if.ren) next_state = IDLE;
+                else if(!i_gen_bus_if.ren) next_state = CANCEL_REQ_WAIT;
                 else next_state = INSTR_WAIT;
             end
 
@@ -119,6 +120,14 @@ module memory_controller (
                     else next_state = IDLE;
                 end else if (i_gen_bus_if.ren) next_state = DATA_INSTR_REQ;
                 else next_state = DATA_WAIT;
+            end
+
+            CANCEL_REQ_WAIT: begin
+                if(out_gen_bus_if.busy == 1'b0) begin
+                    next_state = IDLE;
+                end else begin
+                    next_state = CANCEL_REQ_WAIT;
+                end
             end
 
             default: next_state = IDLE;
@@ -192,6 +201,16 @@ module memory_controller (
                 i_gen_bus_if.busy      = 1'b1;
                 d_gen_bus_if.busy      = out_gen_bus_if.busy;
             end
+
+            CANCEL_REQ_WAIT: begin
+                out_gen_bus_if.wen     = 0;
+                out_gen_bus_if.ren     = 0;
+                out_gen_bus_if.addr    = 0;
+                out_gen_bus_if.byte_en = 0;
+                i_gen_bus_if.busy      = 1;
+                d_gen_bus_if.busy      = 1;
+            end
+
             default: begin
                 out_gen_bus_if.wen     = 0;
                 out_gen_bus_if.ren     = 0;
