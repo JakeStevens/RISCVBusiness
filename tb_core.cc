@@ -19,6 +19,7 @@
 #define EXT_ADDR_SET    0xFFFFFFF4
 #define EXT_ADDR_CLEAR  0xFFFFFFF8
 #define MAGIC_ADDR      0xFFFFFFFC
+#define BUS_ERROR_TOP   0x20000000
 
 // Inclusive range of memory-mapped peripherals
 #define MMIO_RANGE_BEGIN (MTIME_ADDR)
@@ -281,12 +282,15 @@ int main(int argc, char **argv) {
 
     reset(dut, m_trace);
     while(!dut.halt && sim_time < 100000) {
+        dut.error = 0;
         // TODO: Variable latency
         if((dut.ren || dut.wen) && dut.busy) {
             dut.busy = 0;
             if(dut.ren) {
                 uint32_t addr = dut.addr & 0xFFFFFFFC;
-                if(!MemoryMap::is_mmio_region(addr)) {
+                if(addr < BUS_ERROR_TOP) {
+                    dut.error = 1;
+                }else if(!MemoryMap::is_mmio_region(addr)) {
                     dut.rdata = memory.read(addr);
                 } else {
                     dut.rdata = memory.mmio_read(addr);
@@ -295,7 +299,9 @@ int main(int argc, char **argv) {
                 uint32_t addr = dut.addr & 0xFFFFFFFC;
                 uint32_t value = dut.wdata;
                 uint8_t mask = dut.byte_en;
-                if(!MemoryMap::is_mmio_region(addr)) {
+                if(addr < BUS_ERROR_TOP) {
+                    dut.error = 1;
+                } else if(!MemoryMap::is_mmio_region(addr)) {
                     memory.write(addr, value, mask);
                 } else {
                     memory.mmio_write(addr, value, mask);
