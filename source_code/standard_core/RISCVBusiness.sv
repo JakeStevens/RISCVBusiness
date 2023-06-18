@@ -219,14 +219,14 @@ module RISCVBusiness (
                     .ahb_m(ahb_manager)
                 );
             end
-            "apb_if": begin : g_apb_if
+            /*"apb_if": begin : g_apb_if
                 apb bt(
                     .CLK(CLK),
                     .nRST(nRST),
                     .out_gen_bus_if(pipeline_trans_if),
                     .apbif(apb_requester)
                 );
-            end
+            end*/
         endcase
 
     endgenerate

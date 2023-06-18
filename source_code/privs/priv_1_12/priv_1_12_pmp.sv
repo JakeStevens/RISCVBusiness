@@ -51,8 +51,11 @@ module priv_1_12_pmp (
   end
 
   // Core State Logic
-  logic [1:0] pmp_cfg_addr_add_one_reg = (priv_ext_if.csr_addr[3:0] + 1) >> 2;   // exists because TOR is weird
-  logic [1:0] pmp_cfg_addr_add_one_cfg = (priv_ext_if.csr_addr[3:0] + 1) & 2'h3; // exists because TOR is weird
+  logic [1:0] pmp_cfg_addr_add_one_reg; // exists because TOR is weird
+  logic [1:0] pmp_cfg_addr_add_one_cfg; // exists because TOR is weird
+
+  assign pmp_cfg_addr_add_one_reg = (priv_ext_if.csr_addr[3:0] + 1) >> 2;   // exists because TOR is weird
+  assign pmp_cfg_addr_add_one_cfg = (priv_ext_if.csr_addr[3:0] + 1) & 2'h3; // exists because TOR is weird
   always_comb begin
     nxt_pmp_addr = pmp_addr_regs;
     nxt_pmp_cfg = pmp_cfg_regs;
@@ -139,7 +142,7 @@ module priv_1_12_pmp (
   genvar i;
 
   generate
-    for (i=0; i<16; i++) begin
+    for (i=0; i<16; i++) begin : g_dpmp_match
       priv_1_12_pmp_matcher matcher (
         {2'b00, prv_intern_if.daddr[31:2]},
         pmp_cfg_regs[i>>2][i & 3],
@@ -200,7 +203,7 @@ module priv_1_12_pmp (
   genvar j;
 
   generate
-    for (j=0; j<16; j++) begin
+    for (j=0; j<16; j++) begin : g_ipmp_matchers
       priv_1_12_pmp_matcher matcher (
         {2'b00, prv_intern_if.iaddr[31:2]},
         pmp_cfg_regs[j>>2][j%4],

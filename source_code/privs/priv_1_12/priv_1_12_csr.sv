@@ -244,7 +244,7 @@ module priv_1_12_csr #(
     mcause_next = mcause;
 
     inject_mcycle = 1'b0;
-    inject_mcycle = 1'b0;
+    inject_mcycleh = 1'b0;
     inject_minstret = 1'b0;
     inject_minstreth = 1'b0;
 
